@@ -134,6 +134,14 @@
               </a>
             </li>
 
+            <!-- Salon Management -->
+            <li class="menu-item {{ request()->is('salons*') ? 'active' : '' }}">
+              <a href="{{ route('salons.index') }}" class="menu-link">
+                <i class="menu-icon tf-icons bx bx-building"></i>
+                <div data-i18n="Salon">Salons</div>
+              </a>
+            </li>
+
             <!-- Add more menu items as needed -->
             
           </ul>
