@@ -133,12 +133,30 @@
                 <div data-i18n="Analytics">Dashboard</div>
               </a>
             </li>
+            <br>
+            
 
             <!-- Salon Management -->
             <li class="menu-item {{ request()->is('salons*') ? 'active' : '' }}">
               <a href="{{ route('salons.index') }}" class="menu-link">
                 <i class="menu-icon tf-icons bx bx-building"></i>
                 <div data-i18n="Salon">Salons</div>
+              </a>
+            </li>
+
+            <!-- Prestation Management -->
+            <li class="menu-item {{ request()->is('prestations*') ? 'active' : '' }}">
+              <a href="{{ route('prestations.index') }}" class="menu-link">
+                <i class="menu-icon tf-icons bx bx-timer"></i>
+                <div data-i18n="Prestation">Prestations</div>
+              </a>
+            </li>
+
+            <!-- Client Management -->
+            <li class="menu-item {{ request()->is('clients*') ? 'active' : '' }}">
+              <a href="{{ route('clients.index') }}" class="menu-link">
+                <i class="menu-icon tf-icons bx bx-user"></i>
+                <div data-i18n="Client">Clients</div>
               </a>
             </li>
 
@@ -206,13 +224,13 @@
                     <li>
                       <a class="dropdown-item" href="#">
                         <i class="bx bx-user me-2"></i>
-                        <span class="align-middle">My Profile</span>
+                        <span class="align-middle">Profile</span>
                       </a>
                     </li>
                     <li>
                       <a class="dropdown-item" href="#">
                         <i class="bx bx-cog me-2"></i>
-                        <span class="align-middle">Settings</span>
+                        <span class="align-middle">Parametres</span>
                       </a>
                     </li>
                     <li>
@@ -225,7 +243,7 @@
                       <a class="dropdown-item" href="{{ route('logout') }}"
                          onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
                         <i class="bx bx-power-off me-2"></i>
-                        <span class="align-middle">Log Out</span>
+                        <span class="align-middle">Se deconnecter</span>
                       </a>
                     </li>
                   </ul>
@@ -253,7 +271,7 @@
                     document.write(new Date().getFullYear());
                   </script>
                   , made with ❤️ by
-                  <a href="https://themeselection.com" target="_blank" class="footer-link fw-bolder">ThemeSelection</a>
+                  <a href="https://themeselection.com" target="_blank" class="footer-link fw-bolder">AL AMINE FAYE</a>
                 </div>
               </div>
             </footer>

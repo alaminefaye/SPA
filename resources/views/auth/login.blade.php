@@ -157,9 +157,9 @@
                 </div>
                 <div class="mb-3 form-password-toggle">
                   <div class="d-flex justify-content-between">
-                    <label class="form-label" for="password">Password</label>
+                    <label class="form-label" for="password">Mot de passe</label>
                     <a href="{{ route('password.request') }}">
-                      <small>Forgot Password?</small>
+                      <small>Mot de passe oublié?</small>
                     </a>
                   </div>
                   <div class="input-group input-group-merge">
@@ -182,11 +182,11 @@
                 <div class="mb-3">
                   <div class="form-check">
                     <input class="form-check-input" type="checkbox" id="remember" name="remember" {{ old('remember') ? 'checked' : '' }} />
-                    <label class="form-check-label" for="remember"> Remember Me </label>
+                    <label class="form-check-label" for="remember"> Se souvenir de moi </label>
                   </div>
                 </div>
                 <div class="mb-3">
-                  <button class="btn btn-primary d-grid w-100" type="submit">Sign in</button>
+                  <button class="btn btn-primary d-grid w-100" type="submit">Se connecter</button>
                 </div>
               </form>
             </div>

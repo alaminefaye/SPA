@@ -2,7 +2,9 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\ClientController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\PrestationController;
 use App\Http\Controllers\SalonController;
 
 // Welcome page
@@ -28,4 +30,10 @@ Route::middleware('auth')->group(function () {
     
     // Salon routes
     Route::resource('salons', SalonController::class);
+    
+    // Prestation routes
+    Route::resource('prestations', PrestationController::class);
+    
+    // Client routes
+    Route::resource('clients', ClientController::class);
 });
