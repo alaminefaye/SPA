@@ -159,6 +159,14 @@
                 <div data-i18n="Client">Clients</div>
               </a>
             </li>
+            
+            <!-- Séances Management -->
+            <li class="menu-item {{ request()->is('seances*') ? 'active' : '' }}">
+              <a href="{{ route('seances.index') }}" class="menu-link">
+                <i class="menu-icon tf-icons bx bx-calendar"></i>
+                <div data-i18n="Seance">Séances</div>
+              </a>
+            </li>
 
             <!-- Add more menu items as needed -->
             

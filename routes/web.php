@@ -6,6 +6,7 @@ use App\Http\Controllers\ClientController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\PrestationController;
 use App\Http\Controllers\SalonController;
+use App\Http\Controllers\SeanceController;
 
 // Welcome page
 Route::get('/', function () {
@@ -36,4 +37,11 @@ Route::middleware('auth')->group(function () {
     
     // Client routes
     Route::resource('clients', ClientController::class);
+    
+    // Seance routes
+    Route::resource('seances', SeanceController::class);
+    
+    // AJAX routes pour les séances
+    Route::get('/client-search', [SeanceController::class, 'getClientByPhone'])->name('seances.getClientByPhone');
+    Route::get('/prestation-details', [SeanceController::class, 'getPrestationDetails'])->name('seances.getPrestationDetails');
 });
