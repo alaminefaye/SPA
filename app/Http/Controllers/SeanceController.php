@@ -18,7 +18,7 @@ class SeanceController extends Controller
     {
         $search = $request->input('search');
         
-        $query = Seance::with(['client', 'salon', 'prestation']);
+        $query = Seance::with(['client', 'salon', 'prestations']);
         
         if ($search) {
             $query->whereHas('client', function($q) use ($search) {
@@ -28,7 +28,7 @@ class SeanceController extends Controller
             ->orWhereHas('salon', function($q) use ($search) {
                 $q->where('nom', 'LIKE', "%{$search}%");
             })
-            ->orWhereHas('prestation', function($q) use ($search) {
+            ->orWhereHas('prestations', function($q) use ($search) {
                 $q->where('nom_prestation', 'LIKE', "%{$search}%");
             });
         }
@@ -59,9 +59,8 @@ class SeanceController extends Controller
         $validator = Validator::make($request->all(), [
             'numero_telephone' => 'required|string|max:255',
             'salon_id' => 'required|exists:salons,id',
-            'prestation_id' => 'required|exists:prestations,id',
-            'prix' => 'required|numeric',
-            'duree' => 'required',
+            'prestations' => 'required|array',
+            'prestations.*' => 'exists:prestations,id',
             'commentaire' => 'nullable|string',
         ]);
         
@@ -93,15 +92,30 @@ class SeanceController extends Controller
         }
         
         // Création de la séance
-        Seance::create([
-            'client_id' => $client->id,
-            'salon_id' => $request->salon_id,
-            'prestation_id' => $request->prestation_id,
-            'prix' => $request->prix,
-            'duree' => $request->duree,
-            'statut' => 'planifie',
-            'commentaire' => $request->commentaire,
-        ]);
+        $seance = new Seance();
+        $seance->client_id = $client->id;
+        $seance->salon_id = $request->salon_id;
+        $seance->statut = 'planifie';
+        $seance->commentaire = $request->commentaire;
+        
+        // Initialiser le prix à 0 et la durée à un format valide pour éviter l'erreur NOT NULL
+        $seance->prix = 0;
+        $seance->duree = '00:00:00';
+        
+        // Sauvegarde initiale de la séance pour obtenir un ID
+        $seance->save();
+        
+        // Ajout des prestations sélectionnées
+        if ($request->has('prestations') && is_array($request->prestations)) {
+            foreach ($request->prestations as $prestationId) {
+                $seance->prestations()->attach($prestationId);
+            }
+        }
+        
+        // Calcul et mise à jour du prix et de la durée totale
+        $seance->prix = $seance->calculerPrixTotal();
+        $seance->duree = $seance->calculerDureeTotale();
+        $seance->save();
         
         return redirect()->route('seances.index')
             ->with('success', 'Séance créée avec succès');
@@ -112,7 +126,7 @@ class SeanceController extends Controller
      */
     public function show(string $id)
     {
-        $seance = Seance::with(['client', 'salon', 'prestation'])->findOrFail($id);
+        $seance = Seance::with(['client', 'salon', 'prestations'])->findOrFail($id);
         return view('seances.show', compact('seance'));
     }
 
@@ -135,9 +149,8 @@ class SeanceController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'salon_id' => 'required|exists:salons,id',
-            'prestation_id' => 'required|exists:prestations,id',
-            'prix' => 'required|numeric',
-            'duree' => 'required',
+            'prestations' => 'required|array',
+            'prestations.*' => 'exists:prestations,id',
             'statut' => 'required|in:planifie,en_cours,termine,annule',
             'commentaire' => 'nullable|string',
         ]);
@@ -149,7 +162,23 @@ class SeanceController extends Controller
         }
         
         $seance = Seance::findOrFail($id);
-        $seance->update($request->all());
+        
+        // Mise à jour des données de base de la séance
+        $seance->salon_id = $request->salon_id;
+        $seance->statut = $request->statut;
+        $seance->commentaire = $request->commentaire;
+        
+        // Mise à jour des prestations
+        $seance->prestations()->detach(); // Supprime les anciennes relations
+        
+        if ($request->has('prestations') && is_array($request->prestations)) {
+            $seance->prestations()->sync($request->prestations);
+        }
+        
+        // Recalcul du prix et de la durée totale
+        $seance->prix = $seance->calculerPrixTotal();
+        $seance->duree = $seance->calculerDureeTotale();
+        $seance->save();
         
         return redirect()->route('seances.index')
             ->with('success', 'Séance mise à jour avec succès');

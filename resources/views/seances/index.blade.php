@@ -49,7 +49,21 @@
                         <tr>
                             <td>{{ $seance->client->nom_complet }}</td>
                             <td>{{ $seance->salon->nom }}</td>
-                            <td>{{ $seance->prestation->nom_prestation }}</td>
+                            <td>
+                                @if($seance->prestations->count() > 0)
+                                    @if($seance->prestations->count() == 1)
+                                        {{ $seance->prestations->first()->nom_prestation }}
+                                    @else
+                                        <span class="badge bg-info">{{ $seance->prestations->count() }} prestations</span>
+                                        <button type="button" class="btn btn-sm btn-outline-primary popover-btn" data-bs-toggle="popover" title="Prestations" 
+                                            data-bs-content="{{ $seance->prestations->pluck('nom_prestation')->join(', ') }}">
+                                            <i class='bx bx-info-circle'></i>
+                                        </button>
+                                    @endif
+                                @else
+                                    <span class="text-muted">Aucune prestation</span>
+                                @endif
+                            </td>
                             <td>
                                 @switch($seance->statut)
                                     @case('planifie')
@@ -103,4 +117,13 @@
         </div>
     </div>
 </div>
+@endsection
+
+@section('page-js')
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const popoverTriggerList = document.querySelectorAll('[data-bs-toggle="popover"]');
+        const popoverList = [...popoverTriggerList].map(popoverTriggerEl => new bootstrap.Popover(popoverTriggerEl));
+    });
+</script>
 @endsection

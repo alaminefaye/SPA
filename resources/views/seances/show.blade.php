@@ -84,20 +84,37 @@
                         </div>
                     </div>
                     <div class="col-md-6">
-                        <h6 class="text-muted">Prestation</h6>
+                        <h6 class="text-muted">Prestations</h6>
                         <div class="table-responsive">
                             <table class="table table-borderless">
+                                @if($seance->prestations->count() > 0)
+                                    <tr>
+                                        <th style="width: 35%">Prestations:</th>
+                                        <td>
+                                            <ul class="list-unstyled">
+                                                @foreach($seance->prestations as $prestation)
+                                                    <li>
+                                                        <i class="bx bx-check-circle text-success me-1"></i>
+                                                        {{ $prestation->nom_prestation }} 
+                                                        <span class="text-muted small">({{ number_format($prestation->prix, 2, ',', ' ') }} FCFA, {{ $prestation->duree->format('H:i') }})</span>
+                                                    </li>
+                                                @endforeach
+                                            </ul>
+                                        </td>
+                                    </tr>
+                                @else
+                                    <tr>
+                                        <th style="width: 35%">Prestations:</th>
+                                        <td><span class="text-muted">Aucune prestation</span></td>
+                                    </tr>
+                                @endif
                                 <tr>
-                                    <th style="width: 35%">Nom:</th>
-                                    <td>{{ $seance->prestation->nom_prestation }}</td>
+                                    <th>Prix Total:</th>
+                                    <td><strong>{{ number_format($seance->prix, 2, ',', ' ') }} FCFA</strong></td>
                                 </tr>
                                 <tr>
-                                    <th>Prix:</th>
-                                    <td>{{ number_format($seance->prix, 2, ',', ' ') }} €</td>
-                                </tr>
-                                <tr>
-                                    <th>Durée:</th>
-                                    <td>{{ $seance->duree->format('H:i') }}</td>
+                                    <th>Durée Totale:</th>
+                                    <td><strong>{{ $seance->duree->format('H:i') }}</strong></td>
                                 </tr>
                             </table>
                         </div>

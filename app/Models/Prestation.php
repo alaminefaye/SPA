@@ -15,4 +15,14 @@ class Prestation extends Model
     protected $casts = [
         'duree' => 'datetime:H:i:s',
     ];
+    
+    /**
+     * Get the seances that use this prestation.
+     */
+    public function seances()
+    {
+        return $this->belongsToMany(Seance::class, 'seance_prestation')
+                    ->withPivot('quantite')
+                    ->withTimestamps();
+    }
 }
