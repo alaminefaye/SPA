@@ -148,7 +148,8 @@
             <li class="menu-item {{ request()->is('prestations*') ? 'active' : '' }}">
               <a href="{{ route('prestations.index') }}" class="menu-link">
                 <i class="menu-icon tf-icons bx bx-timer"></i>
-                <div data-i18n="Prestation">Prestations</div>
+                <div data-i18n="Prestation"> Services et prestations
+                </div>
               </a>
             </li>
 
@@ -156,7 +157,7 @@
             <li class="menu-item {{ request()->is('clients*') ? 'active' : '' }}">
               <a href="{{ route('clients.index') }}" class="menu-link">
                 <i class="menu-icon tf-icons bx bx-user"></i>
-                <div data-i18n="Client">Clients</div>
+                <div data-i18n="Client">Gestion des clients</div>
               </a>
             </li>
             
@@ -164,7 +165,22 @@
             <li class="menu-item {{ request()->is('seances*') ? 'active' : '' }}">
               <a href="{{ route('seances.index') }}" class="menu-link">
                 <i class="menu-icon tf-icons bx bx-calendar"></i>
-                <div data-i18n="Seance">Séances</div>
+                <div data-i18n="Séances">Séances</div>
+              </a>
+            </li>
+            
+            <li class="menu-item {{ request()->is('reservations*') ? 'active' : '' }}">
+              <a href="{{ route('reservations.index') }}" class="menu-link">
+                <i class="menu-icon tf-icons bx bx-calendar-check"></i>
+                <div data-i18n="Réservations" style="position: relative;">
+                  Réservations
+                  @if(isset($newReservationsCount) && $newReservationsCount > 0)
+                  <span class="badge rounded-pill badge-center h-px-20 w-px-20 bg-danger position-absolute" 
+                        style="top: -8px; right: -20px;">
+                    {{ $newReservationsCount }}
+                  </span>
+                  @endif
+                </div>
               </a>
             </li>
 
