@@ -10,8 +10,8 @@
 // JS global variables
 let config = {
   colors: {
-    primary: '#696cff',
-    secondary: '#8592a3',
+    primary: '#FF57A8', /* Rose vif du logo Jared Spa */
+    secondary: '#3D575D', /* Bleu-gris du logo Jared Spa */
     success: '#71dd37',
     info: '#03c3ec',
     warning: '#ffab00',
@@ -20,7 +20,7 @@ let config = {
     black: '#000',
     white: '#fff',
     body: '#f4f5fb',
-    headingColor: '#566a7f',
+    headingColor: '#3D575D', /* Bleu-gris du logo pour les titres */
     axisColor: '#a1acb8',
     borderColor: '#eceef1'
   }
