@@ -47,6 +47,7 @@
                         <th>Nom complet</th>
                         <th>Numéro téléphone</th>
                         <th>Adresse mail</th>
+                        <th>Points</th>
                         <th>Actions</th>
                     </tr>
                 </thead>
@@ -57,6 +58,16 @@
                             <td>{{ $client->nom_complet }}</td>
                             <td>{{ $client->numero_telephone }}</td>
                             <td>{{ $client->adresse_mail }}</td>
+                            <td>
+                                @if($client->points >= 5)
+                                    <span class="badge bg-success">{{ $client->points }} points</span>
+                                    <i class="bx bxs-gift text-warning" data-bs-toggle="tooltip" title="Client éligible pour une séance gratuite"></i>
+                                @elseif($client->points > 0)
+                                    <span class="badge bg-info">{{ $client->points }} points</span>
+                                @else
+                                    <span class="badge bg-secondary">0 point</span>
+                                @endif
+                            </td>
                             <td>
                                 <div class="dropdown">
                                     <button type="button" class="btn p-0 dropdown-toggle hide-arrow" data-bs-toggle="dropdown">
@@ -83,7 +94,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="5" class="text-center">Aucun client trouvé</td>
+                            <td colspan="6" class="text-center">Aucun client trouvé</td>
                         </tr>
                     @endforelse
                 </tbody>
@@ -94,4 +105,14 @@
         </div>
     </div>
 </div>
+@endsection
+
+@section('page-js')
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialisation des tooltips pour les badges de fidélité
+        const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+        const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl));
+    });
+</script>
 @endsection

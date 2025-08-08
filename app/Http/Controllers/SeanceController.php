@@ -115,6 +115,21 @@ class SeanceController extends Controller
         // Calcul et mise à jour du prix et de la durée totale
         $seance->prix = $seance->calculerPrixTotal();
         $seance->duree = $seance->calculerDureeTotale();
+        
+        // Vérifier si c'est une séance gratuite (utilisation des points de fidélité)
+        $pointsNecessaires = 5; // Points nécessaires pour une séance gratuite
+        
+        if ($request->has('utiliser_points') && $request->utiliser_points) {
+            if ($client->peutObtenirSeanceGratuite($pointsNecessaires)) {
+                $client->utiliserPoints($pointsNecessaires);
+                $seance->is_free = true;
+                $seance->prix = 0; // La séance est gratuite, donc prix à 0
+            }
+        } else {
+            // Si ce n'est pas une séance gratuite, ajouter un point de fidélité
+            $client->ajouterPoints(1);
+        }
+        
         $seance->save();
         
         return redirect()->route('seances.index')

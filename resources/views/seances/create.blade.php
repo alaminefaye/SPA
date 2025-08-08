@@ -135,6 +135,22 @@
                                     <div class="alert alert-success mb-0" id="resume-prestations">
                                         <p class="mb-0">Aucune prestation sélectionnée</p>
                                     </div>
+                                    
+                                    <!-- Section Fidélité -->
+                                    <div class="mt-3 pt-3 border-top" id="fidelite-section" style="display:none;">
+                                        <h6><i class="bx bxs-star text-warning"></i> Points de Fidélité</h6>
+                                        <div class="alert alert-warning mb-2">
+                                            <p class="mb-0"><strong>Points disponibles:</strong> <span id="points-disponibles">0</span></p>
+                                            <p class="mb-0 mt-1">Tous les 5 points, bénéficiez d'une séance gratuite!</p>
+                                        </div>
+                                        
+                                        <div class="form-check form-switch" id="utiliser-points-container" style="display:none;">
+                                            <input class="form-check-input" type="checkbox" id="utiliser_points" name="utiliser_points" value="1">
+                                            <label class="form-check-label" for="utiliser_points">
+                                                Utiliser 5 points pour une séance gratuite
+                                            </label>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -188,8 +204,25 @@
                     if (data.success) {
                         document.getElementById('nom_complet').value = data.client.nom_complet;
                         document.getElementById('adresse_mail').value = data.client.adresse_mail;
+                        
+                        // Afficher la section de fidélité et les points disponibles
+                        document.getElementById('fidelite-section').style.display = 'block';
+                        const pointsDisponibles = data.client.points || 0;
+                        document.getElementById('points-disponibles').textContent = pointsDisponibles;
+                        
+                        // Afficher l'option d'utiliser des points si le client a au moins 5 points
+                        if (pointsDisponibles >= 5) {
+                            document.getElementById('utiliser-points-container').style.display = 'block';
+                        } else {
+                            document.getElementById('utiliser-points-container').style.display = 'none';
+                        }
+                        
                         alert('Client trouvé et informations remplies automatiquement');
                     } else {
+                        // Masquer la section de fidélité si aucun client n'est trouvé
+                        document.getElementById('fidelite-section').style.display = 'none';
+                        document.getElementById('utiliser-points-container').style.display = 'none';
+                        
                         alert(data.message + '. Veuillez compléter les informations du client.');
                         document.getElementById('nom_complet').focus();
                     }

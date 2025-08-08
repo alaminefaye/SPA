@@ -41,6 +41,7 @@
                         <th>Salon</th>
                         <th>Prestation</th>
                         <th>Statut</th>
+                        <th>Prix</th>
                         <th>Actions</th>
                     </tr>
                 </thead>
@@ -81,6 +82,14 @@
                                 @endswitch
                             </td>
                             <td>
+                                @if($seance->is_free)
+                                    <span class="badge bg-success">GRATUIT</span>
+                                    <i class="bx bxs-star text-warning ms-1" data-bs-toggle="tooltip" title="Séance offerte (fidélité)"></i>
+                                @else
+                                    {{ number_format($seance->prix, 0, ',', ' ') }} FCFA
+                                @endif
+                            </td>
+                            <td>
                                 <div class="dropdown">
                                     <button type="button" class="btn p-0 dropdown-toggle hide-arrow" data-bs-toggle="dropdown">
                                         <i class="bx bx-dots-vertical-rounded"></i>
@@ -105,7 +114,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="5" class="text-center">Aucune séance trouvée</td>
+                            <td colspan="6" class="text-center">Aucune séance trouvée</td>
                         </tr>
                     @endforelse
                 </tbody>
@@ -122,8 +131,13 @@
 @section('page-js')
 <script>
     document.addEventListener('DOMContentLoaded', function() {
+        // Initialisation des popovers pour les informations sur les prestations
         const popoverTriggerList = document.querySelectorAll('[data-bs-toggle="popover"]');
         const popoverList = [...popoverTriggerList].map(popoverTriggerEl => new bootstrap.Popover(popoverTriggerEl));
+        
+        // Initialisation des tooltips pour les badges de fidélité
+        const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+        const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl));
     });
 </script>
 @endsection

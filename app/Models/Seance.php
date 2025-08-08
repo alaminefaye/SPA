@@ -15,11 +15,13 @@ class Seance extends Model
         'duree',
         'statut',
         'commentaire',
+        'is_free',
     ];
     
     protected $casts = [
         'duree' => 'datetime:H:i:s',
         'prix' => 'decimal:2',
+        'is_free' => 'boolean',
     ];
     
     /**
