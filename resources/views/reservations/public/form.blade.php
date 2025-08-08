@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Réservation en ligne | SPA</title>
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -404,17 +405,39 @@
                         <input type="hidden" name="salon_id" value="1" /> <!-- Valeur temporaire qui sera remplacée par l'administrateur -->
 
                         <div class="mb-4">
-                            <label for="prestation_id" class="form-label">Choisissez une prestation</label>
-                            <div class="input-group">
-                                <span class="input-group-text"><i class="fas fa-list-ul"></i></span>
-                                <select class="form-select" id="prestation_id" name="prestation_id" required>
-                                    <option value="">Sélectionner une prestation</option>
-                                    @foreach($prestations as $prestation)
-                                    <option value="{{ $prestation->id }}" {{ old('prestation_id') == $prestation->id ? 'selected' : '' }}>
-                                        {{ $prestation->nom_prestation }} - {{ number_format($prestation->prix, 2, ',', ' ') }} FCFA
-                                    </option>
-                                    @endforeach
-                                </select>
+                            <label class="form-label mb-3">Choisissez vos prestations</label>
+                            <div class="alert alert-info mb-3">
+                                <i class="fas fa-info-circle me-2"></i> Sélectionnez une ou plusieurs prestations. Le prix total et la durée totale seront automatiquement calculés.
+                            </div>
+                            <div class="table-responsive prestations-table">
+                                <table class="table table-bordered">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th style="width: 70px;" class="text-center">Sélection</th>
+                                            <th>Prestation</th>
+                                            <th style="width: 140px;" class="text-end">Prix (FCFA)</th>
+                                            <th style="width: 100px;" class="text-center">Durée</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach($prestations as $prestation)
+                                        <tr>
+                                            <td class="text-center">
+                                                <div class="form-check d-flex justify-content-center">
+                                                    <input class="form-check-input prestation-checkbox" type="checkbox" 
+                                                        value="{{ $prestation->id }}" id="prestation_{{ $prestation->id }}" 
+                                                        name="prestations[]" data-prix="{{ $prestation->prix }}" 
+                                                        data-duree="{{ $prestation->duree ? $prestation->duree->format('H:i') : '00:00' }}"
+                                                        {{ (is_array(old('prestations')) && in_array($prestation->id, old('prestations'))) ? 'checked' : '' }}>
+                                                </div>
+                                            </td>
+                                            <td>{{ $prestation->nom_prestation }}</td>
+                                            <td class="text-end">{{ number_format($prestation->prix, 0, ',', ' ') }}</td>
+                                            <td class="text-center">{{ $prestation->duree ? $prestation->duree->format('H:i') : '00:00' }}</td>
+                                        </tr>
+                                        @endforeach
+                                    </tbody>
+                                </table>
                             </div>
                         </div>
                     </div>
@@ -424,7 +447,7 @@
                         <h4 class="section-title"><i class="fas fa-clock"></i> Date et heure du rendez-vous</h4>
                         
                         <div class="row">
-                            <div class="col-md-6 mb-3">
+                            <div class="col-md-4 mb-3">
                                 <label for="date_heure" class="form-label">Date et heure souhaitée</label>
                                 <div class="input-group">
                                     <span class="input-group-text"><i class="fas fa-calendar-alt"></i></span>
@@ -432,13 +455,21 @@
                                 </div>
                                 <div class="form-text">Choisissez une date et une heure disponibles</div>
                             </div>
-                            <div class="col-md-6 mb-3">
+                            <div class="col-md-4 mb-3">
                                 <label for="prestation_info" class="form-label">Durée estimée</label>
                                 <div class="input-group">
                                     <span class="input-group-text"><i class="fas fa-hourglass-half"></i></span>
                                     <input type="text" class="form-control" id="prestation_info" readonly placeholder="Sélectionnez une prestation">
                                 </div>
-                                <div class="form-text">Durée estimée de votre prestation</div>
+                                <div class="form-text">Durée totale des prestations</div>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label for="prix_total" class="form-label">Prix total</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fas fa-money-bill-wave"></i></span>
+                                    <input type="text" class="form-control" id="prix_total" readonly placeholder="Sélectionnez une prestation">
+                                </div>
+                                <div class="form-text">Coût total des prestations</div>
                             </div>
                         </div>
                     </div>
@@ -478,36 +509,76 @@
     <!-- Custom JS -->
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Récupération des détails de la prestation
-            document.getElementById('prestation_id').addEventListener('change', function() {
-                const prestationId = this.value;
-                const prestationInfoField = document.getElementById('prestation_info');
+            // Récupération des détails des prestations via checkboxes
+            const checkboxes = document.querySelectorAll('.prestation-checkbox');
+            const prestationInfoField = document.getElementById('prestation_info');
+            const prixTotalField = document.getElementById('prix_total');
+            
+            // Fonction pour calculer les totaux
+            function calculerTotaux() {
+                const selectedCheckboxes = document.querySelectorAll('.prestation-checkbox:checked');
                 
-                if (!prestationId) {
-                    prestationInfoField.value = 'Sélectionnez une prestation';
+                if (selectedCheckboxes.length === 0) {
+                    prestationInfoField.value = 'Sélectionnez au moins une prestation';
+                    prixTotalField.value = 'Sélectionnez au moins une prestation';
                     return;
                 }
                 
-                fetch(`{{ route('reservations.public.getPrestationDetails') }}?prestation_id=${prestationId}`)
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            const duree = data.prestation.duree;
-                            prestationInfoField.value = `${duree}`;
-                        } else {
-                            prestationInfoField.value = 'Information non disponible';
+                // Récupérer les IDs des prestations sélectionnées
+                const selectedIds = Array.from(selectedCheckboxes).map(checkbox => checkbox.value);
+                
+                // Utiliser FormData pour envoyer un tableau de valeurs
+                const formData = new FormData();
+                selectedIds.forEach(id => {
+                    formData.append('prestations[]', id);
+                });
+                
+                fetch('{{ route("reservations.public.getPrestationDetails") }}', {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                    },
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Format de la durée totale
+                        prestationInfoField.value = `${data.duree}`;
+                        
+                        // Affichage du prix total
+                        if (prixTotalField) {
+                            prixTotalField.value = `${data.prix.toLocaleString('fr-FR')} FCFA`;
                         }
-                    })
-                    .catch(error => {
-                        console.error('Erreur:', error);
-                        prestationInfoField.value = 'Erreur lors de la récupération des informations';
-                    });
-            });
+                    } else {
+                        prestationInfoField.value = 'Information non disponible';
+                        prixTotalField.value = 'Information non disponible';
+                    }
+                })
+                .catch(error => {
+                    console.error('Erreur:', error);
+                    prestationInfoField.value = 'Erreur lors de la récupération des informations';
+                    prixTotalField.value = 'Erreur lors de la récupération des informations';
+                });
+            }
+            
 
-            // Si une prestation est déjà sélectionnée (en cas de retour de formulaire avec erreurs)
-            const prestationSelect = document.getElementById('prestation_id');
-            if (prestationSelect.value) {
-                prestationSelect.dispatchEvent(new Event('change'));
+            // Ajouter les écouteurs d'événements aux cases à cocher
+            checkboxes.forEach(checkbox => {
+                checkbox.addEventListener('change', calculerTotaux);
+            });
+            
+            // Vérifier s'il y a des prestations déjà sélectionnées au chargement
+            const selectedInitial = document.querySelectorAll('.prestation-checkbox:checked');
+            if (selectedInitial.length > 0) {
+                calculerTotaux();
+            }
+            
+            // Ajouter un style personnalisé au tableau des prestations
+            const prestationsTable = document.querySelector('.prestations-table');
+            if (prestationsTable) {
+                prestationsTable.style.borderRadius = '8px';
+                prestationsTable.style.overflow = 'hidden';
             }
         });
     </script>

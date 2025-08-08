@@ -32,7 +32,8 @@ class PublicReservationController extends Controller
             'numero_telephone' => 'required|string|max:255',
             'adresse_mail' => 'required|email|max:255',
             'salon_id' => 'required|exists:salons,id',
-            'prestation_id' => 'required|exists:prestations,id',
+            'prestations' => 'required|array',
+            'prestations.*' => 'exists:prestations,id',
             'date_heure' => 'required|date|after:now',
             'commentaire' => 'nullable|string',
         ]);
@@ -52,21 +53,38 @@ class PublicReservationController extends Controller
             ]
         );
         
-        // Récupération des détails de la prestation
-        $prestation = Prestation::findOrFail($request->prestation_id);
+        // Calculer le prix total et la durée totale
+        $prestations = Prestation::whereIn('id', $request->prestations)->get();
+        $prix_total = $prestations->sum('prix');
+        
+        // Convertir les durées en minutes, les additionner, puis reformater en H:i
+        $duree_totale_minutes = 0;
+        foreach ($prestations as $prestation) {
+            // Convertir la durée au format H:i:s en minutes
+            $time_parts = explode(':', $prestation->duree->format('H:i:s'));
+            $duree_minutes = $time_parts[0] * 60 + $time_parts[1];
+            $duree_totale_minutes += $duree_minutes;
+        }
+        
+        // Convertir les minutes totales en format de durée
+        $heures = floor($duree_totale_minutes / 60);
+        $minutes = $duree_totale_minutes % 60;
+        $duree_totale = sprintf('%02d:%02d', $heures, $minutes);
         
         // Création de la réservation
-        Reservation::create([
+        $reservation = Reservation::create([
             'client_id' => $client->id,
             'salon_id' => $request->salon_id,
-            'prestation_id' => $request->prestation_id,
-            'prix' => $prestation->prix,
-            'duree' => $prestation->duree,
+            'prix' => $prix_total,
+            'duree' => $duree_totale,
             'date_heure' => $request->date_heure,
             'statut' => 'en_attente', // Par défaut, une réservation client est en attente de confirmation
             'commentaire' => $request->commentaire,
             'client_created' => true, // Indique que cette réservation a été créée par un client
         ]);
+        
+        // Associer les prestations à la réservation
+        $reservation->prestations()->attach($request->prestations);
         
         return redirect()->route('reservations.public.confirmation');
     }
@@ -84,32 +102,37 @@ class PublicReservationController extends Controller
      */
     public function getPrestationDetails(Request $request)
     {
-        $prestation_id = $request->input('prestation_id');
+        $prestation_ids = $request->input('prestations');
         
-        if (!$prestation_id) {
+        if (!$prestation_ids || !is_array($prestation_ids) || empty($prestation_ids)) {
             return response()->json([
                 'success' => false,
-                'message' => 'ID de prestation manquant'
+                'message' => 'Au moins une prestation est requise'
             ]);
         }
         
-        $prestation = Prestation::find($prestation_id);
+        // Calculer le prix total et la durée totale de toutes les prestations sélectionnées
+        $prestations = Prestation::whereIn('id', $prestation_ids)->get();
+        $prix_total = $prestations->sum('prix');
         
-        if (!$prestation) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Prestation non trouvée'
-            ]);
+        // Convertir les durées en minutes, les additionner, puis reformater en H:i
+        $duree_totale_minutes = 0;
+        foreach ($prestations as $prestation) {
+            // Convertir la durée au format H:i:s en minutes
+            $time_parts = explode(':', $prestation->duree->format('H:i:s'));
+            $duree_minutes = $time_parts[0] * 60 + $time_parts[1];
+            $duree_totale_minutes += $duree_minutes;
         }
+        
+        // Convertir les minutes totales en heures et minutes
+        $heures = floor($duree_totale_minutes / 60);
+        $minutes = $duree_totale_minutes % 60;
+        $duree_totale = sprintf('%02d:%02d', $heures, $minutes);
         
         return response()->json([
             'success' => true,
-            'prestation' => [
-                'id' => $prestation->id,
-                'nom_prestation' => $prestation->nom_prestation,
-                'prix' => $prestation->prix,
-                'duree' => $prestation->duree ? $prestation->duree->format('H:i') : '00:00'
-            ]
+            'prix' => $prix_total,
+            'duree' => $duree_totale
         ]);
     }
 }

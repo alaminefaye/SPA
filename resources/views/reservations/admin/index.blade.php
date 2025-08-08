@@ -46,7 +46,15 @@
                         <tr>
                             <td>{{ $reservation->client->nom_complet }}</td>
                             <td>{{ $reservation->salon->nom }}</td>
-                            <td>{{ $reservation->prestation->nom_prestation }}</td>
+                            <td>
+                                @if($reservation->prestations->count() > 0)
+                                    @foreach($reservation->prestations as $prestation)
+                                        <span class="badge bg-label-info mb-1">{{ $prestation->nom_prestation }}</span>@if(!$loop->last),<br>@endif
+                                    @endforeach
+                                @else
+                                    <span class="badge bg-label-danger">Aucune prestation</span>
+                                @endif
+                            </td>
                             <td>{{ $reservation->date_heure->format('d/m/Y H:i') }}</td>
                             <td>
                                 @switch($reservation->statut)
@@ -102,8 +110,8 @@
         </div>
     </div>
 
-    <div class="mt-4">
-        {{ $reservations->links() }}
+    <div class="mt-4 px-2">
+        {{ $reservations->links('pagination::bootstrap-5') }}
     </div>
 </div>
 @endsection

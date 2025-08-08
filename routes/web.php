@@ -52,7 +52,7 @@ Route::middleware('auth')->group(function () {
     
     // AJAX routes pour les réservations (admin)
     Route::get('/admin/client-search', [ReservationController::class, 'getClientByPhone'])->name('reservations.getClientByPhone');
-    Route::get('/admin/prestation-details', [ReservationController::class, 'getPrestationDetails'])->name('reservations.getPrestationDetails');
+    Route::post('/admin/prestation-details', [ReservationController::class, 'getPrestationDetails'])->name('reservations.getPrestationDetails');
 });
 
 // Routes publiques pour les réservations (sans authentification)
@@ -60,5 +60,5 @@ Route::prefix('reservation-publique')->group(function () {
     Route::get('/', [PublicReservationController::class, 'showForm'])->name('reservations.public.form');
     Route::post('/store', [PublicReservationController::class, 'store'])->name('reservations.public.store');
     Route::get('/confirmation', [PublicReservationController::class, 'confirmation'])->name('reservations.public.confirmation');
-    Route::get('/prestation-details', [PublicReservationController::class, 'getPrestationDetails'])->name('reservations.public.getPrestationDetails');
+    Route::post('/prestation-details', [PublicReservationController::class, 'getPrestationDetails'])->name('reservations.public.getPrestationDetails');
 });

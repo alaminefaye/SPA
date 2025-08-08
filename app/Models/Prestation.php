@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Prestation extends Model
 {
@@ -19,10 +20,17 @@ class Prestation extends Model
     /**
      * Get the seances that use this prestation.
      */
-    public function seances()
+    public function seances(): BelongsToMany
     {
         return $this->belongsToMany(Seance::class, 'seance_prestation')
-                    ->withPivot('quantite')
                     ->withTimestamps();
+    }
+    
+    /**
+     * Get the reservations that use this prestation.
+     */
+    public function reservations(): BelongsToMany
+    {
+        return $this->belongsToMany(Reservation::class, 'reservation_prestation');
     }
 }

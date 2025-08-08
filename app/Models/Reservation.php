@@ -4,13 +4,13 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Reservation extends Model
 {
     protected $fillable = [
         'client_id',
         'salon_id',
-        'prestation_id',
         'prix',
         'duree',
         'date_heure',
@@ -45,10 +45,10 @@ class Reservation extends Model
     }
     
     /**
-     * Get the prestation associated with the reservation.
+     * Get the prestations associated with the reservation.
      */
-    public function prestation(): BelongsTo
+    public function prestations(): BelongsToMany
     {
-        return $this->belongsTo(Prestation::class);
+        return $this->belongsToMany(Prestation::class, 'reservation_prestation');
     }
 }

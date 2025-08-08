@@ -107,21 +107,28 @@
                     </div>
                 </div>
                 <div class="col-md-6">
-                    <h6 class="text-muted">Détails de la Prestation</h6>
+                    <h6 class="text-muted">Détails des Prestations</h6>
                     <div class="table-responsive">
-                        <table class="table table-borderless">
+                        <table class="table table-bordered">
+                            <thead>
+                                <tr>
+                                    <th>Prestation</th>
+                                    <th>Prix</th>
+                                    <th>Durée</th>
+                                </tr>
+                            </thead>
                             <tbody>
+                                @foreach($reservation->prestations as $prestation)
                                 <tr>
-                                    <td class="fw-medium">Prestation</td>
-                                    <td>{{ $reservation->prestation->nom_prestation }}</td>
+                                    <td>{{ $prestation->nom_prestation }}</td>
+                                    <td>{{ number_format($prestation->prix, 2, ',', ' ') }} FCFA</td>
+                                    <td>{{ $prestation->duree->format('H:i') }}</td>
                                 </tr>
-                                <tr>
-                                    <td class="fw-medium">Prix</td>
-                                    <td>{{ number_format($reservation->prix, 2, ',', ' ') }} FCFA</td>
-                                </tr>
-                                <tr>
-                                    <td class="fw-medium">Durée</td>
-                                    <td>{{ $reservation->duree->format('H:i') }}</td>
+                                @endforeach
+                                <tr class="table-active">
+                                    <td><strong>Total</strong></td>
+                                    <td><strong>{{ number_format($reservation->prix, 2, ',', ' ') }} FCFA</strong></td>
+                                    <td><strong>{{ $reservation->duree->format('H:i') }}</strong></td>
                                 </tr>
                             </tbody>
                         </table>

@@ -18,7 +18,7 @@ class ReservationController extends Controller
     {
         $search = $request->input('search');
         
-        $query = Reservation::with(['client', 'salon', 'prestation']);
+        $query = Reservation::with(['client', 'salon', 'prestations']);
         
         if ($search) {
             $query->whereHas('client', function($q) use ($search) {
@@ -28,7 +28,7 @@ class ReservationController extends Controller
             ->orWhereHas('salon', function($q) use ($search) {
                 $q->where('nom', 'LIKE', "%{$search}%");
             })
-            ->orWhereHas('prestation', function($q) use ($search) {
+            ->orWhereHas('prestations', function($q) use ($search) {
                 $q->where('nom_prestation', 'LIKE', "%{$search}%");
             });
         }
@@ -59,7 +59,8 @@ class ReservationController extends Controller
         $validator = Validator::make($request->all(), [
             'numero_telephone' => 'required|string|max:255',
             'salon_id' => 'required|exists:salons,id',
-            'prestation_id' => 'required|exists:prestations,id',
+            'prestations' => 'required|array',
+            'prestations.*' => 'exists:prestations,id',
             'prix' => 'required|numeric',
             'duree' => 'required',
             'date_heure' => 'required|date',
@@ -94,10 +95,9 @@ class ReservationController extends Controller
         }
         
         // Création de la réservation
-        Reservation::create([
+        $reservation = Reservation::create([
             'client_id' => $client->id,
             'salon_id' => $request->salon_id,
-            'prestation_id' => $request->prestation_id,
             'prix' => $request->prix,
             'duree' => $request->duree,
             'date_heure' => $request->date_heure,
@@ -105,6 +105,9 @@ class ReservationController extends Controller
             'commentaire' => $request->commentaire,
             'client_created' => false, // Indique que cette réservation a été créée par l'administrateur
         ]);
+        
+        // Associer les prestations à la réservation
+        $reservation->prestations()->attach($request->prestations);
         
         return redirect()->route('reservations.index')
             ->with('success', 'Réservation créée avec succès');
@@ -115,7 +118,7 @@ class ReservationController extends Controller
      */
     public function show(string $id)
     {
-        $reservation = Reservation::with(['client', 'salon', 'prestation'])->findOrFail($id);
+        $reservation = Reservation::with(['client', 'salon', 'prestations'])->findOrFail($id);
         
         // Marquer cette réservation comme lue si elle ne l'était pas déjà
         if (!$reservation->is_read) {
@@ -145,7 +148,8 @@ class ReservationController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'salon_id' => 'required|exists:salons,id',
-            'prestation_id' => 'required|exists:prestations,id',
+            'prestations' => 'required|array',
+            'prestations.*' => 'exists:prestations,id',
             'prix' => 'required|numeric',
             'duree' => 'required',
             'date_heure' => 'required|date',
@@ -160,7 +164,19 @@ class ReservationController extends Controller
         }
         
         $reservation = Reservation::findOrFail($id);
-        $reservation->update($request->all());
+        
+        // Mise à jour des informations de la réservation
+        $reservation->update([
+            'salon_id' => $request->salon_id,
+            'prix' => $request->prix,
+            'duree' => $request->duree,
+            'date_heure' => $request->date_heure,
+            'statut' => $request->statut,
+            'commentaire' => $request->commentaire,
+        ]);
+        
+        // Synchroniser les prestations
+        $reservation->prestations()->sync($request->prestations);
         
         return redirect()->route('reservations.index')
             ->with('success', 'Réservation mise à jour avec succès');
@@ -204,32 +220,37 @@ class ReservationController extends Controller
      */
     public function getPrestationDetails(Request $request)
     {
-        $prestation_id = $request->input('prestation_id');
+        $prestation_ids = $request->input('prestations');
         
-        if (!$prestation_id) {
+        if (!$prestation_ids || !is_array($prestation_ids) || empty($prestation_ids)) {
             return response()->json([
                 'success' => false,
-                'message' => 'ID de prestation manquant'
+                'message' => 'Au moins une prestation est requise'
             ]);
         }
         
-        $prestation = Prestation::find($prestation_id);
+        // Calculer le prix total et la durée totale de toutes les prestations sélectionnées
+        $prestations = Prestation::whereIn('id', $prestation_ids)->get();
+        $prix_total = $prestations->sum('prix');
         
-        if (!$prestation) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Prestation non trouvée'
-            ]);
+        // Convertir les durées en minutes, les additionner, puis reformater en H:i
+        $duree_totale_minutes = 0;
+        foreach ($prestations as $prestation) {
+            // Convertir la durée au format H:i:s en minutes
+            $time_parts = explode(':', $prestation->duree->format('H:i:s'));
+            $duree_minutes = $time_parts[0] * 60 + $time_parts[1];
+            $duree_totale_minutes += $duree_minutes;
         }
+        
+        // Convertir les minutes totales en heures et minutes
+        $heures = floor($duree_totale_minutes / 60);
+        $minutes = $duree_totale_minutes % 60;
+        $duree_totale = sprintf('%02d:%02d', $heures, $minutes);
         
         return response()->json([
             'success' => true,
-            'prestation' => [
-                'id' => $prestation->id,
-                'nom_prestation' => $prestation->nom_prestation,
-                'prix' => $prestation->prix,
-                'duree' => $prestation->duree ? $prestation->duree->format('H:i') : '00:00'
-            ]
+            'prix' => $prix_total,
+            'duree' => $duree_totale
         ]);
     }
 }

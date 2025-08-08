@@ -69,16 +69,69 @@
                         </div>
                         
                         <div class="row mb-3">
-                            <label class="col-sm-2 col-form-label" for="prestation_id">Prestation</label>
+                            <label class="col-sm-2 col-form-label">Prestations</label>
                             <div class="col-sm-10">
-                                <select class="form-select" id="prestation_id" name="prestation_id" required>
-                                    <option value="">Sélectionner une prestation</option>
-                                    @foreach($prestations as $prestation)
-                                    <option value="{{ $prestation->id }}" {{ old('prestation_id') == $prestation->id ? 'selected' : '' }}>
-                                        {{ $prestation->nom_prestation }}
-                                    </option>
-                                    @endforeach
-                                </select>
+                                <div class="alert alert-info mb-2">
+                                    Sélectionnez une ou plusieurs prestations. Le prix total et la durée totale seront automatiquement calculés.
+                                </div>
+                                <div class="table-responsive">
+                                    <table class="table table-bordered">
+                                        <thead>
+                                            <tr>
+                                                <th style="width: 40px;">Sélection</th>
+                                                <th>Prestation</th>
+                                                <th style="width: 120px;">Prix (FCFA)</th>
+                                                <th style="width: 120px;">Durée</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @foreach($prestations as $prestation)
+                                            <tr>
+                                                <td class="text-center">
+                                                    <div class="form-check">
+                                                        <input class="form-check-input prestation-checkbox" type="checkbox" 
+                                                            value="{{ $prestation->id }}" id="prestation_{{ $prestation->id }}" 
+                                                            name="prestations[]" data-prix="{{ $prestation->prix }}" 
+                                                            data-duree="{{ $prestation->duree ? $prestation->duree->format('H:i') : '00:00' }}"
+                                                            data-nom="{{ $prestation->nom_prestation }}"
+                                                            {{ (is_array(old('prestations')) && in_array($prestation->id, old('prestations'))) ? 'checked' : '' }}>
+                                                    </div>
+                                                </td>
+                                                <td>{{ $prestation->nom_prestation }}</td>
+                                                <td class="text-end">{{ number_format($prestation->prix, 0, ',', ' ') }}</td>
+                                                <td>{{ $prestation->duree ? $prestation->duree->format('H:i') : '00:00' }}</td>
+                                            </tr>
+                                            @endforeach
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row mb-3">
+                            <label class="col-sm-2 col-form-label">Résumé</label>
+                            <div class="col-sm-10">
+                                <div class="card">
+                                    <div class="card-body p-3">
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <div class="mb-2">
+                                                    <label class="form-label">Prix Total (FCFA)</label>
+                                                    <input type="number" step="0.01" class="form-control" id="prix" name="prix" value="{{ old('prix', 0) }}" required readonly />
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="mb-2">
+                                                    <label class="form-label">Durée Totale</label>
+                                                    <input type="time" class="form-control" id="duree" name="duree" value="{{ old('duree', '00:00') }}" required readonly />
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="alert alert-success mb-0" id="resume-prestations">
+                                            <p class="mb-0">Aucune prestation sélectionnée</p>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                         
@@ -89,21 +142,7 @@
                             </div>
                         </div>
                         
-                        <div class="row mb-3">
-                            <label class="col-sm-2 col-form-label" for="prix">Prix (FCFA)</label>
-                            <div class="col-sm-10">
-                                <input type="number" class="form-control" id="prix" name="prix" step="0.01" min="0" value="{{ old('prix') }}" required readonly>
-                                <div class="form-text">Auto-rempli en fonction de la prestation</div>
-                            </div>
-                        </div>
-                        
-                        <div class="row mb-3">
-                            <label class="col-sm-2 col-form-label" for="duree">Durée</label>
-                            <div class="col-sm-10">
-                                <input type="time" class="form-control" id="duree" name="duree" value="{{ old('duree') }}" required readonly>
-                                <div class="form-text">Auto-rempli en fonction de la prestation</div>
-                            </div>
-                        </div>
+
                         
                         <div class="row mb-3">
                             <label class="col-sm-2 col-form-label" for="commentaire">Commentaire</label>
@@ -155,43 +194,75 @@
                 });
         });
         
-        // Auto-remplissage des détails de prestation
-        document.getElementById('prestation_id').addEventListener('change', function() {
-            const prestationId = this.value;
-            if (!prestationId) {
-                document.getElementById('prix').value = '';
-                document.getElementById('duree').value = '';
+        // Gestion des prestations multiples avec cases à cocher
+        const prestationCheckboxes = document.querySelectorAll('.prestation-checkbox');
+        const prixInput = document.getElementById('prix');
+        const dureeInput = document.getElementById('duree');
+        const resumePrestations = document.getElementById('resume-prestations');
+        
+        // Fonction pour calculer le prix et la durée totale
+        function updateTotals() {
+            const selectedPrestations = Array.from(document.querySelectorAll('.prestation-checkbox:checked'));
+            let totalPrix = 0;
+            let totalHeures = 0;
+            let totalMinutes = 0;
+            
+            if (selectedPrestations.length === 0) {
+                prixInput.value = '0';
+                dureeInput.value = '00:00';
+                resumePrestations.innerHTML = '<p class="mb-0">Aucune prestation sélectionnée</p>';
+                resumePrestations.className = 'alert alert-success mb-0';
                 return;
             }
             
-            fetch(`{{ route('reservations.getPrestationDetails') }}?prestation_id=${prestationId}`)
-                .then(response => response.json())
-                .then(data => {
-                    console.log('Response received:', data);
-                    if (data.success) {
-                        console.log('Prestation details received:', data.prestation);
-                        console.log('Prix value:', data.prestation.prix);
-                        console.log('Durée value:', data.prestation.duree);
-                        console.log('Prix field exists:', !!document.getElementById('prix'));
-                        console.log('Durée field exists:', !!document.getElementById('duree'));
-                        // Remplissage du prix sans problème
-                        document.getElementById('prix').value = data.prestation.prix;
-                        
-                        // Pour le champ durée, s'assurer qu'il est bien au format HH:MM attendu par input[type="time"]
-                        const dureeValue = data.prestation.duree;
-                        console.log('Trying to set duree to:', dureeValue);
-                        document.getElementById('duree').value = dureeValue;
-                    } else {
-                        alert(data.message);
-                        document.getElementById('prix').value = '';
-                        document.getElementById('duree').value = '';
-                    }
-                })
-                .catch(error => {
-                    console.error('Erreur:', error);
-                    alert('Une erreur est survenue lors de la récupération des détails de la prestation');
-                });
+            // Récupérer les noms des prestations sélectionnées pour l'affichage dans le résumé
+            const selectedPrestationNames = selectedPrestations.map(checkbox => {
+                return checkbox.dataset.nom || checkbox.closest('tr').querySelector('td:nth-child(2)').textContent.trim();
+            });
+            
+            // Calculer le prix total
+            totalPrix = selectedPrestations.reduce((sum, checkbox) => {
+                return sum + parseFloat(checkbox.dataset.prix);
+            }, 0);
+            
+            // Calculer la durée totale
+            selectedPrestations.forEach(checkbox => {
+                const dureeStr = checkbox.dataset.duree;
+                const [hours, minutes] = dureeStr.split(':').map(Number);
+                totalHeures += hours;
+                totalMinutes += minutes;
+            });
+            
+            // Conversion des minutes en heures si > 60
+            totalHeures += Math.floor(totalMinutes / 60);
+            totalMinutes = totalMinutes % 60;
+            
+            // Formatage de la durée au format HH:MM
+            const formattedHours = String(totalHeures).padStart(2, '0');
+            const formattedMinutes = String(totalMinutes).padStart(2, '0');
+            const totalDuree = `${formattedHours}:${formattedMinutes}`;
+            
+            // Mise à jour des champs
+            prixInput.value = totalPrix;
+            dureeInput.value = totalDuree;
+            
+            // Mise à jour du résumé
+            let resumeHTML = '<p class="mb-0"><strong>Prestations sélectionnées :</strong></p><ul class="mb-0">';
+            selectedPrestationNames.forEach(name => {
+                resumeHTML += `<li>${name}</li>`;
+            });
+            resumeHTML += '</ul>';
+            resumePrestations.innerHTML = resumeHTML;
+            resumePrestations.className = 'alert alert-primary mb-0';
+        }
+        
+        // Ajouter les écouteurs d'événements à chaque case à cocher
+        prestationCheckboxes.forEach(checkbox => {
+            checkbox.addEventListener('change', updateTotals);
         });
+        
+        // Initialiser les totaux au chargement de la page
+        updateTotals();
     });
 </script>
 @endsection
