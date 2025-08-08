@@ -50,6 +50,10 @@ Route::middleware('auth')->group(function () {
     Route::get('/client-search', [SeanceController::class, 'getClientByPhone'])->name('seances.getClientByPhone');
     Route::get('/prestation-details', [SeanceController::class, 'getPrestationDetails'])->name('seances.getPrestationDetails');
     
+    // Routes pour le démarrage et la fin de séance
+    Route::post('/seances/{id}/demarrer', [SeanceController::class, 'demarrer'])->name('seances.demarrer');
+    Route::post('/seances/{id}/terminer', [SeanceController::class, 'terminer'])->name('seances.terminer');
+    
     // Reservation routes (admin)
     Route::resource('reservations', ReservationController::class);
     

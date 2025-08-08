@@ -21,6 +21,27 @@
                     </a>
                 </div>
             </div>
+            <div class="card-header d-flex justify-content-center bg-light py-3 mt-2">
+                <div id="timer-controls" class="d-flex gap-3">
+                    @if($seance->statut == 'planifie')
+                        <button type="button" id="btn-demarrer" class="btn btn-success" data-id="{{ $seance->id }}">
+                            <i class="bx bx-play-circle me-1"></i> Démarrer la séance
+                        </button>
+                    @elseif($seance->statut == 'en_cours')
+                        <div class="d-flex flex-column align-items-center me-4">
+                            <span class="mb-2">Temps écoulé:</span>
+                            <div id="timer" class="fs-3 fw-bold">00:00:00</div>
+                            <div id="timer-alert" class="mt-1 small text-danger"></div>
+                        </div>
+                        <form action="{{ route('seances.terminer', $seance->id) }}" method="POST">
+                            @csrf
+                            <button type="submit" class="btn btn-danger">
+                                <i class="bx bx-stop-circle me-1"></i> Terminer la séance
+                            </button>
+                        </form>
+                    @endif
+                </div>
+            </div>
             <div class="card-body">
                 <div class="row mb-4">
                     <div class="col-md-6">
@@ -133,4 +154,98 @@
         </div>
     </div>
 </div>
+@endsection
+
+@section('page-js')
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Variables pour le timer
+        let timer;
+        let seconds = 0;
+        let totalDurationMinutes = {{ $seance->prestations->sum(function($prestation) {
+            $dureeParts = explode(':', $prestation->duree->format('H:i:s'));
+            return $dureeParts[0] * 60 + $dureeParts[1];
+        }) }};
+        let totalDurationSeconds = totalDurationMinutes * 60;
+        let alertPlayed = false;
+        
+        // Si la séance est déjà en cours, calculer le temps écoulé depuis le début
+        @if($seance->statut == 'en_cours' && $seance->heure_debut)
+            const startTime = new Date('{{ $seance->heure_debut }}').getTime();
+            const now = new Date().getTime();
+            seconds = Math.floor((now - startTime) / 1000);
+            updateTimerDisplay();
+            startTimer();
+        @endif
+        
+        // Bouton pour démarrer la séance
+        const btnDemarrer = document.getElementById('btn-demarrer');
+        if (btnDemarrer) {
+            btnDemarrer.addEventListener('click', function() {
+                const seanceId = this.getAttribute('data-id');
+                
+                // Appel AJAX pour démarrer la séance
+                fetch(`/seances/${seanceId}/demarrer`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                    },
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Recharger la page pour afficher le timer
+                        window.location.reload();
+                    } else {
+                        alert('Erreur lors du démarrage de la séance: ' + data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Erreur:', error);
+                    alert('Erreur lors du démarrage de la séance');
+                });
+            });
+        }
+        
+        // Fonction pour démarrer le timer
+        function startTimer() {
+            timer = setInterval(function() {
+                seconds++;
+                updateTimerDisplay();
+                
+                // Vérifier si le temps est dépassé
+                if (seconds > totalDurationSeconds && !alertPlayed) {
+                    document.getElementById('timer-alert').textContent = 'Attention: Durée dépassée!';
+                    document.getElementById('timer').classList.add('text-danger');
+                    playAlertSound();
+                    alertPlayed = true;
+                }
+            }, 1000);
+        }
+        
+        // Fonction pour mettre à jour l'affichage du timer
+        function updateTimerDisplay() {
+            const hours = Math.floor(seconds / 3600);
+            const minutes = Math.floor((seconds % 3600) / 60);
+            const secs = seconds % 60;
+            
+            const display = 
+                String(hours).padStart(2, '0') + ':' +
+                String(minutes).padStart(2, '0') + ':' +
+                String(secs).padStart(2, '0');
+            
+            document.getElementById('timer').textContent = display;
+        }
+        
+        // Fonction pour jouer le son d'alerte
+        function playAlertSound() {
+            if (window.playNotificationBeep) {
+                window.playNotificationBeep();
+            } else {
+                console.log('Fonction de notification non disponible');
+            }
+        }
+    });
+</script>
 @endsection

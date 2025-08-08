@@ -121,8 +121,8 @@
             </table>
         </div>
         
-        <div class="mt-4">
-            {{ $seances->links() }}
+        <div class="mt-3 px-2">
+            {{ $seances->links('pagination::bootstrap-5') }}
         </div>
     </div>
 </div>

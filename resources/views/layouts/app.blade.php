@@ -305,6 +305,7 @@
 
     <!-- Main JS -->
     <script src="{{ asset('assets/js/main.js') }}"></script>
+    <script src="{{ asset('assets/js/notification-sound.js') }}"></script>
 
     <!-- Page JS -->
     @yield('page-js')

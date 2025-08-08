@@ -266,4 +266,43 @@ class SeanceController extends Controller
             ]
         ]);
     }
+    
+    /**
+     * Démarre une séance en modifiant son statut à 'en_cours'
+     */
+    public function demarrer(string $id)
+    {
+        $seance = Seance::findOrFail($id);
+        $seance->statut = 'en_cours';
+        $seance->heure_debut = now();
+        $seance->save();
+        
+        // Calcul de la durée totale en minutes pour le timer JavaScript
+        $dureeMinutes = 0;
+        foreach ($seance->prestations as $prestation) {
+            $dureeParts = explode(':', $prestation->duree->format('H:i:s'));
+            $dureeMinutes += $dureeParts[0] * 60 + $dureeParts[1];
+        }
+        
+        return response()->json([
+            'success' => true,
+            'message' => 'Séance démarrée avec succès',
+            'duree_minutes' => $dureeMinutes,
+            'duree_formatee' => $seance->duree ? $seance->duree->format('H:i:s') : '00:00:00'
+        ]);
+    }
+    
+    /**
+     * Termine une séance en modifiant son statut à 'termine'
+     */
+    public function terminer(string $id)
+    {
+        $seance = Seance::findOrFail($id);
+        $seance->statut = 'termine';
+        $seance->heure_fin = now();
+        $seance->save();
+        
+        return redirect()->route('seances.show', $id)
+            ->with('success', 'Séance terminée avec succès');
+    }
 }
