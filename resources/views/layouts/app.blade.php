@@ -32,6 +32,8 @@
 
     <!-- Icons. Uncomment required icon fonts -->
     <link rel="stylesheet" href="{{ asset('assets/vendor/fonts/boxicons.css') }}" />
+    <!-- Ajout du CDN BoxIcons pour garantir le chargement des icônes -->
+    <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet" />
 
     <!-- Core CSS -->
     <link rel="stylesheet" href="{{ asset('assets/vendor/css/core.css') }}" class="template-customizer-core-css" />
@@ -185,6 +187,31 @@
             </li>
 
             <!-- Add more menu items as needed -->
+            
+            <!-- Gestion des Produits Dropdown -->
+            <li class="menu-item {{ request()->is('product-categories*') || request()->is('products*') || request()->is('purchases*') ? 'active open' : '' }}">
+              <a href="javascript:void(0);" class="menu-link menu-toggle">
+                <i class="menu-icon tf-icons bx bx-package"></i>
+                <div data-i18n="Produits">Gestion des produits</div>
+              </a>
+              <ul class="menu-sub">
+                <li class="menu-item {{ request()->is('product-categories*') ? 'active' : '' }}">
+                  <a href="{{ route('product-categories.index') }}" class="menu-link">
+                    <div data-i18n="Catégories">Catégories</div>
+                  </a>
+                </li>
+                <li class="menu-item {{ request()->is('products*') ? 'active' : '' }}">
+                  <a href="{{ route('products.index') }}" class="menu-link">
+                    <div data-i18n="Produits">Produits</div>
+                  </a>
+                </li>
+                <li class="menu-item {{ request()->is('purchases*') ? 'active' : '' }}">
+                  <a href="{{ route('purchases.index') }}" class="menu-link">
+                    <div data-i18n="Achats">Achats</div>
+                  </a>
+                </li>
+              </ul>
+            </li>
             
           </ul>
         </aside>

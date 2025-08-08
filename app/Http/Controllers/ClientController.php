@@ -114,4 +114,38 @@ class ClientController extends Controller
         return redirect()->route('clients.index')
             ->with('success', 'Client supprimé avec succès');
     }
+    
+    /**
+     * Search for a client by phone number (AJAX)
+     */
+    public function searchByPhone(Request $request)
+    {
+        $phone = $request->input('phone');
+        
+        if (!$phone) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Veuillez fournir un numéro de téléphone'
+            ]);
+        }
+        
+        $client = Client::where('numero_telephone', 'LIKE', "%{$phone}%")->first();
+        
+        if ($client) {
+            return response()->json([
+                'success' => true,
+                'client' => [
+                    'id' => $client->id,
+                    'nom_complet' => $client->nom_complet,
+                    'adresse_mail' => $client->adresse_mail,
+                    'telephone' => $client->numero_telephone
+                ]
+            ]);
+        } else {
+            return response()->json([
+                'success' => false,
+                'message' => 'Aucun client trouvé avec ce numéro de téléphone'
+            ]);
+        }
+    }
 }

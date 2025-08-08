@@ -5,6 +5,9 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ClientController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\PrestationController;
+use App\Http\Controllers\ProductCategoryController;
+use App\Http\Controllers\ProductController;
+use App\Http\Controllers\PurchaseController;
 use App\Http\Controllers\SalonController;
 use App\Http\Controllers\SeanceController;
 use App\Http\Controllers\ReservationController;
@@ -53,6 +56,21 @@ Route::middleware('auth')->group(function () {
     // AJAX routes pour les réservations (admin)
     Route::get('/admin/client-search', [ReservationController::class, 'getClientByPhone'])->name('reservations.getClientByPhone');
     Route::post('/admin/prestation-details', [ReservationController::class, 'getPrestationDetails'])->name('reservations.getPrestationDetails');
+    
+    // Product category routes
+    Route::resource('product-categories', ProductCategoryController::class);
+    
+    // Product routes
+    Route::resource('products', ProductController::class);
+    Route::post('/products/{product}/update-stock', [ProductController::class, 'updateStock'])->name('products.updateStock');
+    
+    // Purchase routes
+    Route::resource('purchases', PurchaseController::class)->except(['edit', 'update', 'destroy']);
+    Route::post('/purchases/{purchase}/cancel', [PurchaseController::class, 'cancel'])->name('purchases.cancel');
+    Route::get('/product-details', [PurchaseController::class, 'getProductDetails'])->name('purchases.getProductDetails');
+    
+    // Client search route
+    Route::get('/client-search-by-phone', [ClientController::class, 'searchByPhone'])->name('clients.searchByPhone');
 });
 
 // Routes publiques pour les réservations (sans authentification)
