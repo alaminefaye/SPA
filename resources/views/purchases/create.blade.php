@@ -2,6 +2,33 @@
 
 @section('title', 'Nouvel Achat')
 
+@section('page-css')
+<!-- Select2 CSS -->
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+<link href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css" rel="stylesheet" />
+<style>
+    /* Styles pour la recherche de produits */
+    .select2-container--bootstrap-5 .select2-selection {
+        min-height: calc(1.5em + 0.75rem + 2px);
+    }
+    .product-item {
+        display: flex;
+        justify-content: space-between;
+    }
+    .product-info {
+        flex-grow: 1;
+    }
+    .product-stock {
+        text-align: right;
+        white-space: nowrap;
+        padding-left: 10px;
+    }
+    .product-low-stock {
+        color: #dc3545;
+        font-weight: bold;
+    }
+</style>
+
 @section('content')
 <div class="container-fluid">
     <h1 class="h3 mb-4 text-gray-800">Nouvel Achat</h1>
@@ -146,8 +173,8 @@
 <template id="product-row-template">
     <tr class="product-row">
         <td>
-            <select class="form-control product-select" name="items[__INDEX__][product_id]" required>
-                <option value="">Sélectionner un produit</option>
+            <select class="form-control product-select product-search" name="items[__INDEX__][product_id]" required>
+                <option value="">Rechercher un produit...</option>
                 @foreach($products as $product)
                     <option value="{{ $product->id }}" data-price="{{ $product->price }}" data-stock="{{ $product->stock }}">
                         {{ $product->name }} - Stock: {{ $product->stock }} {{ $product->isLowStock() ? '⚠️' : '' }}
@@ -186,6 +213,8 @@
 @endsection
 
 @section('page-js')
+<!-- Select2 JS -->
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 <script>
     $(document).ready(function() {
         let productIndex = 0;
@@ -256,6 +285,25 @@
         
         // Fonction pour initialiser les événements d'une ligne
         function initRowEvents(row) {
+            // Initialiser Select2 pour la recherche de produit
+            $(row).find('.product-search').select2({
+                theme: 'bootstrap-5',
+                placeholder: 'Rechercher un produit...',
+                width: '100%',
+                language: {
+                    noResults: function() {
+                        return "Aucun produit trouvé";
+                    },
+                    searching: function() {
+                        return "Recherche en cours...";
+                    }
+                },
+                templateResult: formatProduct,
+                templateSelection: formatProductSelection,
+                minimumInputLength: 1, // Exige au moins 1 caractère avant d'afficher des résultats
+                minimumResultsForSearch: Infinity // Masque la barre de recherche interne de Select2
+            });
+            
             // Changement de produit
             $(row).find('.product-select').change(function() {
                 const option = $(this).find('option:selected');
@@ -340,6 +388,46 @@
         
         // Ajouter une première ligne de produit automatiquement
         $('#add-product').trigger('click');
+        
+        // Fonction pour formater l'affichage des produits dans la liste déroulante
+        function formatProduct(product) {
+            if (!product.id) {
+                return product.text;
+            }
+            
+            const $option = $(product.element);
+            const price = parseFloat($option.data('price')) || 0;
+            const stock = parseInt($option.data('stock')) || 0;
+            const isLowStock = stock <= 5;
+            
+            const $container = $('<div class="product-item"></div>');
+            
+            const $productInfo = $('<div class="product-info"></div>');
+            $productInfo.text(product.text.split(' - ')[0]); // Affiche uniquement le nom du produit
+            
+            const $stockInfo = $('<div class="product-stock"></div>');
+            if (isLowStock) {
+                $stockInfo.addClass('product-low-stock');
+                $stockInfo.html(`Stock: ${stock} ⚠️`);
+            } else {
+                $stockInfo.text(`Stock: ${stock}`);
+            }
+            
+            $container.append($productInfo);
+            $container.append($stockInfo);
+            
+            return $container;
+        }
+        
+        // Fonction pour formater l'affichage des produits sélectionnés
+        function formatProductSelection(product) {
+            if (!product.id) {
+                return product.text;
+            }
+            
+            // Retourne uniquement le nom du produit sans les informations de stock
+            return product.text.split(' - ')[0];
+        }
     });
 </script>
 @endsection
