@@ -340,4 +340,66 @@ class SeanceController extends Controller
         
         return view('seances.a_demarrer', compact('seances'));
     }
+    
+    /**
+     * API pour récupérer les séances en cours (pour les notifications)
+     */
+    public function getSeancesEnCours()
+    {
+        $seances = Seance::with(['client', 'prestations'])
+            ->where('statut', 'en_cours')
+            ->whereNotNull('heure_debut')
+            ->get()
+            ->map(function($seance) {
+                // Calcul de la durée totale en minutes pour le timer JavaScript
+                $dureeMinutes = 0;
+                foreach ($seance->prestations as $prestation) {
+                    $dureeParts = explode(':', $prestation->duree->format('H:i:s'));
+                    $dureeMinutes += $dureeParts[0] * 60 + $dureeParts[1];
+                }
+                
+                return [
+                    'id' => $seance->id,
+                    'heure_debut' => $seance->heure_debut,
+                    'client_nom' => $seance->client->nom_complet,
+                    'statut' => $seance->statut,
+                    'duree_minutes' => $dureeMinutes
+                ];
+            });
+            
+        return response()->json([
+            'success' => true,
+            'seances' => $seances
+        ]);
+    }
+    
+    /**
+     * Affiche la page de test des notifications
+     * 
+     * @return \Illuminate\View\View
+     */
+    public function notificationTest()
+    {
+        return view('seances.notification-test');
+    }
+    
+    /**
+     * API pour vérifier si une séance est toujours active (non terminée)
+     *
+     * @param string $id ID de la séance
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function checkSeanceStatus(string $id)
+    {
+        $seance = Seance::findOrFail($id);
+        
+        // Une séance est considérée comme active si elle n'est pas terminée
+        $isActive = $seance->statut !== 'termine';
+        
+        return response()->json([
+            'success' => true,
+            'active' => $isActive,
+            'statut' => $seance->statut
+        ]);
+    }
 }

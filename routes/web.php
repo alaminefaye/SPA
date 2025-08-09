@@ -87,3 +87,14 @@ Route::prefix('reservation-publique')->group(function () {
     Route::get('/confirmation', [PublicReservationController::class, 'confirmation'])->name('reservations.public.confirmation');
     Route::post('/prestation-details', [PublicReservationController::class, 'getPrestationDetails'])->name('reservations.public.getPrestationDetails');
 });
+
+// Routes API pour les notifications et alertes
+Route::prefix('api')->middleware('auth')->group(function () {
+    Route::get('/seances/en-cours', [SeanceController::class, 'getSeancesEnCours'])->name('api.seances.en-cours');
+    Route::get('/seances/{id}/status', [SeanceController::class, 'checkSeanceStatus'])->name('api.seances.check-status');
+});
+
+// Routes de test
+Route::middleware('auth')->group(function () {
+    Route::get('/notifications-test', [SeanceController::class, 'notificationTest'])->name('notifications.test');
+});

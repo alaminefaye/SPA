@@ -261,6 +261,12 @@
                             countdownElement.classList.add('running');
                             countdownElement.setAttribute('data-debut', new Date().toISOString());
                             updateCountdown(countdownElement);
+                            
+                            // Déclencher immédiatement la vérification des séances en cours
+                            if (window.notificationManager && typeof window.notificationManager.checkSeancesImmediate === 'function') {
+                                console.log('Déclenchement immédiat de la vérification des séances après démarrage');
+                                window.notificationManager.checkSeancesImmediate();
+                            }
                         }
                         
                         // Remplacer le bouton Démarrer par Terminer sans recharger la page
@@ -312,10 +318,17 @@
                             this.parentNode.replaceChild(newButton, this);
                             
                             // Mettre à jour le badge de statut
-                            const statusBadge = document.querySelector(`tr[data-id="${seanceId}"] td:nth-child(5) span.badge`);
+                            // Mise à jour du badge de statut (4e colonne - index 4)
+                            const statusBadge = document.querySelector(`tr[data-id="${seanceId}"] td:nth-child(4) span.badge`);
                             if (statusBadge) {
                                 statusBadge.className = 'badge bg-warning';
                                 statusBadge.textContent = 'En cours';
+                            }
+                            
+                            // Mise à jour du statut de la séance pour le système de notifications
+                            const tr = document.querySelector(`tr[data-id="${seanceId}"]`);
+                            if (tr) {
+                                tr.setAttribute('data-statut', 'en_cours');
                             }
                         }
                     } else {
