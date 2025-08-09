@@ -23,7 +23,7 @@
             </div>
             <div class="card-header d-flex justify-content-center bg-light py-3 mt-2">
                 <div id="timer-controls" class="d-flex gap-3">
-                    @if($seance->statut == 'planifie')
+                    @if($seance->statut == 'planifiee')
                         <button type="button" id="btn-demarrer" class="btn btn-success" data-id="{{ $seance->id }}">
                             <i class="bx bx-play-circle me-1"></i> Démarrer la séance
                         </button>
@@ -72,7 +72,7 @@
                                     <th>Statut:</th>
                                     <td>
                                         @switch($seance->statut)
-                                            @case('planifie')
+                                            @case('planifiee')
                                                 <span class="badge bg-primary">Planifiée</span>
                                                 @break
                                             @case('en_cours')

@@ -95,8 +95,18 @@ class SeanceController extends Controller
         $seance = new Seance();
         $seance->client_id = $client->id;
         $seance->salon_id = $request->salon_id;
-        $seance->statut = 'planifie';
+        $seance->statut = 'planifiee';
         $seance->commentaire = $request->commentaire;
+        
+        // Définir automatiquement la date du jour pour la séance
+        $seance->date_seance = now()->toDateString();
+        
+        // Si l'heure prévue est fournie, l'utiliser, sinon mettre l'heure actuelle
+        if ($request->filled('heure_prevu')) {
+            $seance->heure_prevu = $request->heure_prevu;
+        } else {
+            $seance->heure_prevu = now()->format('H:i:s');
+        }
         
         // Initialiser le prix à 0 et la durée à un format valide pour éviter l'erreur NOT NULL
         $seance->prix = 0;
@@ -302,7 +312,32 @@ class SeanceController extends Controller
         $seance->heure_fin = now();
         $seance->save();
         
+        // Si la requête est AJAX (comme celle du bouton "Terminer"), retourner JSON
+        if (request()->ajax() || request()->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Séance terminée avec succès'
+            ]);
+        }
+        
+        // Sinon, rediriger avec un message flash
         return redirect()->route('seances.show', $id)
             ->with('success', 'Séance terminée avec succès');
+    }
+    
+    /**
+     * Affiche les séances du jour qui ne sont pas encore démarrées
+     */
+    public function aDemarrer()
+    {
+        $today = now()->toDateString(); // Format Y-m-d
+        
+        $seances = Seance::with(['client', 'salon', 'prestations'])
+            ->whereDate('date_seance', $today)
+            ->whereIn('statut', ['planifiee', 'en_cours']) // Afficher les séances planifiées ET en cours
+            ->orderBy('heure_prevu', 'asc')
+            ->get();
+        
+        return view('seances.a_demarrer', compact('seances'));
     }
 }

@@ -43,16 +43,19 @@ Route::middleware('auth')->group(function () {
     // Client routes
     Route::resource('clients', ClientController::class);
     
+    // Routes pour le démarrage et la fin de séance
+    // Note: Ces routes spécifiques doivent être définies AVANT la route resource
+    Route::get('/seances/a-demarrer', [SeanceController::class, 'aDemarrer'])->name('seances.a_demarrer');
+    Route::get('/seances-test/demarrage', [SeanceController::class, 'aDemarrer'])->name('seances.test.demarrage');
+    Route::post('/seances/{id}/demarrer', [SeanceController::class, 'demarrer'])->name('seances.demarrer');
+    Route::post('/seances/{id}/terminer', [SeanceController::class, 'terminer'])->name('seances.terminer');
+    
     // Seance routes
     Route::resource('seances', SeanceController::class);
     
     // AJAX routes pour les séances
     Route::get('/client-search', [SeanceController::class, 'getClientByPhone'])->name('seances.getClientByPhone');
     Route::get('/prestation-details', [SeanceController::class, 'getPrestationDetails'])->name('seances.getPrestationDetails');
-    
-    // Routes pour le démarrage et la fin de séance
-    Route::post('/seances/{id}/demarrer', [SeanceController::class, 'demarrer'])->name('seances.demarrer');
-    Route::post('/seances/{id}/terminer', [SeanceController::class, 'terminer'])->name('seances.terminer');
     
     // Reservation routes (admin)
     Route::resource('reservations', ReservationController::class);

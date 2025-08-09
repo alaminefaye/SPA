@@ -88,11 +88,23 @@
             <br>
             
           <!-- Séances Management -->
-            <li class="menu-item {{ request()->is('seances*') ? 'active' : '' }}">
-              <a href="{{ route('seances.index') }}" class="menu-link">
+            <li class="menu-item {{ request()->is('seances*') ? 'active open' : '' }}">
+              <a href="javascript:void(0);" class="menu-link menu-toggle">
                 <i class="menu-icon tf-icons bx bx-calendar"></i>
                 <div data-i18n="Séances">Gestion des séances</div>
               </a>
+              <ul class="menu-sub">
+                <li class="menu-item {{ request()->is('seances') || request()->is('seances/create') || request()->is('seances/*/edit') ? 'active' : '' }}">
+                  <a href="{{ route('seances.index') }}" class="menu-link">
+                    <div data-i18n="Liste">Liste des séances</div>
+                  </a>
+                </li>
+                <li class="menu-item {{ request()->is('seances/a-demarrer') ? 'active' : '' }}">
+                  <a href="{{ route('seances.a_demarrer') }}" class="menu-link">
+                    <div data-i18n="A démarrer">Séances à démarrer</div>
+                  </a>
+                </li>
+              </ul>
             </li>
             <!-- Salon Management -->
             <li class="menu-item {{ request()->is('salons*') ? 'active' : '' }}">

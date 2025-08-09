@@ -67,7 +67,7 @@
                             </td>
                             <td>
                                 @switch($seance->statut)
-                                    @case('planifie')
+                                    @case('planifiee')
                                         <span class="badge bg-primary">Planifiée</span>
                                         @break
                                     @case('en_cours')
