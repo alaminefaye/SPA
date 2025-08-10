@@ -104,6 +104,11 @@
                     <div data-i18n="A démarrer">Séances à démarrer</div>
                   </a>
                 </li>
+                <li class="menu-item {{ request()->is('seances/terminees') ? 'active' : '' }}">
+                  <a href="{{ route('seances.terminees') }}" class="menu-link">
+                    <div data-i18n="Terminées">Séances terminées</div>
+                  </a>
+                </li>
               </ul>
             </li>
             <!-- Salon Management -->

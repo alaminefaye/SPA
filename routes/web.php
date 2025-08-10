@@ -46,6 +46,7 @@ Route::middleware('auth')->group(function () {
     // Routes pour le démarrage et la fin de séance
     // Note: Ces routes spécifiques doivent être définies AVANT la route resource
     Route::get('/seances/a-demarrer', [SeanceController::class, 'aDemarrer'])->name('seances.a_demarrer');
+    Route::get('/seances/terminees', [SeanceController::class, 'terminees'])->name('seances.terminees');
     Route::get('/seances-test/demarrage', [SeanceController::class, 'aDemarrer'])->name('seances.test.demarrage');
     Route::post('/seances/{id}/demarrer', [SeanceController::class, 'demarrer'])->name('seances.demarrer');
     Route::post('/seances/{id}/terminer', [SeanceController::class, 'terminer'])->name('seances.terminer');

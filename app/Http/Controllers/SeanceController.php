@@ -402,4 +402,39 @@ class SeanceController extends Controller
             'statut' => $seance->statut
         ]);
     }
+    
+    /**
+     * Affiche la liste des séances terminées
+     *
+     * @param Request $request
+     * @return \Illuminate\View\View
+     */
+    public function terminees(Request $request)
+    {
+        $search = $request->input('search');
+        
+        $query = Seance::with(['client', 'salon', 'prestations'])
+            ->where('statut', 'termine')
+            ->whereNotNull('heure_debut')
+            ->whereNotNull('heure_fin');
+        
+        if ($search) {
+            $query->whereHas('client', function($q) use ($search) {
+                $q->where('nom_complet', 'LIKE', "%{$search}%")
+                  ->orWhere('numero_telephone', 'LIKE', "%{$search}%");
+            })
+            ->orWhereHas('salon', function($q) use ($search) {
+                $q->where('nom', 'LIKE', "%{$search}%");
+            })
+            ->orWhereHas('prestations', function($q) use ($search) {
+                $q->where('nom_prestation', 'LIKE', "%{$search}%");
+            });
+        }
+        
+        $seances = $query->orderBy('heure_fin', 'desc')
+                         ->paginate(10)
+                         ->withQueryString();
+        
+        return view('seances.terminees', compact('seances', 'search'));
+    }
 }
