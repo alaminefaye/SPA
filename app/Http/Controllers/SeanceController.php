@@ -45,10 +45,33 @@ class SeanceController extends Controller
      */
     public function create()
     {
-        $salons = Salon::orderBy('nom')->get();
+        // Récupérer tous les salons pour la liste complète
+        $tousLesSalons = Salon::orderBy('nom')->get();
+        
+        // Récupérer uniquement les salons disponibles
+        $salonsDisponibles = Salon::getSalonsDisponibles();
+        
+        // Récupérer les IDs des salons disponibles
+        $salonsDisponiblesIds = collect($salonsDisponibles)->pluck('id')->toArray();
+        
+        // Compter combien de salons sont occupés
+        $salonsTotalCount = $tousLesSalons->count();
+        $salonsDisponiblesCount = count($salonsDisponibles);
+        $salonsOccupesCount = $salonsTotalCount - $salonsDisponiblesCount;
+        
+        // Vérifier si tous les salons sont occupés
+        $tousSalonsOccupes = ($salonsDisponiblesCount === 0);
+        
         $prestations = Prestation::orderBy('nom_prestation')->get();
         
-        return view('seances.create', compact('salons', 'prestations'));
+        return view('seances.create', compact(
+            'tousLesSalons', 
+            'salonsDisponibles', 
+            'salonsDisponiblesIds', 
+            'tousSalonsOccupes',
+            'salonsOccupesCount',
+            'prestations'
+        ));
     }
 
     /**
@@ -91,12 +114,26 @@ class SeanceController extends Controller
             }
         }
         
+        // Vérifier si le salon est disponible
+        $salon = Salon::findOrFail($request->salon_id);
+        $estDisponible = $salon->estDisponible();
+        
         // Création de la séance
         $seance = new Seance();
         $seance->client_id = $client->id;
         $seance->salon_id = $request->salon_id;
-        $seance->statut = 'planifiee';
+        
+        // Si le salon est disponible, la séance est planifiée, sinon elle est mise en attente
+        $seance->statut = $estDisponible ? Seance::STATUT_PLANIFIEE : Seance::STATUT_EN_ATTENTE;
         $seance->commentaire = $request->commentaire;
+        
+        // Ajouter un commentaire additionnel si la séance est mise en file d'attente
+        if (!$estDisponible) {
+            $commentaireFile = "\n[AUTO] Séance en file d'attente : le salon était occupé lors de la création.";
+            $seance->commentaire = $seance->commentaire 
+                ? $seance->commentaire . $commentaireFile 
+                : $commentaireFile;
+        }
         
         // Définir automatiquement la date du jour pour la séance
         $seance->date_seance = now()->toDateString();
@@ -176,7 +213,7 @@ class SeanceController extends Controller
             'salon_id' => 'required|exists:salons,id',
             'prestations' => 'required|array',
             'prestations.*' => 'exists:prestations,id',
-            'statut' => 'required|in:planifie,en_cours,termine,annule',
+            'statut' => 'required|in:planifiee,en_cours,termine,annule,en_attente',
             'commentaire' => 'nullable|string',
         ]);
         
@@ -307,22 +344,47 @@ class SeanceController extends Controller
      */
     public function terminer(string $id)
     {
-        $seance = Seance::findOrFail($id);
-        $seance->statut = 'termine';
+        $seance = Seance::with('salon')->findOrFail($id);
+        $salon_id = $seance->salon_id; // Sauvegarde de l'ID du salon qui va être libéré
+        $salon = $seance->salon; // Sauvegarde du salon pour la recherche ultérieure de séances en attente
+        
+        $seance->statut = Seance::STATUT_TERMINEE;
         $seance->heure_fin = now();
         $seance->save();
+        
+        // Gestion de la file d'attente : chercher une séance en attente pour ce salon en particulier
+        $seanceEnAttente = Seance::trouverProchainEnAttente($salon_id);
+        
+        // Si aucune séance n'attend ce salon spécifique, chercher n'importe quelle séance en attente
+        if (!$seanceEnAttente) {
+            $seanceEnAttente = Seance::trouverProchainEnAttente();
+        }
+        
+        $messageAttribution = '';
+        if ($seanceEnAttente) {
+            // Attribution automatique du salon à la séance en attente
+            if ($seanceEnAttente->attribuerSalon($salon_id)) {
+                $messageAttribution = ' et le salon a été automatiquement attribué à la prochaine séance en file d\'attente';
+            }
+        }
         
         // Si la requête est AJAX (comme celle du bouton "Terminer"), retourner JSON
         if (request()->ajax() || request()->wantsJson()) {
             return response()->json([
                 'success' => true,
-                'message' => 'Séance terminée avec succès'
+                'message' => 'Séance terminée avec succès' . $messageAttribution,
+                'salon_attribue' => $seanceEnAttente ? true : false,
+                'seance_attente' => $seanceEnAttente ? [
+                    'id' => $seanceEnAttente->id,
+                    'client' => $seanceEnAttente->client->nom_complet,
+                    'salon' => $salon->nom
+                ] : null
             ]);
         }
         
         // Sinon, rediriger avec un message flash
         return redirect()->route('seances.show', $id)
-            ->with('success', 'Séance terminée avec succès');
+            ->with('success', 'Séance terminée avec succès' . $messageAttribution);
     }
     
     /**

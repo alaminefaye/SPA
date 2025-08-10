@@ -70,15 +70,30 @@
                                     @case('planifiee')
                                         <span class="badge bg-primary">Planifiée</span>
                                         @break
+                                    @case('planifie')
+                                        <span class="badge bg-primary">Planifiée</span>
+                                        @break
                                     @case('en_cours')
                                         <span class="badge bg-warning">En cours</span>
                                         @break
                                     @case('termine')
                                         <span class="badge bg-success">Terminée</span>
                                         @break
+                                    @case('terminee')
+                                        <span class="badge bg-success">Terminée</span>
+                                        @break
                                     @case('annule')
                                         <span class="badge bg-danger">Annulée</span>
                                         @break
+                                    @case('annulee')
+                                        <span class="badge bg-danger">Annulée</span>
+                                        @break
+                                    @case('en_attente')
+                                        <span class="badge bg-info">En file d'attente</span>
+                                        <i class="bx bx-time-five" data-bs-toggle="tooltip" title="En attente de disponibilité d'un salon"></i>
+                                        @break
+                                    @default
+                                        <span class="badge bg-secondary">{{ $seance->statut ?: 'Non défini' }}</span>
                                 @endswitch
                             </td>
                             <td>

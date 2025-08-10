@@ -64,14 +64,43 @@
                     <div class="row mb-3">
                         <label class="col-sm-2 col-form-label" for="salon_id">Salon *</label>
                         <div class="col-sm-10">
-                            <select class="form-select" id="salon_id" name="salon_id" required>
-                                <option value="">Sélectionnez un salon</option>
-                                @foreach($salons as $salon)
-                                    <option value="{{ $salon->id }}" {{ old('salon_id') == $salon->id ? 'selected' : '' }}>
-                                        {{ $salon->nom }}
-                                    </option>
-                                @endforeach
-                            </select>
+                            @if($tousSalonsOccupes)
+                                <div class="alert alert-warning mb-2">
+                                    <i class="bx bx-info-circle me-2"></i>
+                                    <strong>Tous les salons sont actuellement occupés</strong>. 
+                                    Vous pouvez mettre cette séance en file d'attente jusqu'à ce qu'un salon se libère.
+                                </div>
+                                <select class="form-select" id="salon_id" name="salon_id" required>
+                                    <option value="">Tous les salons sont occupés - Sélectionnez pour file d'attente</option>
+                                    @foreach($tousLesSalons as $salon)
+                                        <option value="{{ $salon->id }}" {{ old('salon_id') == $salon->id ? 'selected' : '' }}>
+                                            {{ $salon->nom }} (Occupé - Sera mis en file d'attente)
+                                        </option>
+                                    @endforeach
+                                </select>
+                                <div class="form-text text-warning">
+                                    <i class="bx bx-time me-1"></i> 
+                                    La séance sera automatiquement placée en file d'attente et pourra démarrer dès qu'un salon sera disponible.
+                                </div>
+                            @else
+                                <select class="form-select" id="salon_id" name="salon_id" required>
+                                    <option value="">Sélectionnez un salon disponible</option>
+                                    @foreach($tousLesSalons as $salon)
+                                        @php $estDisponible = in_array($salon->id, $salonsDisponiblesIds); @endphp
+                                        <option value="{{ $salon->id }}" 
+                                            {{ old('salon_id') == $salon->id ? 'selected' : '' }}
+                                            {{ !$estDisponible ? 'disabled' : '' }}>
+                                            {{ $salon->nom }} {{ !$estDisponible ? '(Occupé)' : '(Disponible)' }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                                @if($salonsOccupesCount > 0)
+                                <div class="form-text text-info">
+                                    <i class="bx bx-info-circle me-1"></i> 
+                                    {{ $salonsOccupesCount }} salon(s) actuellement occupé(s) et ne peuvent pas être sélectionnés.
+                                </div>
+                                @endif
+                            @endif
                         </div>
                     </div>
                     
