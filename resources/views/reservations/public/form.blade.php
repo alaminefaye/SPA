@@ -4,53 +4,120 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>Réservation en ligne | SPA</title>
+    <title>Réservation en ligne - Jared SPA</title>
+    
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Font Awesome Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
+    <!-- Font Awesome Icons (pour les icônes des sections) -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <!-- Custom styles -->
+    
     <style>
-        :root {
-            --primary-color: #81b29a;
-            --primary-light: #a7cdb8;
-            --primary-dark: #5f9380;
-            --accent-color: #f2cc8f;
-            --text-dark: #3d405b;
-            --text-light: #6e6b7b;
-            --white: #ffffff;
-            --light-bg: #f8f9fa;
-            --border-radius: 12px;
-            --box-shadow: 0 10px 25px rgba(129, 178, 154, 0.15);
-            --transition: all 0.3s ease;
-        }
-        
         body {
-            background-color: var(--light-bg);
-            font-family: 'Poppins', sans-serif;
-            color: var(--text-dark);
-            line-height: 1.7;
+            background-color: #f8f9fa;
+            color: #333;
+            font-family: 'Segoe UI', Arial, sans-serif;
         }
         
-        .reservation-container {
-            max-width: 900px;
-            margin: 40px auto;
-            background-color: var(--white);
-            border-radius: var(--border-radius);
-            box-shadow: var(--box-shadow);
-            overflow: hidden;
-            transition: var(--transition);
+        .spa-header {
+            background-color: #ff69b4;
+            color: white;
+            padding: 15px 0;
+            margin-bottom: 30px;
         }
         
-        .reservation-header {
-            background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
-            color: var(--white);
+        .spa-header h1 {
+            font-weight: 300;
+        }
+        
+        .reservation-form-container {
+            background: #fff;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
             padding: 30px;
-            text-align: center;
+            margin-bottom: 40px;
+        }
+        
+        .reservation-form-container h2 {
+            color: #ff69b4;
+            margin-bottom: 25px;
+            font-weight: 500;
+        }
+        
+        .form-label {
+            font-weight: 500;
+        }
+        
+        .btn-submit {
+            background-color: #ff69b4;
+            border-color: #ff69b4;
+            padding: 10px 25px;
+            font-weight: 500;
+        }
+        
+        .btn-submit:hover {
+            background-color: #ff4da6;
+            border-color: #ff4da6;
+        }
+        
+        .spa-image-container {
             position: relative;
-            overflow: hidden;
+            height: 100%;
+            min-height: 300px;
+            background-image: url('https://images.unsplash.com/photo-1600334129128-685c5582fd35?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80');
+            background-size: cover;
+            background-position: center;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .spa-image-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255, 105, 180, 0.3);
+            border-radius: 10px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        .spa-quote {
+            font-size: 24px;
+            font-style: italic;
+            margin-bottom: 15px;
+        }
+        
+        .form-section {
+            margin-bottom: 30px;
+            padding: 20px;
+            background-color: rgba(248, 249, 250, 0.5);
+            border-radius: 10px;
+            border-left: 4px solid #ff69b4;
+            transition: all 0.3s ease;
+        }
+        
+        .form-section:hover {
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            transform: translateY(-2px);
+        }
+        
+        .section-title {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+            color: #ff69b4;
+        }
+        
+        .section-title i {
+            margin-right: 10px;
+            font-size: 1.5rem;
         }
         
         .reservation-header::before {
@@ -303,67 +370,47 @@
     </style>
 </head>
 <body>
-    <div class="container animated">
-        <!-- Bannière décorative supérieure -->
-        <div class="spa-banner mb-4 text-center">
-            <img src="https://images.unsplash.com/photo-1600334129128-685c5582fd35?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80" alt="Spa Ambiance" class="img-fluid rounded spa-banner-img">
-            <div class="spa-logo">
-                <i class="fas fa-spa"></i> SPA & Bien-Être
-            </div>
-            <!-- Icônes décoratives flottantes -->
-            <div class="spa-icon-container">
-                <i class="fas fa-hot-tub spa-icon icon-1"></i>
-                <i class="fas fa-leaf spa-icon icon-2"></i>
-                <i class="fas fa-hand-sparkles spa-icon icon-3"></i>
-                <i class="fas fa-cloud spa-icon icon-4"></i>
-            </div>
-        </div>
-        
-        <!-- Galerie d'images de services SPA -->
-        <div class="row mb-4 animated">
-            <div class="col-md-4 mb-3">
-                <div class="service-card">
-                    <img src="https://images.unsplash.com/photo-1544161515-4ab6ce6db874?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80" class="img-fluid rounded" alt="Massage">
-                    <div class="service-overlay">
-                        <h5>Massage relaxant</h5>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-4 mb-3">
-                <div class="service-card">
-                    <img src="https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80" class="img-fluid rounded" alt="Soins visage">
-                    <div class="service-overlay">
-                        <h5>Soins du visage</h5>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-4 mb-3">
-                <div class="service-card">
-                    <img src="https://images.unsplash.com/photo-1519823551278-64ac92734fb1?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80" class="img-fluid rounded" alt="Manucure">
-                    <div class="service-overlay">
-                        <h5>Manucure & pédicure</h5>
-                    </div>
+    <!-- Header -->
+    <header class="spa-header">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <h1><i class='bx bx-spa'></i> Jared SPA - Votre bien-être est notre priorité</h1>
                 </div>
             </div>
         </div>
-        
-        <div class="reservation-container">
-            <div class="reservation-header">
-                <h2 class="mb-0"><i class="fas fa-calendar-check"></i> Réservation en ligne</h2>
-                <p class="mb-0">Prenez rendez-vous facilement en quelques clics</p>
+    </header>
+    
+    <div class="container">
+        @if (session('success'))
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                {{ session('success') }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>
-
-            <div class="reservation-body">
-                @if ($errors->any())
-                <div class="alert alert-danger alert-dismissible mb-4">
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                    <ul class="mb-0">
-                        @foreach ($errors->all() as $error)
-                        <li><i class="fas fa-exclamation-circle me-2"></i>{{ $error }}</li>
-                        @endforeach
-                    </ul>
-                </div>
-                @endif
+        @endif
+        
+        @if (session('error'))
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                {{ session('error') }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        @endif
+        
+        <div class="row">
+            <div class="col-md-7">
+                <div class="reservation-form-container">
+                    <h2 class="text-center mb-4">Réservation en ligne</h2>
+                    <p class="text-muted mb-4">Réservez votre rendez-vous dès maintenant pour profiter de nos prestations exceptionnelles. Remplissez simplement le formulaire ci-dessous.</p>
+                    @if ($errors->any())
+                    <div class="alert alert-danger alert-dismissible mb-4">
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        <ul class="mb-0">
+                            @foreach ($errors->all() as $error)
+                            <li><i class="fas fa-exclamation-circle me-2"></i>{{ $error }}</li>
+                            @endforeach
+                        </ul>
+                    </div>
+                    @endif
 
                 <form action="{{ route('reservations.public.store') }}" method="POST">
                     @csrf
@@ -492,17 +539,32 @@
                         </div>
                     </div>
 
-                    <div class="d-grid gap-2 mt-4">
-                        <button type="submit" class="btn btn-primary btn-lg"><i class="fas fa-calendar-check me-2"></i> Réserver maintenant</button>
+                    <div class="text-center mt-4">
+                        <button type="submit" class="btn btn-submit btn-lg px-5"><i class="fas fa-calendar-check me-2"></i> Réserver maintenant</button>
                     </div>
                 </form>
             </div>
         </div>
         
-        <div class="footer">
-            <p><i class="fas fa-heart text-danger me-1"></i> &copy; {{ date('Y') }} SPA - Tous droits réservés</p>
+        <div class="col-md-5">
+            <div class="spa-image-container">
+                <div class="spa-image-overlay">
+                    <p class="spa-quote">Offrez-vous un moment de détente et de bien-être.</p>
+                    <p class="lead">Notre équipe de professionnels est à votre service pour une expérience unique.</p>
+                </div>
+            </div>
         </div>
     </div>
+    
+    <footer class="bg-dark text-white py-4 mt-5">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6 text-md-end">
+                    <p class="small">&copy; {{ date('Y') }} Jared SPA. Tous droits réservés.</p>
+                </div>
+            </div>
+        </div>
+    </footer>
 
     <!-- Bootstrap JS & Popper.js -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>

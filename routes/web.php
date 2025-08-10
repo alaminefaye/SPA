@@ -12,6 +12,7 @@ use App\Http\Controllers\SalonController;
 use App\Http\Controllers\SeanceController;
 use App\Http\Controllers\ReservationController;
 use App\Http\Controllers\PublicReservationController;
+use App\Http\Controllers\FeedbackController;
 
 // Welcome page
 Route::get('/', function () {
@@ -77,6 +78,11 @@ Route::middleware('auth')->group(function () {
     Route::post('/purchases/{purchase}/cancel', [PurchaseController::class, 'cancel'])->name('purchases.cancel');
     Route::get('/product-details', [PurchaseController::class, 'getProductDetails'])->name('purchases.getProductDetails');
     
+    // Feedback routes (admin)
+    Route::resource('feedbacks', FeedbackController::class)->except(['edit', 'update']);
+    Route::put('/feedbacks/{feedback}/mark-read', [FeedbackController::class, 'markAsRead'])->name('feedbacks.mark-read');
+    Route::put('/feedbacks/{feedback}/toggle-priority', [FeedbackController::class, 'togglePriority'])->name('feedbacks.toggle-priority');
+    
     // Client search route
     Route::get('/client-search-by-phone', [ClientController::class, 'searchByPhone'])->name('clients.searchByPhone');
 });
@@ -87,6 +93,12 @@ Route::prefix('reservation-publique')->group(function () {
     Route::post('/store', [PublicReservationController::class, 'store'])->name('reservations.public.store');
     Route::get('/confirmation', [PublicReservationController::class, 'confirmation'])->name('reservations.public.confirmation');
     Route::post('/prestation-details', [PublicReservationController::class, 'getPrestationDetails'])->name('reservations.public.getPrestationDetails');
+});
+
+// Routes publiques pour les suggestions et préoccupations (sans authentification)
+Route::prefix('suggestions')->group(function () {
+    Route::get('/', [FeedbackController::class, 'showPublicForm'])->name('feedbacks.public.form');
+    Route::post('/envoyer', [FeedbackController::class, 'store'])->name('feedbacks.store');
 });
 
 // Routes API pour les notifications et alertes

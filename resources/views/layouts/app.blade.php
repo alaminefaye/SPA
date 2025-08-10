@@ -153,6 +153,22 @@
               </a>
             </li>
 
+            <!-- Suggestions et préoccupations -->
+            <li class="menu-item {{ request()->is('feedbacks*') ? 'active' : '' }}">
+              <a href="{{ route('feedbacks.index') }}" class="menu-link">
+                <i class="menu-icon tf-icons bx bx-message-alt-dots"></i>
+                <div data-i18n="Suggestions" style="position: relative;">
+                  Suggestions et préoccupations
+                  @if(isset($newFeedbacksCount) && $newFeedbacksCount > 0)
+                  <span class="badge rounded-pill badge-center h-px-20 w-px-20 {{ isset($priorityFeedbacksCount) && $priorityFeedbacksCount > 0 ? 'bg-danger' : 'bg-info' }} position-absolute" 
+                        style="top: -8px; right: -20px;">
+                    {{ $newFeedbacksCount }}
+                  </span>
+                  @endif
+                </div>
+              </a>
+            </li>
+
             <!-- Add more menu items as needed -->
             
             <!-- Gestion des Produits Dropdown -->

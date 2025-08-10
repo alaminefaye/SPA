@@ -77,11 +77,18 @@
                                 <td>{{ $product->category->name }}</td>
                                 <td>{{ number_format($product->price, 2) }} FCFA</td>
                                 <td>
-                                    <span class="font-weight-bold {{ $product->isLowStock() ? 'text-danger' : '' }}">
-                                        {{ $product->stock }}
-                                    </span>
-                                    @if($product->isLowStock())
-                                        <i class="fas fa-exclamation-triangle text-danger ml-1" title="Stock bas"></i>
+                                    @if($product->stock == 0)
+                                        <span class="font-weight-bold text-danger">
+                                            Rupture de stock
+                                        </span>
+                                        <i class="fas fa-exclamation-triangle text-danger ml-1" title="Rupture de stock"></i>
+                                    @else
+                                        <span class="font-weight-bold {{ $product->isLowStock() ? 'text-danger' : '' }}">
+                                            {{ $product->stock }}
+                                        </span>
+                                        @if($product->isLowStock())
+                                            <i class="fas fa-exclamation-triangle text-danger ml-1" title="Stock bas"></i>
+                                        @endif
                                     @endif
                                 </td>
                                 <td>
