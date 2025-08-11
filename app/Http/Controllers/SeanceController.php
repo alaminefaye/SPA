@@ -198,10 +198,48 @@ class SeanceController extends Controller
     public function edit(string $id)
     {
         $seance = Seance::findOrFail($id);
-        $salons = Salon::orderBy('nom')->get();
+        
+        // Récupérer tous les salons pour l'affichage
+        $tousLesSalons = Salon::orderBy('nom')->get();
+        
+        // Récupérer uniquement les salons disponibles
+        $salonsDisponibles = Salon::getSalonsDisponibles();
+        
+        // Ajouter le salon actuel de cette séance aux salons disponibles (pour pouvoir garder le même salon)
+        if ($seance->salon) {
+            $salonActuel = $seance->salon;
+            // Vérifier si le salon actuel n'est pas déjà dans la liste des disponibles
+            $salonActuelDejaDansListe = collect($salonsDisponibles)->contains('id', $salonActuel->id);
+            
+            if (!$salonActuelDejaDansListe) {
+                // Ajouter le salon actuel avec un marqueur spécial
+                $salonActuel->salon_actuel = true;
+                $salonsDisponibles[] = $salonActuel;
+            }
+        }
+        
+        // Récupérer les IDs des salons disponibles
+        $salonsDisponiblesIds = collect($salonsDisponibles)->pluck('id')->toArray();
+        
+        // Compter combien de salons sont occupés
+        $salonsTotalCount = $tousLesSalons->count();
+        $salonsDisponiblesCount = count($salonsDisponibles);
+        $salonsOccupesCount = $salonsTotalCount - $salonsDisponiblesCount;
+        
+        // Vérifier si tous les salons sont occupés (sauf le salon actuel)
+        $tousSalonsOccupes = ($salonsDisponiblesCount === 0);
+        
         $prestations = Prestation::orderBy('nom_prestation')->get();
         
-        return view('seances.edit', compact('seance', 'salons', 'prestations'));
+        return view('seances.edit', compact(
+            'seance',
+            'tousLesSalons', 
+            'salonsDisponibles', 
+            'salonsDisponiblesIds', 
+            'tousSalonsOccupes',
+            'salonsOccupesCount',
+            'prestations'
+        ));
     }
 
     /**
@@ -213,7 +251,7 @@ class SeanceController extends Controller
             'salon_id' => 'required|exists:salons,id',
             'prestations' => 'required|array',
             'prestations.*' => 'exists:prestations,id',
-            'statut' => 'required|in:planifiee,en_cours,termine,annule,en_attente',
+            'statut' => 'required|in:planifiee,en_cours,terminee,annulee,en_attente',
             'commentaire' => 'nullable|string',
         ]);
         
@@ -224,11 +262,40 @@ class SeanceController extends Controller
         }
         
         $seance = Seance::findOrFail($id);
+        $ancienSalonId = $seance->salon_id;
+        $ancienStatut = $seance->statut;
         
-        // Mise à jour des données de base de la séance
+        // Récupérer le salon choisi
+        $salonChoisi = Salon::findOrFail($request->salon_id);
+        
+        // Déterminer si le salon est disponible
+        // Exception: si c'est le même salon et la même séance, on considère qu'il est disponible
+        $estDisponible = ($salonChoisi->id == $ancienSalonId && $ancienStatut == 'en_cours') || $salonChoisi->estDisponible();
+        
+        // Commentaire original de l'utilisateur
+        $commentaireUtilisateur = $request->commentaire ?? '';
+        
+        // Déterminer le statut final en fonction de la disponibilité du salon
+        if ($request->statut == 'planifiee' && !$estDisponible) {
+            // Si l'utilisateur veut planifier mais le salon est occupé, mettre en attente
+            $nouveauStatut = 'en_attente';
+            $commentaireFile = "\n[AUTO] Séance en file d'attente : le salon est occupé";
+            if ($ancienSalonId != $request->salon_id) {
+                $commentaireFile .= " lors du changement de salon.";
+            } else {
+                $commentaireFile .= ".";
+            }
+            $commentaireFinal = $commentaireUtilisateur ? $commentaireUtilisateur . $commentaireFile : $commentaireFile;
+        } else {
+            // Dans tous les autres cas, respecter le choix de l'utilisateur
+            $nouveauStatut = $request->statut;
+            $commentaireFinal = $commentaireUtilisateur;
+        }
+        
+        // Mise à jour des champs
         $seance->salon_id = $request->salon_id;
-        $seance->statut = $request->statut;
-        $seance->commentaire = $request->commentaire;
+        $seance->statut = $nouveauStatut;
+        $seance->commentaire = $commentaireFinal;
         
         // Mise à jour des prestations
         $seance->prestations()->detach(); // Supprime les anciennes relations

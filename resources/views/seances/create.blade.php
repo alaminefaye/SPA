@@ -110,6 +110,13 @@
                             <div class="alert alert-info mb-2">
                                 Sélectionnez une ou plusieurs prestations. Le prix total et la durée totale seront automatiquement calculés.
                             </div>
+                            <div class="mb-3">
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="bx bx-search"></i></span>
+                                    <input type="text" class="form-control" id="recherche-prestation" placeholder="Rechercher une prestation..." autocomplete="off">
+                                </div>
+                                <div class="form-text">Commencez à taper pour afficher les prestations correspondantes</div>
+                            </div>
                             <div class="table-responsive">
                                 <table class="table table-bordered">
                                     <thead>
@@ -120,22 +127,8 @@
                                             <th style="width: 120px;">Durée</th>
                                         </tr>
                                     </thead>
-                                    <tbody>
-                                        @foreach($prestations as $prestation)
-                                        <tr>
-                                            <td class="text-center">
-                                                <div class="form-check">
-                                                    <input class="form-check-input prestation-checkbox" type="checkbox" 
-                                                        value="{{ $prestation->id }}" id="prestation_{{ $prestation->id }}" 
-                                                        name="prestations[]" data-prix="{{ $prestation->prix }}" 
-                                                        data-duree="{{ $prestation->duree ? $prestation->duree->format('H:i') : '00:00' }}">
-                                                </div>
-                                            </td>
-                                            <td>{{ $prestation->nom_prestation }}</td>
-                                            <td class="text-end">{{ number_format($prestation->prix, 0, ',', ' ') }}</td>
-                                            <td>{{ $prestation->duree ? $prestation->duree->format('H:i') : '00:00' }}</td>
-                                        </tr>
-                                        @endforeach
+                                    <tbody id="prestations-table-body">
+                                        <!-- Les prestations seront affichées ici via JavaScript après recherche -->
                                     </tbody>
                                 </table>
                             </div>
@@ -214,10 +207,25 @@
             @foreach($prestations as $prestation)
                 "{{ $prestation->id }}": {
                     prix: "{{ $prestation->prix }}",
-                    duree: "{{ $prestation->duree ? $prestation->duree->format('H:i') : '00:00' }}"
+                    duree: "{{ $prestation->duree ? $prestation->duree->format('H:i') : '00:00' }}",
+                    nom: "{{ $prestation->nom_prestation }}",
+                    prix_formatte: "{{ number_format($prestation->prix, 0, ',', ' ') }}"
                 },
             @endforeach
         };
+        
+        // Liste complète des prestations pour la recherche
+        const toutesLesPrestation = [
+            @foreach($prestations as $prestation)
+                {
+                    id: "{{ $prestation->id }}",
+                    nom: "{{ $prestation->nom_prestation }}",
+                    prix: "{{ $prestation->prix }}",
+                    prix_formatte: "{{ number_format($prestation->prix, 0, ',', ' ') }}",
+                    duree: "{{ $prestation->duree ? $prestation->duree->format('H:i') : '00:00' }}"
+                },
+            @endforeach
+        ];
 
         // Recherche client par numéro de téléphone
         document.getElementById('searchClient').addEventListener('click', function() {
@@ -263,7 +271,7 @@
         });
         
         // Gestion des checkboxes de prestations et calcul du total
-        const checkboxes = document.querySelectorAll('.prestation-checkbox');
+        let checkboxes = document.querySelectorAll('.prestation-checkbox');
         const prixTotalInput = document.getElementById('prix');
         const dureeTotaleInput = document.getElementById('duree');
         const resumePrestations = document.getElementById('resume-prestations');
@@ -316,11 +324,64 @@
             }
         }
         
-        // Event listeners pour les cases à cocher
-        checkboxes.forEach(checkbox => {
-            checkbox.addEventListener('change', function() {
-                calculerTotaux();
+        // Fonction pour mettre à jour les event listeners des checkboxes après filtrage
+        function actualiserEventListeners() {
+            // Mettre à jour la référence globale aux checkboxes
+            checkboxes = document.querySelectorAll('.prestation-checkbox');
+            
+            // Supprimer les anciens événements pour éviter les doublons
+            checkboxes.forEach(checkbox => {
+                checkbox.removeEventListener('change', calculerTotaux);
+                checkbox.addEventListener('change', calculerTotaux);
             });
+        }
+        
+        // Recherche de prestations
+        const rechercheInput = document.getElementById('recherche-prestation');
+        const prestationsTableBody = document.getElementById('prestations-table-body');
+        
+        rechercheInput.addEventListener('input', function() {
+            const valeur = this.value.toLowerCase().trim();
+            let html = '';
+            
+            // Si la valeur est vide, ne rien afficher
+            if (valeur === '') {
+                prestationsTableBody.innerHTML = '';
+                return;
+            }
+            
+            // Filtrer les prestations selon la recherche
+            const resultats = toutesLesPrestation.filter(prestation => 
+                prestation.nom.toLowerCase().includes(valeur)
+            );
+            
+            // Générer le HTML pour les résultats
+            resultats.forEach(prestation => {
+                html += `
+                <tr>
+                    <td class="text-center">
+                        <div class="form-check">
+                            <input class="form-check-input prestation-checkbox" type="checkbox" 
+                                value="${prestation.id}" id="prestation_${prestation.id}" 
+                                name="prestations[]" data-prix="${prestation.prix}" 
+                                data-duree="${prestation.duree}">
+                        </div>
+                    </td>
+                    <td>${prestation.nom}</td>
+                    <td class="text-end">${prestation.prix_formatte}</td>
+                    <td>${prestation.duree}</td>
+                </tr>
+                `;
+            });
+            
+            // Si aucun résultat
+            if (resultats.length === 0) {
+                html = `<tr><td colspan="4" class="text-center">Aucune prestation correspondante</td></tr>`;
+            }
+            
+            prestationsTableBody.innerHTML = html;
+            actualiserEventListeners();
+            // Ne pas appeler calculerTotaux() ici car aucune case n'est encore cochée
         });
         
         // Initialisation

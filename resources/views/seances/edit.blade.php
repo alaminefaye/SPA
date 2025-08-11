@@ -43,14 +43,46 @@
                     <div class="row mb-3">
                         <label class="col-sm-2 col-form-label" for="salon_id">Salon *</label>
                         <div class="col-sm-10">
+                            @if (isset($tousSalonsOccupes) && $tousSalonsOccupes)
+                                <div class="alert alert-warning mb-2">
+                                    <i class="bx bx-error-circle me-1"></i>
+                                    Tous les salons sont occupés. La séance sera <strong>automatiquement mise en file d'attente</strong> après enregistrement.
+                                </div>
+                            @endif
+                            
                             <select class="form-select" id="salon_id" name="salon_id" required>
                                 <option value="">Sélectionnez un salon</option>
-                                @foreach($salons as $salon)
-                                    <option value="{{ $salon->id }}" {{ (old('salon_id') ?? $seance->salon_id) == $salon->id ? 'selected' : '' }}>
-                                        {{ $salon->nom }}
+                                
+                                @foreach($tousLesSalons as $salon)
+                                    @php
+                                        $isDisponible = in_array($salon->id, $salonsDisponiblesIds);
+                                        $isCurrentSalon = $seance->salon_id == $salon->id;
+                                        $disabled = !$isDisponible && !$isCurrentSalon;
+                                    @endphp
+                                    <option value="{{ $salon->id }}" 
+                                        {{ (old('salon_id') ?? $seance->salon_id) == $salon->id ? 'selected' : '' }}
+                                        {{ $disabled ? 'disabled' : '' }}
+                                    >
+                                        {{ $salon->nom }} 
+                                        @if(!$isDisponible && !$isCurrentSalon) 
+                                            (Occupé) 
+                                        @elseif(!$isDisponible && $isCurrentSalon) 
+                                            (Salon actuel) 
+                                        @endif
                                     </option>
                                 @endforeach
                             </select>
+                            
+                            @if (isset($salonsOccupesCount) && $salonsOccupesCount > 0)
+                                <div class="form-text text-warning">
+                                    <i class="bx bx-info-circle"></i>
+                                    {{ $salonsOccupesCount }} salon(s) actuellement occupé(s) et ne peuvent pas être sélectionnés.
+                                </div>
+                                <div class="alert alert-info mt-2">
+                                    <i class="bx bx-bulb me-1"></i>
+                                    <strong>Important :</strong> Si vous sélectionnez un salon occupé et que vous choisissez le statut "Planifiée", la séance sera <strong>automatiquement mise en file d'attente</strong> après enregistrement.
+                                </div>
+                            @endif
                         </div>
                     </div>
                     
@@ -124,10 +156,11 @@
                         <label class="col-sm-2 col-form-label" for="statut">Statut *</label>
                         <div class="col-sm-10">
                             <select class="form-select" id="statut" name="statut" required>
-                                <option value="planifie" {{ (old('statut') ?? $seance->statut) == 'planifie' ? 'selected' : '' }}>Planifiée</option>
+                                <option value="planifiee" {{ (old('statut') ?? $seance->statut) == 'planifiee' ? 'selected' : '' }}>Planifiée</option>
                                 <option value="en_cours" {{ (old('statut') ?? $seance->statut) == 'en_cours' ? 'selected' : '' }}>En cours</option>
-                                <option value="termine" {{ (old('statut') ?? $seance->statut) == 'termine' ? 'selected' : '' }}>Terminée</option>
-                                <option value="annule" {{ (old('statut') ?? $seance->statut) == 'annule' ? 'selected' : '' }}>Annulée</option>
+                                <option value="terminee" {{ (old('statut') ?? $seance->statut) == 'terminee' ? 'selected' : '' }}>Terminée</option>
+                                <option value="annulee" {{ (old('statut') ?? $seance->statut) == 'annulee' ? 'selected' : '' }}>Annulée</option>
+                                <option value="en_attente" {{ (old('statut') ?? $seance->statut) == 'en_attente' ? 'selected' : '' }}>En file d'attente</option>
                             </select>
                         </div>
                     </div>

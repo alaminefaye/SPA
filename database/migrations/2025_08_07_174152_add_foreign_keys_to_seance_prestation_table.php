@@ -40,15 +40,21 @@ return new class extends Migration
     }
     
     /**
-     * Vérifie si un index existe déjà sur la table
+     * Vérifie si un index existe déjà sur la table en utilisant Schema::hasTable
+     * au lieu de getDoctrineSchemaManager qui n'est plus disponible dans Laravel 10+
      */
     protected function hasIndex($table, $columns)
     {
-        $conn = Schema::getConnection();
-        $dbSchemaManager = $conn->getDoctrineSchemaManager();
-        $doctrineTable = $dbSchemaManager->listTableDetails($table);
-        
-        $index = $table.'_'.implode('_', $columns).'_unique';
-        return $doctrineTable->hasIndex($index);
+        // Vérifier si l'index existe en essayant de le créer dans une transaction et en captant l'exception
+        try {
+            Schema::table($table, function (Blueprint $table) use ($columns) {
+                $indexName = 'seance_prestation_' . implode('_', $columns) . '_unique';
+                $table->unique($columns, $indexName);
+            });
+            return false; // Si aucune exception, l'index n'existe pas
+        } catch (\Exception $e) {
+            // Si une exception est levée, c'est probablement parce que l'index existe déjà
+            return strpos($e->getMessage(), 'Duplicate') !== false;
+        }
     }
 };

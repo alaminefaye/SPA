@@ -74,6 +74,10 @@
                                 <div class="alert alert-info mb-2">
                                     Sélectionnez une ou plusieurs prestations. Le prix total et la durée totale seront automatiquement calculés.
                                 </div>
+                                <div class="mb-3">
+                                    <input type="text" class="form-control" id="searchPrestation" placeholder="Rechercher une prestation...">
+                                    <div class="form-text">Commencez à taper pour voir les prestations disponibles</div>
+                                </div>
                                 <div class="table-responsive">
                                     <table class="table table-bordered">
                                         <thead>
@@ -168,6 +172,34 @@
 @section('page-js')
 <script>
     document.addEventListener('DOMContentLoaded', function() {
+        // Gestion du champ de recherche des prestations
+        const searchInput = document.getElementById('searchPrestation');
+        const prestationRows = document.querySelectorAll('.prestation-checkbox').forEach(checkbox => {
+            // Cacher toutes les lignes de prestation au chargement initial
+            const row = checkbox.closest('tr');
+            row.style.display = 'none';
+        });
+        
+        // Fonction pour filtrer les prestations basée sur la recherche
+        searchInput.addEventListener('input', function() {
+            const searchTerm = this.value.toLowerCase();
+            document.querySelectorAll('.prestation-checkbox').forEach(checkbox => {
+                const row = checkbox.closest('tr');
+                const prestationName = row.querySelector('td:nth-child(2)').textContent.toLowerCase();
+                
+                if (searchTerm === '') {
+                    // Si le champ de recherche est vide, ne rien afficher
+                    row.style.display = 'none';
+                } else if (prestationName.includes(searchTerm)) {
+                    // Afficher les lignes qui correspondent à la recherche
+                    row.style.display = '';
+                } else {
+                    // Cacher les lignes qui ne correspondent pas à la recherche
+                    row.style.display = 'none';
+                }
+            });
+        });
+
         // Recherche de client par téléphone
         document.getElementById('searchClientBtn').addEventListener('click', function() {
             const phone = document.getElementById('numero_telephone').value;

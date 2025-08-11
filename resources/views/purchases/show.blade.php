@@ -35,7 +35,7 @@
                         <strong>Client:</strong> 
                         @if($purchase->client)
                             <a href="{{ route('clients.show', $purchase->client) }}">
-                                {{ $purchase->client->nom_complet }} {{ $purchase->client->nom_complet }}
+                                {{ $purchase->client->nom_complet }}
                             </a>
                         @else
                             <span class="text-muted">Client non spécifié</span>
