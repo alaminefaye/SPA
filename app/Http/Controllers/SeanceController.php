@@ -411,13 +411,57 @@ class SeanceController extends Controller
      */
     public function terminer(string $id)
     {
-        $seance = Seance::with('salon')->findOrFail($id);
-        $salon_id = $seance->salon_id; // Sauvegarde de l'ID du salon qui va être libéré
-        $salon = $seance->salon; // Sauvegarde du salon pour la recherche ultérieure de séances en attente
-        
-        $seance->statut = Seance::STATUT_TERMINEE;
-        $seance->heure_fin = now();
-        $seance->save();
+        try {
+            \Log::info("Début de la méthode terminer pour séance ID: {$id}");
+            
+            $seance = Seance::with('salon')->findOrFail($id);
+            \Log::info("Séance trouvée: ", [
+                'id' => $seance->id,
+                'statut' => $seance->statut,
+                'heure_debut' => $seance->heure_debut,
+                'salon_id' => $seance->salon_id
+            ]);
+            
+            $salon_id = $seance->salon_id; // Sauvegarde de l'ID du salon qui va être libéré
+            $salon = $seance->salon; // Sauvegarde du salon pour la recherche ultérieure de séances en attente
+            
+            // Vérifier si la séance a déjà une heure de début mais pas d'heure de fin
+            if ($seance->heure_debut === null) {
+                \Log::info("La séance n'a jamais été démarrée, ajout d'une heure de début automatique");
+                // La séance n'a jamais été démarrée, on la démarre automatiquement
+                $seance->heure_debut = now();
+            }
+            
+            \Log::info("Ancien statut: {$seance->statut}");
+            
+            // Accepter de terminer la séance quel que soit son statut précédent
+            // (planifiee ou en_cours) pour éviter les erreurs après refresh
+            $seance->statut = Seance::STATUT_TERMINEE;
+            $seance->heure_fin = now();
+            
+            \Log::info("Nouveau statut: {$seance->statut}");
+            \Log::info("Tentative de sauvegarde...");
+            
+            $seance->save();
+            
+            \Log::info("Sauvegarde réussie pour la séance ID: {$id}");
+        } catch (\Exception $e) {
+            \Log::error("Erreur lors de la terminaison de la séance ID: {$id}", [
+                'message' => $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            
+            return response()->json([
+                'success' => false,
+                'message' => 'Erreur serveur: ' . $e->getMessage(),
+                'error_details' => [
+                    'file' => $e->getFile(),
+                    'line' => $e->getLine()
+                ]
+            ], 500);
+        }
         
         // Gestion de la file d'attente : chercher une séance en attente pour ce salon en particulier
         $seanceEnAttente = Seance::trouverProchainEnAttente($salon_id);
@@ -435,23 +479,36 @@ class SeanceController extends Controller
             }
         }
         
-        // Si la requête est AJAX (comme celle du bouton "Terminer"), retourner JSON
-        if (request()->ajax() || request()->wantsJson()) {
-            return response()->json([
-                'success' => true,
-                'message' => 'Séance terminée avec succès' . $messageAttribution,
-                'salon_attribue' => $seanceEnAttente ? true : false,
-                'seance_attente' => $seanceEnAttente ? [
-                    'id' => $seanceEnAttente->id,
-                    'client' => $seanceEnAttente->client->nom_complet,
-                    'salon' => $salon->nom
-                ] : null
-            ]);
+        try {
+            // Format de retour selon le type de requête (AJAX ou normal)
+            if (request()->expectsJson() || request()->ajax() || request()->wantsJson()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Séance terminée avec succès' . $messageAttribution,
+                    'salon_attribue' => $seanceEnAttente ? true : false,
+                    'seance_attente' => $seanceEnAttente ? [
+                        'id' => $seanceEnAttente->id,
+                        'client' => $seanceEnAttente->client->nom_complet,
+                        'salon' => $salon->nom
+                    ] : null
+                ]);
+            }
+            
+            // Sinon, rediriger avec un message flash
+            return redirect()->route('seances.show', $id)
+                ->with('success', 'Séance terminée avec succès' . $messageAttribution);
+        } catch (\Exception $e) {
+            \Log::error("Erreur lors du renvoi de la réponse (terminée): {$e->getMessage()}");
+            
+            if (request()->expectsJson() || request()->ajax() || request()->wantsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Erreur lors de la terminaison: ' . $e->getMessage()
+                ], 500);
+            }
+            
+            return redirect()->back()->with('error', 'Erreur: ' . $e->getMessage());
         }
-        
-        // Sinon, rediriger avec un message flash
-        return redirect()->route('seances.show', $id)
-            ->with('success', 'Séance terminée avec succès' . $messageAttribution);
     }
     
     /**
@@ -543,7 +600,10 @@ class SeanceController extends Controller
         $search = $request->input('search');
         
         $query = Seance::with(['client', 'salon', 'prestations'])
-            ->where('statut', 'termine')
+            ->where(function($q) {
+                $q->where('statut', 'termine')
+                  ->orWhere('statut', 'terminee'); // Accepter les deux formes pour assurer la compatibilité
+            })
             ->whereNotNull('heure_debut')
             ->whereNotNull('heure_fin');
         

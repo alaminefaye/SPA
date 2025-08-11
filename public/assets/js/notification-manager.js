@@ -70,6 +70,20 @@ class NotificationManager {
 
     // Jouer le son d'alerte
     playAlertSound(seanceId = null) {
+        // Utiliser le bip configurable si disponible
+        if (window.playNotificationBeep && typeof window.playNotificationBeep === 'function') {
+            if (seanceId && window.playRepeatedBeep && typeof window.playRepeatedBeep === 'function') {
+                // Utiliser le système de bips répétés avec ID de séance
+                window.playRepeatedBeep(seanceId);
+                return;
+            } else {
+                // Utiliser le bip simple
+                window.playNotificationBeep();
+                return;
+            }
+        }
+        
+        // Fallback au son intégré si notification-sound.js n'est pas chargé
         // Réinitialiser le son pour qu'il puisse être joué plusieurs fois
         this.alertSound.pause();
         this.alertSound.currentTime = 0;

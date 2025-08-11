@@ -39,7 +39,7 @@
                 </thead>
                 <tbody>
                     @forelse($seances as $seance)
-                        <tr data-id="{{ $seance->id }}">
+                        <tr data-id="{{ $seance->id }}" data-statut="{{ $seance->statut }}">
                             <td>{{ $seance->client->nom_complet }}</td>
                             <td>{{ $seance->salon->nom }}</td>
                             <td>
@@ -147,6 +147,8 @@
 @endsection
 
 @section('page-js')
+<!-- Script de notification sonore -->
+<script src="{{ asset('assets/js/notification-sound.js') }}"></script>
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         // Initialiser les popovers
@@ -157,7 +159,9 @@
         
         // Variables pour le contrôle du bip
         let beepsPlayed = {};
+        let lastBeepTime = {};
         const MAX_BEEPS = 10;
+        const BEEP_INTERVAL = 3000; // 3 secondes entre chaque bip en millisecondes
         
         // Initialiser les compteurs à rebours
         const countdowns = document.querySelectorAll('.countdown.running');
@@ -216,12 +220,34 @@
                 
                 element.innerHTML = `<span class="text-danger">Retard: ${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}</span>`;
                 
-                // Jouer le bip si le temps vient juste d'être dépassé et si on n'a pas joué MAX_BEEPS fois
-                if (beepsPlayed[seanceId] < MAX_BEEPS && Math.abs(tempsRestant) < 10) {
-                    if (typeof window.playNotificationBeep === 'function') {
-                        window.playNotificationBeep();
-                        beepsPlayed[seanceId]++;
-                        console.log(`Bip joué pour séance ${seanceId} - ${beepsPlayed[seanceId]}/${MAX_BEEPS}`);
+                // Vérifier le statut de la séance pour décider de jouer le bip
+                const tr = element.closest('tr');
+                const seanceStatus = tr ? tr.getAttribute('data-statut') : null;
+                
+                // Jouer le bip seulement si la séance est en cours et pas terminée
+                if (seanceStatus === 'en_cours') {
+                    // Utiliser la nouvelle fonction de bips répétés si disponible
+                    if (typeof window.playRepeatedBeep === 'function') {
+                        // Cette fonction gère elle-même la répétition et le comptage
+                        window.playRepeatedBeep(seanceId);
+                    } 
+                    // Fallback à l'ancienne méthode
+                    else if (beepsPlayed[seanceId] < MAX_BEEPS) {
+                        const currentTime = Date.now();
+                        const canPlayBeep = !lastBeepTime[seanceId] || (currentTime - lastBeepTime[seanceId] >= BEEP_INTERVAL);
+                        
+                        if (canPlayBeep && typeof window.playNotificationBeep === 'function') {
+                            window.playNotificationBeep();
+                            beepsPlayed[seanceId]++;
+                            lastBeepTime[seanceId] = currentTime;
+                            console.log(`Bip joué pour séance ${seanceId} - ${beepsPlayed[seanceId]}/${MAX_BEEPS} à ${new Date().toLocaleTimeString()}`);
+                        }
+                    }
+                }
+                // Si la séance est terminée, arrêter les bips
+                else if (seanceStatus === 'termine' || seanceStatus === 'terminee') {
+                    if (typeof window.stopRepeatedBeep === 'function') {
+                        window.stopRepeatedBeep(seanceId);
                     }
                 }
             } else {
@@ -354,27 +380,92 @@
             btn.addEventListener('click', function() {
                 if (confirm('Êtes-vous sûr de vouloir terminer cette séance ?')) {
                     const seanceId = this.getAttribute('data-id');
+                    const tr = document.querySelector(`tr[data-id="${seanceId}"]`);
                     
-                    // Appel AJAX pour terminer la séance
+                    // Ajout d'une classe visuelle pour montrer que la séance est en train d'être terminée
+                    if (tr) tr.classList.add('terminating');
+                    
+                    // Désactiver le bouton pour éviter les clics multiples
+                    this.disabled = true;
+                    this.innerHTML = '<i class="bx bx-loader bx-spin me-1"></i> Traitement...';
+                    
+                    // Arrêter les bips sonores si actifs
+                    if (window.stopRepeatedBeep && typeof window.stopRepeatedBeep === 'function') {
+                        window.stopRepeatedBeep(seanceId);
+                    }
+                    
+                    // Appel AJAX pour terminer la séance avec une approche plus robuste
+                    // On crée un FormData pour une requête multipart standard
+                    const formData = new FormData();
+                    formData.append('_token', '{{ csrf_token() }}');
+                    
                     fetch(`/seances/${seanceId}/terminer`, {
                         method: 'POST',
                         headers: {
-                            'Content-Type': 'application/json',
                             'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                            'Accept': 'application/json'
                         },
+                        body: formData
                     })
-                    .then(response => response.json())
+                    .then(response => {
+                        // Déboguer la réponse brute pour voir ce qui est reçu réellement
+                        return response.text().then(text => {
+                            console.log('Réponse brute:', text);
+                            try {
+                                // Tenter de parser le JSON
+                                const data = JSON.parse(text);
+                                return data;
+                            } catch (e) {
+                                // Si ce n'est pas du JSON, lancer une erreur avec le début du texte
+                                console.error('Erreur de parsing JSON:', e);
+                                console.error('Texte reçu:', text.substring(0, 100));
+                                throw new Error(`Erreur de parsing: ${text.substring(0, 20)}...`);
+                            }
+                        });
+                    })
                     .then(data => {
                         if (data.success) {
+                            // Arrêter tous les bips sonores pour cette séance
+                            if (window.stopRepeatedBeep && typeof window.stopRepeatedBeep === 'function') {
+                                window.stopRepeatedBeep(seanceId);
+                            }
                             // Rediriger vers la page détaillée de la séance
                             window.location.href = `/seances/${seanceId}`;
                         } else {
+                            if (tr) tr.classList.remove('terminating');
+                            this.disabled = false;
+                            this.innerHTML = '<i class="bx bx-check-circle me-1"></i> Terminer';
                             alert('Erreur lors de la fin de la séance: ' + data.message);
                         }
                     })
                     .catch(error => {
-                        console.error('Erreur:', error);
-                        alert('Erreur lors de la fin de la séance');
+                        // Réactiver le bouton en cas d'erreur
+                        if (tr) tr.classList.remove('terminating');
+                        this.disabled = false;
+                        this.innerHTML = '<i class="bx bx-check-circle me-1"></i> Terminer';
+                        
+                        // Afficher des informations détaillées sur l'erreur
+                        console.error('Erreur détaillée:', error);
+                        
+                        // Créer un message d'erreur détaillé
+                        let errorMsg = 'Erreur lors de la fin de la séance: ' + error.message;
+                        
+                        // Créer une div pour afficher l'erreur (pour le débogage)
+                        const errorDiv = document.createElement('div');
+                        errorDiv.className = 'alert alert-danger mt-3 error-debug';
+                        errorDiv.innerHTML = `<h5>Erreur détaillée (debug)</h5>
+                            <p>Séance ID: ${seanceId}</p>
+                            <p>Message: ${error.message}</p>
+                            <p>Statut: ${tr ? tr.getAttribute('data-statut') : 'inconnu'}</p>`;
+                        
+                        // Ajouter la div d'erreur après le tableau ou avant le footer
+                        const tableContainer = document.querySelector('.table-responsive');
+                        if (tableContainer) {
+                            tableContainer.parentNode.insertBefore(errorDiv, tableContainer.nextSibling);
+                        }
+                        
+                        // Afficher l'alerte
+                        alert(errorMsg);
                     });
                 }
             });
