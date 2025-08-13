@@ -4,9 +4,12 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Spatie\Activitylog\Traits\LogsActivity;
+use Spatie\Activitylog\LogOptions;
 
 class Client extends Model
 {
+    use LogsActivity;
     protected $fillable = [
         'nom_complet',
         'numero_telephone',
@@ -56,5 +59,31 @@ class Client extends Model
     public function peutObtenirSeanceGratuite(int $pointsRequired = 5): bool
     {
         return $this->points >= $pointsRequired;
+    }
+    
+    /**
+     * Configure les options de journalisation d'activité
+     */
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->logOnly(['nom_complet', 'numero_telephone', 'adresse_mail', 'points'])
+            ->logOnlyDirty()
+            ->dontSubmitEmptyLogs()
+            ->setDescriptionForEvent(function(string $eventName) {
+                $desc = "Le client " . $this->nom_complet . " a été ";
+                switch($eventName) {
+                    case 'created':
+                        $desc = "Nouveau client créé : " . $this->nom_complet;
+                        break;
+                    case 'updated':
+                        $desc = "Informations du client " . $this->nom_complet . " modifiées";
+                        break;
+                    case 'deleted':
+                        $desc = "Client supprimé : " . $this->nom_complet;
+                        break;
+                }
+                return $desc;
+            });
     }
 }

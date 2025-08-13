@@ -6,10 +6,12 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Spatie\Activitylog\Traits\LogsActivity;
+use Spatie\Activitylog\LogOptions;
 
 class Product extends Model
 {
-    use HasFactory;
+    use HasFactory, LogsActivity;
     
     /**
      * The attributes that are mass assignable.
@@ -49,7 +51,33 @@ class Product extends Model
      */
     public function isLowStock(): bool
     {
-        return $this->stock < $this->alert_threshold;
+        return $this->stock <= $this->alert_threshold;
+    }
+    
+    /**
+     * Configure les options de journalisation d'activité
+     */
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->logOnly(['product_category_id', 'name', 'description', 'price', 'stock', 'alert_threshold', 'image'])
+            ->logOnlyDirty()
+            ->dontSubmitEmptyLogs()
+            ->setDescriptionForEvent(function(string $eventName) {
+                $desc = "Le produit a été ";
+                switch($eventName) {
+                    case 'created':
+                        $desc .= "créé";
+                        break;
+                    case 'updated':
+                        $desc .= "modifié";
+                        break;
+                    case 'deleted':
+                        $desc .= "supprimé";
+                        break;
+                }
+                return $desc;
+            });
     }
     
     /**

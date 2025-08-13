@@ -4,9 +4,12 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Spatie\Activitylog\Traits\LogsActivity;
+use Spatie\Activitylog\LogOptions;
 
 class Salon extends Model
 {
+    use LogsActivity;
     protected $fillable = [
         'nom',
     ];
@@ -49,5 +52,31 @@ class Salon extends Model
         }
         
         return $salonsDisponibles;
+    }
+    
+    /**
+     * Configure les options de journalisation d'activité
+     */
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->logOnly(['nom'])
+            ->logOnlyDirty()
+            ->dontSubmitEmptyLogs()
+            ->setDescriptionForEvent(function(string $eventName) {
+                $desc = "Le salon a été ";
+                switch($eventName) {
+                    case 'created':
+                        $desc .= "créé";
+                        break;
+                    case 'updated':
+                        $desc .= "modifié";
+                        break;
+                    case 'deleted':
+                        $desc .= "supprimé";
+                        break;
+                }
+                return $desc;
+            });
     }
 }

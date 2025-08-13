@@ -4,9 +4,12 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Spatie\Activitylog\Traits\LogsActivity;
+use Spatie\Activitylog\LogOptions;
 
 class Seance extends Model
 {
+    use LogsActivity;
     // Définition des constantes de statut
     const STATUT_PLANIFIEE = 'planifiee';
     const STATUT_EN_COURS = 'en_cours';
@@ -139,5 +142,31 @@ class Seance extends Model
             : $commentaire;
         
         return $this->save();
+    }
+    
+    /**
+     * Configure les options de journalisation d'activité
+     */
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->logOnly(['client_id', 'salon_id', 'prix', 'duree', 'statut', 'commentaire', 'is_free', 'numero_seance', 'date_seance', 'heure_prevu'])
+            ->logOnlyDirty()
+            ->dontSubmitEmptyLogs()
+            ->setDescriptionForEvent(function(string $eventName) {
+                $desc = "La séance a été ";
+                switch($eventName) {
+                    case 'created':
+                        $desc .= "créée";
+                        break;
+                    case 'updated':
+                        $desc .= "modifiée";
+                        break;
+                    case 'deleted':
+                        $desc .= "supprimée";
+                        break;
+                }
+                return $desc;
+            });
     }
 }

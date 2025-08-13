@@ -87,6 +87,14 @@
             </li>
             <br>
             
+          <!-- Logs d'activité -->            
+          <li class="menu-item {{ request()->is('activity-logs*') ? 'active' : '' }}">
+              <a href="{{ route('activity.index') }}" class="menu-link">
+                <i class="menu-icon tf-icons bx bx-history"></i>
+                <div>Journal d'activité</div>
+              </a>
+            </li>
+
           <!-- Séances Management -->
             <li class="menu-item {{ request()->is('seances*') ? 'active open' : '' }}">
               <a href="javascript:void(0);" class="menu-link menu-toggle">

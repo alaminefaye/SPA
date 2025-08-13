@@ -6,10 +6,12 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Spatie\Activitylog\Traits\LogsActivity;
+use Spatie\Activitylog\LogOptions;
 
 class Purchase extends Model
 {
-    use HasFactory;
+    use HasFactory, LogsActivity;
     
     /**
      * The attributes that are mass assignable.
@@ -103,5 +105,31 @@ class Purchase extends Model
             \DB::rollBack();
             throw $e;
         }
+    }
+    
+    /**
+     * Configure les options de journalisation d'activité
+     */
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->logOnly(['client_id', 'total_amount', 'payment_method', 'status', 'notes'])
+            ->logOnlyDirty()
+            ->dontSubmitEmptyLogs()
+            ->setDescriptionForEvent(function(string $eventName) {
+                $desc = "L'achat a été ";
+                switch($eventName) {
+                    case 'created':
+                        $desc .= "créé";
+                        break;
+                    case 'updated':
+                        $desc .= "modifié";
+                        break;
+                    case 'deleted':
+                        $desc .= "supprimé";
+                        break;
+                }
+                return $desc;
+            });
     }
 }

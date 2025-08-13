@@ -13,6 +13,7 @@ use App\Http\Controllers\SeanceController;
 use App\Http\Controllers\ReservationController;
 use App\Http\Controllers\PublicReservationController;
 use App\Http\Controllers\FeedbackController;
+use App\Http\Controllers\ActivityLogController;
 
 // Welcome page
 Route::get('/', function () {
@@ -34,6 +35,14 @@ Route::middleware('guest')->group(function () {
 Route::middleware('auth')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+    
+    // Routes pour les logs d'activité
+    Route::prefix('activity-logs')->group(function () {
+        Route::get('/', [ActivityLogController::class, 'index'])->name('activity.index');
+        Route::get('/{id}', [ActivityLogController::class, 'show'])->name('activity.show');
+        Route::delete('/{id}', [ActivityLogController::class, 'destroy'])->name('activity.destroy');
+        Route::delete('/', [ActivityLogController::class, 'clearAll'])->name('activity.clearAll');
+    });
     
     // Salon routes
     Route::resource('salons', SalonController::class);
