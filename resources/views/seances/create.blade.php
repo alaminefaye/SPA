@@ -146,6 +146,11 @@
                                                 <label class="form-label">Prix Total (FCFA)</label>
                                                 <input type="number" step="0.01" class="form-control" id="prix" name="prix" value="0" readonly />
                                             </div>
+                                            <div class="mb-2">
+                                                <label class="form-label">Prix Promotionnel (FCFA)</label>
+                                                <input type="number" step="0.01" class="form-control" id="prix_promo" name="prix_promo" value="{{ old('prix_promo') }}" placeholder="Prix promotionnel (optionnel)" />
+                                                <small class="form-text text-info"><i class="bx bx-info-circle"></i> Si renseigné, ce prix remplacera le prix standard.</small>
+                                            </div>
                                         </div>
                                         <div class="col-md-6">
                                             <div class="mb-2">

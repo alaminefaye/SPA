@@ -22,6 +22,7 @@ class Seance extends Model
         'salon_id',
         'prestation_id',
         'prix',
+        'prix_promo',
         'duree',
         'statut',
         'commentaire',
@@ -32,6 +33,7 @@ class Seance extends Model
     protected $casts = [
         'duree' => 'datetime:H:i:s',
         'prix' => 'decimal:2',
+        'prix_promo' => 'decimal:2',
         'is_free' => 'boolean',
     ];
     

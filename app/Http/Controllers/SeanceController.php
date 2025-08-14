@@ -147,6 +147,7 @@ class SeanceController extends Controller
         
         // Initialiser le prix à 0 et la durée à un format valide pour éviter l'erreur NOT NULL
         $seance->prix = 0;
+        $seance->prix_promo = $request->prix_promo; // Ajouter le prix promotionnel
         $seance->duree = '00:00:00';
         
         // Sauvegarde initiale de la séance pour obtenir un ID
@@ -296,6 +297,7 @@ class SeanceController extends Controller
         $seance->salon_id = $request->salon_id;
         $seance->statut = $nouveauStatut;
         $seance->commentaire = $commentaireFinal;
+        $seance->prix_promo = $request->prix_promo; // Ajout du prix promotionnel
         
         // Mise à jour des prestations
         $seance->prestations()->detach(); // Supprime les anciennes relations

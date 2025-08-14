@@ -101,7 +101,13 @@
                                     <span class="badge bg-success">GRATUIT</span>
                                     <i class="bx bxs-star text-warning ms-1" data-bs-toggle="tooltip" title="Séance offerte (fidélité)"></i>
                                 @else
-                                    {{ number_format($seance->prix, 0, ',', ' ') }} FCFA
+                                    @if($seance->prix_promo)
+                                        <span class="text-decoration-line-through text-muted">{{ number_format($seance->prix, 0, ',', ' ') }} FCFA</span>
+                                        <span class="badge bg-danger ms-1">PROMO</span><br>
+                                        <span class="fw-bold">{{ number_format($seance->prix_promo, 0, ',', ' ') }} FCFA</span>
+                                    @else
+                                        {{ number_format($seance->prix, 0, ',', ' ') }} FCFA
+                                    @endif
                                 @endif
                             </td>
                             <td>

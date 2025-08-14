@@ -32,8 +32,22 @@ class DashboardController extends Controller
         $seancesGratuites = Seance::whereDate('created_at', $today)->where('is_free', true)->count();
         
         // Revenus du jour
-        $revenuTotal = Seance::whereDate('created_at', $today)->sum('prix');
-        $revenuPayant = Seance::whereDate('created_at', $today)->where('is_free', false)->sum('prix');
+        // Récupérer toutes les séances du jour
+        $seancesJour = Seance::whereDate('created_at', $today)->get();
+        
+        // Calculer le revenu total et payant en tenant compte du prix promotionnel
+        $revenuTotal = 0;
+        $revenuPayant = 0;
+        
+        foreach ($seancesJour as $seance) {
+            // Utiliser le prix promotionnel s'il existe, sinon le prix normal
+            $prix = $seance->prix_promo ? $seance->prix_promo : $seance->prix;
+            $revenuTotal += $prix;
+            
+            if (!$seance->is_free) {
+                $revenuPayant += $prix;
+            }
+        }
         
         // Statistiques globales
         $totalClients = Client::count();
