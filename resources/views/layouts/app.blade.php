@@ -205,6 +205,14 @@
               </a>
             </li>
             
+            <!-- Gestion des utilisateurs -->  
+            <li class="menu-item {{ request()->is('users*') ? 'active' : '' }}">
+              <a href="{{ route('users.index') }}" class="menu-link">
+                <i class="menu-icon tf-icons bx bx-user"></i>
+                <div>Gestion des utilisateurs</div>
+              </a>
+            </li>
+            
           </ul>
         </aside>
         <!-- / Menu -->

@@ -14,6 +14,7 @@ use App\Http\Controllers\ReservationController;
 use App\Http\Controllers\PublicReservationController;
 use App\Http\Controllers\FeedbackController;
 use App\Http\Controllers\ActivityLogController;
+use App\Http\Controllers\UserController;
 
 // Welcome page
 Route::get('/', function () {
@@ -91,6 +92,9 @@ Route::middleware('auth')->group(function () {
     Route::resource('feedbacks', FeedbackController::class)->except(['edit', 'update']);
     Route::put('/feedbacks/{feedback}/mark-read', [FeedbackController::class, 'markAsRead'])->name('feedbacks.mark-read');
     Route::put('/feedbacks/{feedback}/toggle-priority', [FeedbackController::class, 'togglePriority'])->name('feedbacks.toggle-priority');
+    
+    // User management routes
+    Route::resource('users', UserController::class);
     
     // Client search route
     Route::get('/client-search-by-phone', [ClientController::class, 'searchByPhone'])->name('clients.searchByPhone');
