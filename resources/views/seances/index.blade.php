@@ -119,6 +119,9 @@
                                         <a class="dropdown-item" href="{{ route('seances.show', $seance->id) }}">
                                             <i class="bx bx-show-alt me-1"></i> Voir
                                         </a>
+                                        <a class="dropdown-item" href="{{ route('seances.ticket', $seance->id) }}" target="_blank">
+                                            <i class="bx bx-printer me-1"></i> Imprimer Ticket
+                                        </a>
                                         <a class="dropdown-item" href="{{ route('seances.edit', $seance->id) }}">
                                             <i class="bx bx-edit-alt me-1"></i> Modifier
                                         </a>

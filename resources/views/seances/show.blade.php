@@ -13,6 +13,9 @@
             <div class="card-header d-flex align-items-center justify-content-between">
                 <h5 class="mb-0">Détails de la Séance #{{ $seance->id }}</h5>
                 <div>
+                    <a href="{{ route('seances.ticket', $seance->id) }}" class="btn btn-info btn-sm me-2" target="_blank">
+                        <i class="bx bx-printer me-1"></i> Imprimer Ticket
+                    </a>
                     <a href="{{ route('seances.edit', $seance->id) }}" class="btn btn-primary btn-sm me-2">
                         <i class="bx bx-edit-alt me-1"></i> Modifier
                     </a>

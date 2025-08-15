@@ -27,6 +27,7 @@ class Seance extends Model
         'statut',
         'commentaire',
         'is_free',
+        'paid_with_points',
         'numero_seance',
     ];
     
@@ -35,6 +36,7 @@ class Seance extends Model
         'prix' => 'decimal:2',
         'prix_promo' => 'decimal:2',
         'is_free' => 'boolean',
+        'paid_with_points' => 'boolean',
     ];
     
     /**

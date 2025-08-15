@@ -62,6 +62,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/seances-test/demarrage', [SeanceController::class, 'aDemarrer'])->name('seances.test.demarrage');
     Route::post('/seances/{id}/demarrer', [SeanceController::class, 'demarrer'])->name('seances.demarrer');
     Route::post('/seances/{id}/terminer', [SeanceController::class, 'terminer'])->name('seances.terminer');
+    Route::get('/seances/{id}/ticket', [SeanceController::class, 'imprimerTicket'])->name('seances.ticket');
     
     // Seance routes
     Route::resource('seances', SeanceController::class);

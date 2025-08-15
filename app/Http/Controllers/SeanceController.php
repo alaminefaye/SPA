@@ -8,6 +8,7 @@ use App\Models\Salon;
 use App\Models\Seance;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+use SimpleSoftwareIO\QrCode\Facades\QrCode;
 
 class SeanceController extends Controller
 {
@@ -171,6 +172,7 @@ class SeanceController extends Controller
             if ($client->peutObtenirSeanceGratuite($pointsNecessaires)) {
                 $client->utiliserPoints($pointsNecessaires);
                 $seance->is_free = true;
+                $seance->paid_with_points = true; // Marquer que la séance est payée avec des points
                 $seance->prix = 0; // La séance est gratuite, donc prix à 0
             }
         } else {
@@ -589,6 +591,30 @@ class SeanceController extends Controller
             'active' => $isActive,
             'statut' => $seance->statut
         ]);
+    }
+    
+    /**
+     * Génère et affiche un ticket pour une séance
+     *
+     * @param string $id ID de la séance
+     * @return \Illuminate\View\View
+     */
+    public function imprimerTicket(string $id)
+    {
+        $seance = Seance::with(['client', 'salon', 'prestations'])->findOrFail($id);
+        
+        // Calculer les points de fidélité gagnés pour cette séance
+        $pointsGagnes = $seance->is_free ? 0 : 1;
+        
+        // Récupérer les points totaux du client
+        $pointsTotal = $seance->client->points;
+        
+        // Créer le QR code avec les données de la séance
+        // Format: seance:ID pour pouvoir identifier facilement lors du scan
+        $qrCodeContent = 'seance:' . $seance->id;
+        $qrCode = base64_encode(QrCode::format('png')->size(200)->generate($qrCodeContent));
+        
+        return view('seances.ticket', compact('seance', 'qrCode', 'pointsGagnes', 'pointsTotal'));
     }
     
     /**
