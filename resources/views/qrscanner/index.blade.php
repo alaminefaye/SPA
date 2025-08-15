@@ -99,15 +99,13 @@
                 document.getElementById("start-scanner").innerHTML = '<i class="bx bx-qr-scan me-1"></i> Démarrer le scan';
                 
                 // Envoyer les données au serveur pour traitement
+                const formData = new FormData();
+                formData.append('qr_data', decodedText);
+                formData.append('_token', '{{ csrf_token() }}');
+                
                 fetch('{{ route("qrscanner.process") }}', {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                    },
-                    body: JSON.stringify({
-                        qr_data: decodedText
-                    })
+                    body: formData
                 })
                 .then(response => response.json())
                 .then(data => {
