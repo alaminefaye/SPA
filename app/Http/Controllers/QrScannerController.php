@@ -49,7 +49,7 @@ class QrScannerController extends Controller
                     return response()->json([
                         'success' => true,
                         'message' => 'Séance démarrée avec succès',
-                        'redirect' => route('seances.demarrer', $seance->id),
+                        'redirect' => route('seances.show', $seance->id),
                         'data' => [
                             'id' => $seance->id,
                             'numero' => $seance->numero_seance,
