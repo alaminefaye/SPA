@@ -99,16 +99,24 @@
                 document.getElementById("start-scanner").innerHTML = '<i class="bx bx-qr-scan me-1"></i> Démarrer le scan';
                 
                 // Envoyer les données au serveur pour traitement
-                const formData = new FormData();
-                formData.append('qr_data', decodedText);
-                formData.append('_token', '{{ csrf_token() }}');
+                const csrfToken = '{{ csrf_token() }}';
+                console.log('Tentative de traitement pour:', decodedText);
+                console.log('Token CSRF:', csrfToken);
+                console.log('URL route:', '{{ route("qrscanner.process") }}');
                 
-                fetch('{{ route("qrscanner.process") }}', {
-                    method: 'POST',
-                    body: formData
-                })
-                .then(response => response.json())
-                .then(data => {
+                // Utiliser XMLHttpRequest au lieu de fetch pour tester
+                const xhr = new XMLHttpRequest();
+                xhr.open('POST', '{{ route("qrscanner.process") }}');
+                xhr.setRequestHeader('X-CSRF-TOKEN', csrfToken);
+                xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+                
+                xhr.onload = function() {
+                    console.log('Status:', xhr.status);
+                    console.log('Response Text:', xhr.responseText);
+                    
+                    try {
+                        const data = JSON.parse(xhr.responseText);
+
                     console.log('Réponse serveur:', data);
                     
                     if (data.success) {
@@ -134,15 +142,30 @@
                         `;
                     }
                 })
-                .catch(error => {
-                    console.error('Erreur lors du traitement du QR code:', error);
+                    } catch (e) {
+                        console.error('Erreur de parsing JSON:', e);
+                        qrResultDisplay.innerHTML = `
+                            <div class="alert alert-danger">
+                                <h6 class="alert-heading fw-bold mb-1">Erreur!</h6>
+                                <p class="mb-0">Erreur de format de réponse: ${e.message}</p>
+                                <p class="mb-0"><small class="text-muted">Vérifiez la console pour plus de détails.</small></p>
+                            </div>
+                        `;
+                    }
+                };
+                
+                xhr.onerror = function() {
+                    console.error('Erreur réseau lors de la requête');
                     qrResultDisplay.innerHTML = `
                         <div class="alert alert-danger">
-                            <h6 class="alert-heading fw-bold mb-1">Erreur!</h6>
-                            <p class="mb-0">Une erreur est survenue lors du traitement du QR code.</p>
+                            <h6 class="alert-heading fw-bold mb-1">Erreur réseau!</h6>
+                            <p class="mb-0">Impossible de contacter le serveur.</p>
                         </div>
                     `;
-                });
+                };
+                
+                // Envoyer les données
+                xhr.send('qr_data=' + encodeURIComponent(decodedText) + '&_token=' + encodeURIComponent(csrfToken));
             }).catch(err => {
                 console.log("Erreur lors de l'arrêt du scanner: ", err);
             });
