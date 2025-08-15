@@ -15,6 +15,7 @@ use App\Http\Controllers\PublicReservationController;
 use App\Http\Controllers\FeedbackController;
 use App\Http\Controllers\ActivityLogController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\QrScannerController;
 
 // Welcome page
 Route::get('/', function () {
@@ -95,6 +96,10 @@ Route::middleware('auth')->group(function () {
     
     // User management routes
     Route::resource('users', UserController::class);
+    
+    // QR Code Scanner routes
+    Route::get('/qr-scanner', [QrScannerController::class, 'index'])->name('qrscanner.index');
+    Route::post('/qr-scanner/process', [QrScannerController::class, 'process'])->name('qrscanner.process');
     
     // Client search route
     Route::get('/client-search-by-phone', [ClientController::class, 'searchByPhone'])->name('clients.searchByPhone');

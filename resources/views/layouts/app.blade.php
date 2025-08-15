@@ -213,6 +213,14 @@
               </a>
             </li>
             
+            <!-- Scanner QR Code -->  
+            <li class="menu-item {{ request()->is('qr-scanner*') ? 'active' : '' }}">
+              <a href="{{ route('qrscanner.index') }}" class="menu-link">
+                <i class="menu-icon tf-icons bx bx-qr-scan"></i>
+                <div>Scanner QR Code</div>
+              </a>
+            </li>
+            
           </ul>
         </aside>
         <!-- / Menu -->
