@@ -13,7 +13,7 @@
             <div class="card mb-4">
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <h5 class="mb-0">Scanner un code QR</h5>
-                    <button class="btn btn-primary" id="start-scanner">
+                    <button class="btn btn-primary" id="start-scanner" type="button">
                         <i class="bx bx-qr-scan me-1"></i> Démarrer le scan
                     </button>
                 </div>
@@ -45,15 +45,73 @@
 </div>
 
 @section('page-js')
+
+<!-- Ne dépend d'aucune bibliothèque externe, juste du JavaScript pur -->
+<script>
+// Code simplifié au maximum pour tester
+console.log('Script chargé au début de la page');
+
+// Fonction réutilisable pour l'attachement d'un événement
+function attachClickEvent() {
+    console.log('Tentative d\'attachement de l\'event');
+    var bouton = document.getElementById('start-scanner');
+    console.log('Référence au bouton:', bouton);
+    
+    if (bouton) {
+        console.log('Ajout de l\'event sur le bouton');
+        bouton.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            console.log('CLIC DÉTECTÉ!');
+            alert('CLIC DÉTECTÉ!');
+        });
+    } else {
+        console.error('BOUTON NON TROUVÉ!');
+    }
+}
+
+// Exécuter immédiatement
+attachClickEvent();
+
+// Et aussi exécuter après chargement complet
+window.addEventListener('load', attachClickEvent);
+
+// Et aussi via DOMContentLoaded
+document.addEventListener('DOMContentLoaded', attachClickEvent);
+</script>
+
+
 <script src="https://unpkg.com/html5-qrcode"></script>
 <script>
-    document.addEventListener("DOMContentLoaded", function() {
-        const html5QrCode = new Html5Qrcode("qr-reader");
-        const qrResultDisplay = document.getElementById("qr-result-display");
-        let scanning = false;
-        
-        document.getElementById("start-scanner").addEventListener("click", function() {
-            if (scanning) {
+// Approche originale avec initialisation complète (désactivée pour l'instant)
+/*
+$(document).ready(function() {
+    // Initialisation des variables
+    const qrResultDisplay = document.getElementById("qr-result-display");
+    const startButton = document.getElementById("start-scanner");
+    let scanning = false;
+    let html5QrCode = null;
+    
+    try {
+        // Initialisation du scanner
+        html5QrCode = new Html5Qrcode("qr-reader");
+        console.log("Scanner initialisé avec succès");
+    } catch(err) {
+        console.error("Erreur d'initialisation du scanner:", err);
+        qrResultDisplay.innerHTML = `
+            <div class="alert alert-danger">
+                <h6 class="alert-heading fw-bold mb-1">Erreur d'initialisation</h6>
+                <p class="mb-0">${err.message}</p>
+            </div>
+        `;
+        return;
+    }
+    
+    // Configuration du gestionnaire d'événement pour le bouton
+    $("#start-scanner").on("click", function(event) {
+        event.preventDefault();
+        console.log("Bouton cliqué, scanning=", scanning);
+*/
                 html5QrCode.stop().then(() => {
                     scanning = false;
                     document.getElementById("start-scanner").innerHTML = '<i class="bx bx-qr-scan me-1"></i> Démarrer le scan';
