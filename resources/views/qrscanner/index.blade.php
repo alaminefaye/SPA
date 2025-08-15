@@ -47,42 +47,160 @@
 @section('page-js')
 
 <!-- Ne dépend d'aucune bibliothèque externe, juste du JavaScript pur -->
-<script>
-// Code simplifié au maximum pour tester
-console.log('Script chargé au début de la page');
-
-// Fonction réutilisable pour l'attachement d'un événement
-function attachClickEvent() {
-    console.log('Tentative d\'attachement de l\'event');
-    var bouton = document.getElementById('start-scanner');
-    console.log('Référence au bouton:', bouton);
-    
-    if (bouton) {
-        console.log('Ajout de l\'event sur le bouton');
-        bouton.addEventListener('click', function(e) {
-            e.preventDefault();
-            e.stopPropagation();
-            console.log('CLIC DÉTECTÉ!');
-            alert('CLIC DÉTECTÉ!');
-        });
-    } else {
-        console.error('BOUTON NON TROUVÉ!');
-    }
-}
-
-// Exécuter immédiatement
-attachClickEvent();
-
-// Et aussi exécuter après chargement complet
-window.addEventListener('load', attachClickEvent);
-
-// Et aussi via DOMContentLoaded
-document.addEventListener('DOMContentLoaded', attachClickEvent);
-</script>
-
-
 <script src="https://unpkg.com/html5-qrcode"></script>
 <script>
+// Attendre que le DOM soit complètement chargé
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('DOM chargé, prêt à initialiser');
+    
+    // Références aux éléments DOM
+    const qrReader = document.getElementById('qr-reader');
+    const qrResultDisplay = document.getElementById('qr-result-display');
+    const startButton = document.getElementById('start-scanner');
+    
+    // Variables pour le scanner
+    let html5QrCode = null;
+    let scanning = false;
+    
+    // Configuration du scanner
+    const qrConfig = { fps: 10, qrbox: { width: 250, height: 250 } };
+    
+    // Initialiser la bibliothèque HTML5-QRCode
+    try {
+        html5QrCode = new Html5Qrcode('qr-reader');
+        console.log('Scanner QR initialisé avec succès');
+    } catch(error) {
+        console.error('Erreur lors de l\'initialisation du scanner QR:', error);
+        qrResultDisplay.innerHTML = `
+            <div class="alert alert-danger">
+                <h6 class="alert-heading fw-bold mb-1">Erreur d'initialisation</h6>
+                <p class="mb-0">Impossible d'initialiser le scanner: ${error.message}</p>
+            </div>
+        `;
+        return;
+    }
+    
+    // Fonction pour gérer la réussite du scan
+    function onScanSuccess(decodedText, decodedResult) {
+        console.log('QR Code scanné:', decodedText);
+        
+        // Afficher le résultat
+        qrResultDisplay.innerHTML = `
+            <div class="alert alert-info">
+                <h6 class="alert-heading fw-bold mb-1">QR Code scanné!</h6>
+                <p class="mb-0"><strong>Contenu:</strong> ${decodedText}</p>
+                <p class="mb-0"><small class="text-muted">Traitement en cours...</small></p>
+            </div>
+        `;
+        
+        // Arrêter le scanner
+        if (html5QrCode && scanning) {
+            html5QrCode.stop().then(() => {
+                console.log('Scanner arrêté après scan réussi');
+                scanning = false;
+                startButton.innerHTML = '<i class="bx bx-qr-scan me-1"></i> Démarrer le scan';
+                
+                // Envoyer les données au serveur
+                const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+                console.log('Token CSRF:', csrfToken);
+                
+                const formData = new FormData();
+                formData.append('qr_data', decodedText);
+                formData.append('_token', csrfToken);
+                
+                fetch('{{ route("qrscanner.process") }}', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    console.log('Réponse du serveur:', data);
+                    
+                    if (data.success) {
+                        qrResultDisplay.innerHTML = `
+                            <div class="alert alert-success">
+                                <h6 class="alert-heading fw-bold mb-1">Traitement réussi!</h6>
+                                <p class="mb-0">${data.message}</p>
+                            </div>
+                        `;
+                        
+                        // Rediriger si nécessaire
+                        if (data.redirect) {
+                            console.log('Redirection vers:', data.redirect);
+                            setTimeout(() => {
+                                window.location.href = data.redirect;
+                            }, 500);
+                        }
+                    } else {
+                        qrResultDisplay.innerHTML = `
+                            <div class="alert alert-danger">
+                                <h6 class="alert-heading fw-bold mb-1">Erreur!</h6>
+                                <p class="mb-0">${data.message || 'Erreur de traitement du QR code'}</p>
+                            </div>
+                        `;
+                    }
+                })
+                .catch(error => {
+                    console.error('Erreur lors de la requête:', error);
+                    qrResultDisplay.innerHTML = `
+                        <div class="alert alert-danger">
+                            <h6 class="alert-heading fw-bold mb-1">Erreur réseau!</h6>
+                            <p class="mb-0">Impossible de communiquer avec le serveur.</p>
+                        </div>
+                    `;
+                });
+            }).catch(error => {
+                console.error('Erreur lors de l\'arrêt du scanner:', error);
+            });
+        }
+    }
+    
+    // Fonction pour gérer l'échec du scan
+    function onScanFailure(error) {
+        // Généralement ignoré car normal pendant la recherche de QR code
+        // console.warn('Erreur de scan QR:', error);
+    }
+    
+    // Gestionnaire d'événements pour le bouton de démarrage/arrêt
+    startButton.addEventListener('click', function(e) {
+        e.preventDefault();
+        console.log('Bouton cliqué, état scanning =', scanning);
+        
+        if (scanning) {
+            // Arrêter le scanner
+            html5QrCode.stop().then(() => {
+                console.log('Scanner arrêté');
+                scanning = false;
+                startButton.innerHTML = '<i class="bx bx-qr-scan me-1"></i> Démarrer le scan';
+            }).catch(error => {
+                console.error('Erreur lors de l\'arrêt du scanner:', error);
+            });
+        } else {
+            // Démarrer le scanner
+            console.log('Tentative de démarrage du scanner...');
+            html5QrCode.start(
+                { facingMode: "environment" }, // Utiliser la caméra arrière
+                qrConfig,
+                onScanSuccess,
+                onScanFailure
+            ).then(() => {
+                console.log('Scanner démarré avec succès');
+                scanning = true;
+                startButton.innerHTML = '<i class="bx bx-stop me-1"></i> Arrêter le scan';
+            }).catch(error => {
+                console.error('Erreur lors du démarrage du scanner:', error);
+                qrResultDisplay.innerHTML = `
+                    <div class="alert alert-danger">
+                        <h6 class="alert-heading fw-bold mb-1">Erreur de caméra</h6>
+                        <p class="mb-0">Impossible d'accéder à la caméra: ${error.message}</p>
+                        <p class="mb-0"><small class="text-muted">Vérifiez que vous avez autorisé l'accès à la caméra.</small></p>
+                    </div>
+                `;
+            });
+        }
+    });
+});
+</script>
 // Approche originale avec initialisation complète (désactivée pour l'instant)
 /*
 $(document).ready(function() {
