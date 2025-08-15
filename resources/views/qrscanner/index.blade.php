@@ -86,10 +86,10 @@
             // Handle the scanned QR code
             console.log(`QR Code decoded: ${decodedText}`);
             qrResultDisplay.innerHTML = `
-                <div class="alert alert-success">
-                    <h6 class="alert-heading fw-bold mb-1">Code QR scanné!</h6>
+                <div class="alert alert-info">
+                    <h6 class="alert-heading fw-bold mb-1">QR Code scanné!</h6>
                     <p class="mb-0"><strong>Contenu:</strong> ${decodedText}</p>
-                    <p class="mb-0"><small class="text-muted">Scanné à ${new Date().toLocaleTimeString()}</small></p>
+                    <p class="mb-0"><small class="text-muted">Traitement en cours...</small></p>
                 </div>
             `;
             
@@ -97,6 +97,54 @@
             html5QrCode.stop().then(() => {
                 scanning = false;
                 document.getElementById("start-scanner").innerHTML = '<i class="bx bx-qr-scan me-1"></i> Démarrer le scan';
+                
+                // Envoyer les données au serveur pour traitement
+                fetch('{{ route("qrscanner.process") }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                    },
+                    body: JSON.stringify({
+                        qr_data: decodedText
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    console.log('Réponse serveur:', data);
+                    
+                    if (data.success) {
+                        qrResultDisplay.innerHTML = `
+                            <div class="alert alert-success">
+                                <h6 class="alert-heading fw-bold mb-1">Traitement réussi!</h6>
+                                <p class="mb-0">${data.message}</p>
+                            </div>
+                        `;
+                        
+                        // Si une redirection est fournie, rediriger l'utilisateur
+                        if (data.redirect) {
+                            setTimeout(() => {
+                                window.location.href = data.redirect;
+                            }, 500); // Redirection après 500ms
+                        }
+                    } else {
+                        qrResultDisplay.innerHTML = `
+                            <div class="alert alert-danger">
+                                <h6 class="alert-heading fw-bold mb-1">Erreur!</h6>
+                                <p class="mb-0">${data.message}</p>
+                            </div>
+                        `;
+                    }
+                })
+                .catch(error => {
+                    console.error('Erreur lors du traitement du QR code:', error);
+                    qrResultDisplay.innerHTML = `
+                        <div class="alert alert-danger">
+                            <h6 class="alert-heading fw-bold mb-1">Erreur!</h6>
+                            <p class="mb-0">Une erreur est survenue lors du traitement du QR code.</p>
+                        </div>
+                    `;
+                });
             }).catch(err => {
                 console.log("Erreur lors de l'arrêt du scanner: ", err);
             });
