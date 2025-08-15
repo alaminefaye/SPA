@@ -100,19 +100,30 @@ document.addEventListener('DOMContentLoaded', function() {
                 scanning = false;
                 startButton.innerHTML = '<i class="bx bx-qr-scan me-1"></i> Démarrer le scan';
                 
-                // Envoyer les données au serveur
+                // Envoyer les données au serveur avec plus de détails de débogage
                 const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
                 console.log('Token CSRF:', csrfToken);
+                console.log('URL de requête:', '{{ route("qrscanner.process") }}');
                 
-                const formData = new FormData();
-                formData.append('qr_data', decodedText);
-                formData.append('_token', csrfToken);
+                // Utiliser URLSearchParams au lieu de FormData
+                const params = new URLSearchParams();
+                params.append('qr_data', decodedText);
+                params.append('_token', csrfToken);
                 
                 fetch('{{ route("qrscanner.process") }}', {
                     method: 'POST',
-                    body: formData
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                        'X-CSRF-TOKEN': csrfToken,
+                        'Accept': 'application/json'
+                    },
+                    body: params
                 })
-                .then(response => response.json())
+                .then(response => {
+                    console.log('Response status:', response.status);
+                    console.log('Response headers:', [...response.headers.entries()]);
+                    return response.json();
+                })
                 .then(data => {
                     console.log('Réponse du serveur:', data);
                     
@@ -142,12 +153,30 @@ document.addEventListener('DOMContentLoaded', function() {
                 })
                 .catch(error => {
                     console.error('Erreur lors de la requête:', error);
-                    qrResultDisplay.innerHTML = `
-                        <div class="alert alert-danger">
-                            <h6 class="alert-heading fw-bold mb-1">Erreur réseau!</h6>
-                            <p class="mb-0">Impossible de communiquer avec le serveur.</p>
-                        </div>
-                    `;
+                    
+                    // Tentative de diagnostic plus précis
+                    let errorMessage = 'Impossible de communiquer avec le serveur.';
+                    
+                    // Test de connexion pour vérifier si le serveur est accessible
+                    fetch('{{ route("dashboard") }}', {
+                        method: 'HEAD'
+                    }).then(response => {
+                        if (response.ok) {
+                            errorMessage += ' La connexion au serveur fonctionne, mais le traitement du QR a échoué.';
+                        } else {
+                            errorMessage += ' Le serveur semble indisponible (code ' + response.status + ').';
+                        }
+                    }).catch(() => {
+                        errorMessage += ' Problème de connectivité générale.';
+                    }).finally(() => {
+                        qrResultDisplay.innerHTML = `
+                            <div class="alert alert-danger">
+                                <h6 class="alert-heading fw-bold mb-1">Erreur réseau!</h6>
+                                <p class="mb-0">${errorMessage}</p>
+                                <p class="mb-0"><small>Contenu QR: ${decodedText}</small></p>
+                            </div>
+                        `;
+                    });
                 });
             }).catch(error => {
                 console.error('Erreur lors de l\'arrêt du scanner:', error);
