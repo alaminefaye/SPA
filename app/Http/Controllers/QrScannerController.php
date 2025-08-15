@@ -43,7 +43,7 @@ class QrScannerController extends Controller
                 // Si la séance est planifiée, la démarrer
                 if ($seance->statut === Seance::STATUT_PLANIFIEE) {
                     $seance->statut = Seance::STATUT_EN_COURS;
-                    $seance->date_debut = now();
+                    $seance->heure_debut = now();
                     $seance->save();
                     
                     return response()->json([
