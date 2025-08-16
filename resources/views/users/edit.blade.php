@@ -52,6 +52,19 @@
                             <input type="text" class="form-control" id="password_confirmation" name="password_confirmation" placeholder="Confirmez le nouveau mot de passe">
                         </div>
 
+                        <div class="mb-4">
+                            <label for="roles" class="form-label">Rôles</label>
+                            <select class="form-select @error('roles') is-invalid @enderror" id="roles" name="roles[]" multiple>
+                                @foreach ($roles as $role)
+                                    <option value="{{ $role->id }}" {{ in_array($role->id, $userRoles) ? 'selected' : '' }}>{{ $role->name }}</option>
+                                @endforeach
+                            </select>
+                            @error('roles')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                            <small class="text-muted">Utilisez Ctrl+clic pour sélectionner plusieurs rôles</small>
+                        </div>
+
                         <button type="submit" class="btn btn-primary">
                             <i class="bx bx-save me-1"></i> Enregistrer les modifications
                         </button>

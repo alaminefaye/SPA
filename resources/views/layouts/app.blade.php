@@ -213,6 +213,28 @@
               </a>
             </li>
             
+            <!-- Gestion des rôles et permissions -->  
+            @can('view roles')
+            <li class="menu-item {{ request()->is('roles*') || request()->is('permissions*') ? 'active open' : '' }}">
+              <a href="javascript:void(0);" class="menu-link menu-toggle">
+                <i class="menu-icon tf-icons bx bx-key"></i>
+                <div data-i18n="Roles">Rôles et permissions</div>
+              </a>
+              <ul class="menu-sub">
+                <li class="menu-item {{ request()->is('roles*') ? 'active' : '' }}">
+                  <a href="{{ route('roles.index') }}" class="menu-link">
+                    <div data-i18n="Roles">Rôles</div>
+                  </a>
+                </li>
+                <li class="menu-item {{ request()->is('permissions*') ? 'active' : '' }}">
+                  <a href="{{ route('permissions.index') }}" class="menu-link">
+                    <div data-i18n="Permissions">Permissions</div>
+                  </a>
+                </li>
+              </ul>
+            </li>
+            @endcan
+            
             <!-- Scanner QR Code -->  
             <li class="menu-item {{ request()->is('qr-scanner*') ? 'active' : '' }}">
               <a href="{{ route('qrscanner.index') }}" class="menu-link">

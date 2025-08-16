@@ -16,6 +16,8 @@ use App\Http\Controllers\FeedbackController;
 use App\Http\Controllers\ActivityLogController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\QrScannerController;
+use App\Http\Controllers\RoleController;
+use App\Http\Controllers\PermissionController;
 
 // Welcome page
 Route::get('/', function () {
@@ -98,6 +100,22 @@ Route::middleware('auth')->group(function () {
     
     // User management routes
     Route::resource('users', UserController::class);
+    
+    // Gestion des rôles et permissions
+    Route::group(['middleware' => 'auth'], function () {
+        // Routes pour les rôles avec middlewares spécifiques
+        Route::get('/roles', [RoleController::class, 'index'])->middleware('can:view roles')->name('roles.index');
+        Route::get('/roles/create', [RoleController::class, 'create'])->middleware('can:create roles')->name('roles.create');
+        Route::post('/roles', [RoleController::class, 'store'])->middleware('can:create roles')->name('roles.store');
+        Route::get('/roles/{role}', [RoleController::class, 'show'])->middleware('can:view roles')->name('roles.show');
+        Route::get('/roles/{role}/edit', [RoleController::class, 'edit'])->middleware('can:edit roles')->name('roles.edit');
+        Route::put('/roles/{role}', [RoleController::class, 'update'])->middleware('can:edit roles')->name('roles.update');
+        Route::delete('/roles/{role}', [RoleController::class, 'destroy'])->middleware('can:delete roles')->name('roles.destroy');
+        
+        // Routes pour les permissions (lecture seule)
+        Route::get('/permissions', [PermissionController::class, 'index'])->middleware('can:view roles')->name('permissions.index');
+        Route::get('/permissions/{permission}', [PermissionController::class, 'show'])->middleware('can:view roles')->name('permissions.show');
+    });
     
     // QR Code Scanner routes
     Route::get('/qr-scanner', [QrScannerController::class, 'index'])->name('qrscanner.index');

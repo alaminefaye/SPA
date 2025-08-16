@@ -9,6 +9,18 @@ use Illuminate\Support\Facades\Validator;
 class ProductCategoryController extends Controller
 {
     /**
+     * Constructor pour appliquer les middlewares d'authentification et d'autorisation
+     */
+    public function __construct()
+    {
+        $this->middleware('auth');
+        $this->middleware('can:view product categories')->only(['index', 'show']);
+        $this->middleware('can:create product categories')->only(['create', 'store']);
+        $this->middleware('can:edit product categories')->only(['edit', 'update']);
+        $this->middleware('can:delete product categories')->only(['destroy']);
+    }
+
+    /**
      * Display a listing of the resource.
      */
     public function index(Request $request)

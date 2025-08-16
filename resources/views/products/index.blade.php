@@ -10,12 +10,16 @@
         <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
             <h6 class="m-0 font-weight-bold text-primary">Liste des produits</h6>
             <div>
+                @can('view product categories')
                 <a href="{{ route('product-categories.index') }}" class="btn btn-info btn-sm mr-2">
                     <i class="fas fa-tags mr-1"></i> Gérer les catégories
                 </a>
+                @endcan
+                @can('create products')
                 <a href="{{ route('products.create') }}" class="btn btn-primary btn-sm">
                     <i class="fas fa-plus"></i> Ajouter un produit
                 </a>
+                @endcan
             </div>
         </div>
         <div class="card-body">
@@ -93,12 +97,17 @@
                                 </td>
                                 <td>
                                     <div class="action-icons d-flex justify-content-center">
+                                        @can('view products')
                                         <a href="{{ route('products.show', $product) }}" class="btn btn-icon btn-info btn-action me-1" data-bs-toggle="tooltip" data-bs-placement="top" title="Voir détails">
                                             <i class="bx bx-show"></i>
                                         </a>
+                                        @endcan
+                                        @can('edit products')
                                         <a href="{{ route('products.edit', $product) }}" class="btn btn-icon btn-primary btn-action me-1" data-bs-toggle="tooltip" data-bs-placement="top" title="Modifier">
                                             <i class="bx bx-edit-alt"></i>
                                         </a>
+                                        @endcan
+                                        @can('delete products')
                                         <form action="{{ route('products.destroy', $product) }}" method="POST" class="d-inline">
                                             @csrf
                                             @method('DELETE')
@@ -106,6 +115,7 @@
                                                 <i class="bx bx-trash"></i>
                                             </button>
                                         </form>
+                                        @endcan
                                     </div>
                                 </td>
                             </tr>

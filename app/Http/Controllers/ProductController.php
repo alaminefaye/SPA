@@ -11,6 +11,19 @@ use Illuminate\Support\Facades\Validator;
 class ProductController extends Controller
 {
     /**
+     * Constructor pour appliquer les middlewares d'authentification et d'autorisation
+     */
+    public function __construct()
+    {
+        $this->middleware('auth');
+        $this->middleware('can:view products')->only(['index', 'show']);
+        $this->middleware('can:create products')->only(['create', 'store']);
+        $this->middleware('can:edit products')->only(['edit', 'update']);
+        $this->middleware('can:delete products')->only(['destroy']);
+        $this->middleware('can:manage stock')->only(['updateStock']);
+    }
+
+    /**
      * Display a listing of the resource.
      */
     public function index(Request $request)

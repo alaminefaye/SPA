@@ -36,6 +36,7 @@
                         <th>ID</th>
                         <th>Nom</th>
                         <th>Email</th>
+                        <th>Rôles</th>
                         <th>Date de création</th>
                         <th>Actions</th>
                     </tr>
@@ -46,6 +47,15 @@
                             <td><strong>{{ $user->id }}</strong></td>
                             <td>{{ $user->name }}</td>
                             <td>{{ $user->email }}</td>
+                            <td>
+                                @if($user->roles->count() > 0)
+                                    @foreach($user->roles as $role)
+                                        <span class="badge bg-primary">{{ $role->name }}</span>
+                                    @endforeach
+                                @else
+                                    <span class="badge bg-secondary">Aucun rôle</span>
+                                @endif
+                            </td>
                             <td>{{ $user->created_at->format('d/m/Y H:i') }}</td>
                             <td>
                                 <div class="dropdown">
@@ -71,7 +81,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="5" class="text-center">Aucun utilisateur trouvé</td>
+                            <td colspan="6" class="text-center">Aucun utilisateur trouvé</td>
                         </tr>
                     @endforelse
                 </tbody>
