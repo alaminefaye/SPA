@@ -199,4 +199,22 @@ class PurchaseController extends Controller
             'isLowStock' => $product->isLowStock(),
         ]);
     }
+    
+    /**
+     * Imprimer le ticket d'achat
+     */
+    public function imprimerTicket(Purchase $purchase)
+    {
+        // Charger les relations nécessaires
+        $purchase->load(['client', 'items.product']);
+        
+        // Calcul des points gagnés (si nécessaire)
+        // Par exemple: 1 point pour chaque tranche de 10000 FCFA
+        $pointsGagnes = floor($purchase->total_amount / 10000);
+        
+        return view('purchases.ticket', [
+            'purchase' => $purchase,
+            'pointsGagnes' => $pointsGagnes
+        ]);
+    }
 }

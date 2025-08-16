@@ -94,6 +94,10 @@
                         </a>
                         
                         @if($purchase->status !== 'cancelled')
+                            <a href="{{ route('purchases.ticket', $purchase) }}" class="btn btn-success" target="_blank">
+                                <i class="fas fa-print mr-1"></i> Imprimer le ticket
+                            </a>
+                            
                             <form action="{{ route('purchases.cancel', $purchase) }}" method="POST" class="d-inline" onsubmit="return confirm('Êtes-vous sûr de vouloir annuler cet achat ? Le stock sera restauré.');">
                                 @csrf
                                 <button type="submit" class="btn btn-danger">
