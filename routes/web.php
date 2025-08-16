@@ -86,7 +86,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/products/{product}/update-stock', [ProductController::class, 'updateStock'])->name('products.updateStock');
     
     // Purchase routes
-    Route::resource('purchases', PurchaseController::class)->except(['edit', 'update', 'destroy']);
+    Route::resource('purchases', PurchaseController::class)->except(['destroy']);
     Route::post('/purchases/{purchase}/cancel', [PurchaseController::class, 'cancel'])->name('purchases.cancel');
     Route::get('/purchases/{purchase}/ticket', [PurchaseController::class, 'imprimerTicket'])->name('purchases.ticket');
     Route::get('/product-details', [PurchaseController::class, 'getProductDetails'])->name('purchases.getProductDetails');

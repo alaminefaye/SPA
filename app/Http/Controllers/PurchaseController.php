@@ -212,4 +212,83 @@ class PurchaseController extends Controller
             'purchase' => $purchase
         ]);
     }
+
+    /**
+     * Show the form for editing the specified resource.
+     */
+    public function edit(Purchase $purchase)
+    {
+        $purchase->load(['client', 'items.product']);
+        $clients = Client::all();
+        $paymentMethods = ['cash', 'wave', 'orange_money'];
+        
+        return view('purchases.edit', compact('purchase', 'clients', 'paymentMethods'));
+    }
+
+    /**
+     * Update the specified resource in storage.
+     */
+    public function update(Request $request, Purchase $purchase)
+    {
+        // Validation
+        $validator = Validator::make($request->all(), [
+            'client_id' => 'required|exists:clients,id',
+            'payment_method' => 'required|string|in:cash,wave,orange_money',
+            'notes' => 'nullable|string',
+            'status' => 'required|in:completed,cancelled',
+        ]);
+        
+        if ($validator->fails()) {
+            return redirect()->route('purchases.edit', $purchase)
+                ->withErrors($validator)
+                ->withInput();
+        }
+        
+        DB::beginTransaction();
+        
+        try {
+            // Gestion du changement de statut pour mise à jour du stock
+            $oldStatus = $purchase->status;
+            $newStatus = $request->status;
+            
+            // Si on passe de completed à cancelled, il faut restituer le stock
+            if ($oldStatus === 'completed' && $newStatus === 'cancelled') {
+                foreach ($purchase->items as $item) {
+                    $product = $item->product;
+                    $product->increaseStock($item->quantity);
+                }
+            } 
+            // Si on passe de cancelled à completed, il faut déduire du stock
+            elseif ($oldStatus === 'cancelled' && $newStatus === 'completed') {
+                foreach ($purchase->items as $item) {
+                    $product = $item->product;
+                    // Vérifier si le stock est suffisant
+                    if ($product->stock < $item->quantity) {
+                        throw new \Exception("Stock insuffisant pour {$product->name}");
+                    }
+                    $product->decreaseStock($item->quantity);
+                }
+            }
+            
+            // Mise à jour de l'achat
+            $purchase->update([
+                'client_id' => $request->client_id,
+                'payment_method' => $request->payment_method,
+                'notes' => $request->notes,
+                'status' => $request->status,
+            ]);
+            
+            DB::commit();
+            
+            return redirect()->route('purchases.show', $purchase)
+                ->with('success', 'Achat modifié avec succès.');
+                
+        } catch (\Exception $e) {
+            DB::rollBack();
+            
+            return redirect()->route('purchases.edit', $purchase)
+                ->with('error', 'Erreur lors de la modification de l\'achat: ' . $e->getMessage())
+                ->withInput();
+        }
+    }
 }

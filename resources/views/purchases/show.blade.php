@@ -93,6 +93,10 @@
                             <i class="fas fa-arrow-left mr-1"></i> Retour
                         </a>
                         
+                        <a href="{{ route('purchases.edit', $purchase) }}" class="btn btn-primary">
+                            <i class="fas fa-edit mr-1"></i> Modifier
+                        </a>
+                        
                         @if($purchase->status !== 'cancelled')
                             <a href="{{ route('purchases.ticket', $purchase) }}" class="btn btn-success" target="_blank">
                                 <i class="fas fa-print mr-1"></i> Imprimer le ticket
