@@ -201,15 +201,6 @@
         </div>
         @endif
         
-        <div class="points">
-            Points de fidélité gagnés: {{ $pointsGagnes ?? 0 }}<br>
-            Total de vos points: {{ $purchase->client->points ?? 0 }}
-            @if(isset($purchase->client->points) && $purchase->client->points >= 5)
-                <div style="color: #ff0000; margin-top: 5px; font-weight: bold;">
-                    Félicitations ! Vous avez gagné une séance gratuite !
-                </div>
-            @endif
-        </div>
         
         <div class="footer">
             <p>Merci pour votre achat!</p>

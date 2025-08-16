@@ -208,13 +208,8 @@ class PurchaseController extends Controller
         // Charger les relations nécessaires
         $purchase->load(['client', 'items.product']);
         
-        // Calcul des points gagnés (si nécessaire)
-        // Par exemple: 1 point pour chaque tranche de 10000 FCFA
-        $pointsGagnes = floor($purchase->total_amount / 10000);
-        
         return view('purchases.ticket', [
-            'purchase' => $purchase,
-            'pointsGagnes' => $pointsGagnes
+            'purchase' => $purchase
         ]);
     }
 }
