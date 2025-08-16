@@ -220,9 +220,10 @@ class PurchaseController extends Controller
     {
         $purchase->load(['client', 'items.product']);
         $clients = Client::all();
+        $products = Product::all(); // Ajouter tous les produits pour pouvoir en ajouter de nouveaux
         $paymentMethods = ['cash', 'wave', 'orange_money'];
         
-        return view('purchases.edit', compact('purchase', 'clients', 'paymentMethods'));
+        return view('purchases.edit', compact('purchase', 'clients', 'products', 'paymentMethods'));
     }
 
     /**
@@ -236,6 +237,9 @@ class PurchaseController extends Controller
             'payment_method' => 'required|string|in:cash,wave,orange_money',
             'notes' => 'nullable|string',
             'status' => 'required|in:completed,cancelled',
+            'items' => 'sometimes|array', // Validation pour les produits modifiés
+            'items.*.product_id' => 'sometimes|exists:products,id',
+            'items.*.quantity' => 'sometimes|integer|min:1',
         ]);
         
         if ($validator->fails()) {
@@ -251,32 +255,70 @@ class PurchaseController extends Controller
             $oldStatus = $purchase->status;
             $newStatus = $request->status;
             
-            // Si on passe de completed à cancelled, il faut restituer le stock
-            if ($oldStatus === 'completed' && $newStatus === 'cancelled') {
+            // Si l'achat était complété, on remet d'abord tout le stock
+            if ($oldStatus === 'completed') {
                 foreach ($purchase->items as $item) {
                     $product = $item->product;
                     $product->increaseStock($item->quantity);
                 }
             } 
-            // Si on passe de cancelled à completed, il faut déduire du stock
-            elseif ($oldStatus === 'cancelled' && $newStatus === 'completed') {
-                foreach ($purchase->items as $item) {
-                    $product = $item->product;
-                    // Vérifier si le stock est suffisant
-                    if ($product->stock < $item->quantity) {
-                        throw new \Exception("Stock insuffisant pour {$product->name}");
-                    }
-                    $product->decreaseStock($item->quantity);
-                }
-            }
-            
-            // Mise à jour de l'achat
+
+            // Mise à jour des informations de base de l'achat
             $purchase->update([
                 'client_id' => $request->client_id,
                 'payment_method' => $request->payment_method,
                 'notes' => $request->notes,
                 'status' => $request->status,
             ]);
+            
+            // Gestion des produits modifiés si présents dans la requête
+            if ($request->has('items')) {
+                // Supprimer les anciens items
+                $purchase->items()->delete();
+                
+                $totalAmount = 0;
+                
+                // Ajouter les nouveaux items
+                foreach ($request->items as $itemData) {
+                    $product = Product::findOrFail($itemData['product_id']);
+                    
+                    // Vérifier si stock suffisant si l'achat est complété
+                    if ($newStatus === 'completed' && $product->stock < $itemData['quantity']) {
+                        throw new \Exception("Stock insuffisant pour {$product->name}");
+                    }
+                    
+                    // Créer le nouvel item
+                    $purchaseItem = new \App\Models\PurchaseItem([
+                        'product_id' => $product->id,
+                        'quantity' => $itemData['quantity'],
+                        'unit_price' => $product->price,
+                        'subtotal' => $product->price * $itemData['quantity']
+                    ]);
+                    
+                    $purchase->items()->save($purchaseItem);
+                    $totalAmount += $purchaseItem->subtotal;
+                    
+                    // Mettre à jour le stock si l'achat est complété
+                    if ($newStatus === 'completed') {
+                        $product->decreaseStock($itemData['quantity']);
+                    }
+                }
+                
+                // Mettre à jour le total
+                $purchase->total_amount = $totalAmount;
+                $purchase->save();
+            }
+            // Si aucune modification des produits n'est demandée, on remet le stock à jour selon le nouveau statut
+            else if ($newStatus === 'completed' && $oldStatus !== $newStatus) {
+                // Si on passe à completed, on déduit du stock
+                foreach ($purchase->items as $item) {
+                    $product = $item->product;
+                    if ($product->stock < $item->quantity) {
+                        throw new \Exception("Stock insuffisant pour {$product->name}");
+                    }
+                    $product->decreaseStock($item->quantity);
+                }
+            }
             
             DB::commit();
             
