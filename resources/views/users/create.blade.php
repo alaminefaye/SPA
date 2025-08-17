@@ -93,3 +93,31 @@
     </div>
 </div>
 @endsection
+
+@section('page-js')
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const nameInput = document.getElementById('name');
+        const emailInput = document.getElementById('email');
+        
+        nameInput.addEventListener('input', function() {
+            // Récupération du nom complet
+            let fullName = nameInput.value.trim();
+            
+            // Si le champ n'est pas vide, générer l'email
+            if (fullName) {
+                // Convertir en minuscules et remplacer les espaces par des points
+                let emailName = fullName.toLowerCase();
+                emailName = emailName.replace(/\s+/g, '.'); // Remplace les espaces par des points
+                emailName = emailName.normalize("NFD").replace(/[\u0300-\u036f]/g, ""); // Supprime les accents
+                
+                // Construction de l'adresse email
+                const emailValue = `${emailName}@jaredspa.com`;
+                
+                // Mise à jour du champ email
+                emailInput.value = emailValue;
+            }
+        });
+    });
+</script>
+@endsection

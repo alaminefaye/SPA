@@ -119,8 +119,8 @@
                         </table>
                     </div>
 
-                    <div class="mt-3">
-                        {{ $activities->links() }}
+                    <div class="mt-3 px-2">
+                        {{ $activities->links('pagination::bootstrap-5') }}
                     </div>
                 </div>
             </div>

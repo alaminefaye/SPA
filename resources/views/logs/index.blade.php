@@ -17,6 +17,16 @@
         </div>
     </div>
     <div class="card-body">
+        <form action="{{ route('activity.index') }}" method="GET" class="mb-4">
+            <div class="input-group">
+                <input type="text" class="form-control" placeholder="Rechercher dans les journaux d'activité..." name="search" value="{{ request('search') }}">
+                <button class="btn btn-primary" type="submit"><i class="bx bx-search"></i> Rechercher</button>
+                @if(request()->has('search'))
+                    <a href="{{ route('activity.index') }}" class="btn btn-outline-secondary">Réinitialiser</a>
+                @endif
+            </div>
+        </form>
+
         @if (session('success'))
             <div class="alert alert-success alert-dismissible" role="alert">
                 {{ session('success') }}
@@ -90,8 +100,8 @@
             </table>
         </div>
 
-        <div class="mt-3">
-            {{ $logs->links() }}
+        <div class="mt-3 px-2">
+            {{ $logs->links('pagination::bootstrap-5') }}
         </div>
     </div>
 </div>

@@ -12,10 +12,21 @@ class ActivityLogController extends Controller
      *
      * @return \Illuminate\View\View
      */
-    public function index()
+    public function index(Request $request)
     {
-        $logs = Activity::latest()->paginate(20);
-        return view('logs.index', compact('logs'));
+        $query = Activity::latest();
+        
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('description', 'like', "%{$search}%")
+                  ->orWhere('subject_type', 'like', "%{$search}%")
+                  ->orWhere('event', 'like', "%{$search}%");
+            });
+        }
+        
+        $logs = $query->paginate(20)->withQueryString();
+        return view('logs.index', compact('logs'));    
     }
     
     /**
