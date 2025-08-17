@@ -66,7 +66,7 @@
                             <div class="d-flex justify-content-between">
                                 <h5 class="text-muted"><i class="fas fa-money-bill-wave me-2"></i> Revenu Total</h5>
                             </div>
-                            <h2 class="fw-bold text-success">{{ number_format($totalRevenue, 0, ',', ' ') }} fr</h2>
+                            <h2 class="fw-bold text-primary">{{ number_format($totalRevenue, 0, ',', ' ') }} fr</h2>
                         </div>
                     </div>
                 </div>
@@ -90,8 +90,16 @@
                 <div class="card-header bg-light">
                     <h4><i class="fas fa-chart-bar me-2"></i> Top 5 Prestations</h4>
                 </div>
-                <div class="card-body p-3">
-                    <canvas id="prestationsChart" height="200"></canvas>
+                <div class="card-body p-3" style="min-height: 250px; border: 1px solid #eee;">
+                    @if(count($prestationsCount) > 0)
+                        <canvas id="prestationsChart" height="200" style="display: block; width: 100%;"></canvas>
+                    @else
+                        <div class="alert alert-warning">Aucune donnée disponible pour cette période.</div>
+                    @endif
+                    <!-- Débogage: Afficher les données directement -->
+                    <div style="margin-top: 15px; font-size: 12px; color: #666;">
+                        <strong>Données disponibles:</strong> {{ count($prestationsCount) }} prestations
+                    </div>
                 </div>
             </div>
         </div>
@@ -198,8 +206,8 @@
 </div>
 @endsection
 
-@push('scripts')
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+@section('page-js')
+<script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
 <script>
     function toggleDateInputs(value) {
         const dateInputs = document.getElementById('date_inputs');
@@ -210,15 +218,48 @@
         }
     }
 
-    // Préparation des données pour le graphique des prestations les plus populaires
-    document.addEventListener('DOMContentLoaded', function() {
+    // Utiliser jQuery pour le chargement et la vérification que la page est complètement chargée
+    $(document).ready(function() {
+        console.log('Document prêt - Initialisation du graphique des prestations');
+        
+        // Vérifier si Chart.js est bien chargé
+        if (typeof Chart === 'undefined') {
+            console.error('Chart.js n\'est pas chargé');
+            $('.card-body.p-3').prepend('<div class="alert alert-danger">Erreur: Chart.js n\'est pas chargé.</div>');
+            return;
+        } else {
+            console.log('Chart.js correctement chargé');
+        }
+
+        // Vérifier si l'élément canvas existe
+        const canvas = document.getElementById('prestationsChart');
+        if (!canvas) {
+            console.error('Canvas #prestationsChart introuvable');
+            return;
+        }
+        console.log('Canvas trouvé:', canvas);
+
+        // Débogage: afficher les statistiques des prestations dans la console
         const prestationsData = @json(array_slice($prestationsCount, 0, 5));
+        console.log('Données des prestations:', prestationsData);
+        
+        // Vérifier si prestationsData contient des données
+        if (!prestationsData || Object.keys(prestationsData).length === 0) {
+            console.error('Aucune donnée de prestation disponible pour le graphique');
+            $(canvas).after('<div class="alert alert-warning">Aucune donnée disponible pour cette période.</div>');
+            return;
+        }
+        
         const labels = Object.values(prestationsData).map(p => p.nom);
         const data = Object.values(prestationsData).map(p => p.count);
         const revenues = Object.values(prestationsData).map(p => p.revenue);
         
+        console.log('Labels:', labels);
+        console.log('Données:', data);
+        console.log('Revenus:', revenues);
+        
         // Configuration du graphique
-        const ctx = document.getElementById('prestationsChart').getContext('2d');
+        const ctx = canvas.getContext('2d');
         new Chart(ctx, {
             type: 'bar',
             data: {
@@ -226,8 +267,8 @@
                 datasets: [{
                     label: 'Nombre de prestations',
                     data: data,
-                    backgroundColor: 'rgba(63, 114, 155, 0.7)',
-                    borderColor: 'rgba(63, 114, 155, 1)',
+                    backgroundColor: 'rgba(255, 87, 168, 0.7)',
+                    borderColor: 'rgba(255, 87, 168, 1)',
                     borderWidth: 1
                 }]
             },
@@ -264,4 +305,4 @@
         });
     });
 </script>
-@endpush
+@endsection

@@ -5,9 +5,11 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Spatie\Activitylog\Traits\LogsActivity;
 use Spatie\Activitylog\LogOptions;
+use App\Models\Product;
 
 class Purchase extends Model
 {
@@ -40,6 +42,15 @@ class Purchase extends Model
     public function items(): HasMany
     {
         return $this->hasMany(PurchaseItem::class);
+    }
+    
+    /**
+     * Get the products in this purchase through purchase items
+     */
+    public function products()
+    {
+        return $this->belongsToMany(Product::class, 'purchase_items')
+                    ->withPivot(['quantity', 'unit_price', 'subtotal']);
     }
     
     /**

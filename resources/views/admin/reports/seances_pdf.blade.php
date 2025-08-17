@@ -7,36 +7,36 @@
     <style>
         body {
             font-family: 'DejaVu Sans', sans-serif;
-            line-height: 1.6;
+            line-height: 1.4;
             margin: 0;
-            padding: 20px;
+            padding: 15px;
             color: #333;
             background-color: #fafafa;
+            font-size: 11px;
         }
         .header {
             text-align: center;
-            margin-bottom: 30px;
-            border-bottom: 2px solid #e2e8f0;
-            padding-bottom: 15px;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #e2e8f0;
+            padding-bottom: 10px;
             position: relative;
         }
         .logo {
-            max-width: 150px;
-            max-height: 80px;
-            margin-bottom: 10px;
+            max-width: 100px;
+            max-height: 60px;
             display: block;
-            margin: 0 auto 10px auto;
+            margin: 0 auto 8px auto;
         }
         .header h1 {
             color: #2d3748;
-            margin-bottom: 10px;
-            font-size: 24px;
+            margin-bottom: 8px;
+            font-size: 18px;
         }
         .date-range {
             color: #4a5568;
-            font-size: 16px;
+            font-size: 12px;
             font-weight: 600;
-            margin-bottom: 20px;
+            margin-bottom: 15px;
         }
         .stats-container {
             display: flex;
@@ -46,21 +46,21 @@
         }
         .stat-box {
             background-color: #ffffff;
-            border-radius: 10px;
-            padding: 15px 20px;
+            border-radius: 8px;
+            padding: 12px 15px;
             width: 22%;
-            margin-bottom: 20px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-            border-left: 4px solid #4299e1;
+            margin-bottom: 15px;
+            box-shadow: 0 3px 5px rgba(0, 0, 0, 0.04);
+            border-left: 3px solid #FF57A8;
         }
         .stat-box h3 {
             color: #4a5568;
-            margin: 0 0 8px 0;
-            font-size: 16px;
+            margin: 0 0 6px 0;
+            font-size: 11px;
             font-weight: 600;
         }
         .stat-box p {
-            font-size: 22px;
+            font-size: 14px;
             font-weight: bold;
             color: #2d3748;
             margin: 0;
@@ -75,19 +75,20 @@
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
         }
         th, td {
-            padding: 12px 15px;
+            padding: 8px 10px;
             text-align: left;
             border-bottom: 1px solid #e2e8f0;
+            font-size: 10px;
         }
         th {
-            background-color: #4299e1;
+            background-color: #FF57A8;
             font-weight: bold;
             color: white;
             border-top: none;
-            border-bottom: 2px solid #2b6cb0;
+            border-bottom: 2px solid #e64e97;
             text-transform: uppercase;
-            font-size: 12px;
-            letter-spacing: 0.5px;
+            font-size: 10px;
+            letter-spacing: 0.3px;
         }
         tr:nth-child(even) {
             background-color: #f9fafb;
@@ -97,11 +98,11 @@
         }
         h2 {
             color: #2d3748;
-            border-bottom: 2px solid #4299e1;
-            padding-bottom: 10px;
-            font-size: 18px;
-            margin-top: 30px;
-            margin-bottom: 20px;
+            border-bottom: 2px solid #FF57A8;
+            padding-bottom: 8px;
+            font-size: 14px;
+            margin-top: 20px;
+            margin-bottom: 15px;
             position: relative;
         }
         h2:after {
@@ -109,12 +110,12 @@
             position: absolute;
             bottom: -2px;
             left: 0;
-            width: 60px;
+            width: 40px;
             height: 2px;
-            background-color: #3182ce;
+            background-color: #e64e97;
         }
         .status-terminee {
-            color: #38a169;
+            color: #FF57A8;
             font-weight: bold;
         }
         .status-annulee {
@@ -128,10 +129,10 @@
         .footer {
             text-align: center;
             color: #4a5568;
-            font-size: 12px;
-            margin-top: 40px;
+            font-size: 9px;
+            margin-top: 30px;
             border-top: 1px solid #e2e8f0;
-            padding-top: 15px;
+            padding-top: 10px;
             font-style: italic;
         }
         .page-break {
@@ -141,7 +142,7 @@
 </head>
 <body>
     <div class="header">
-        <img src="{{ public_path('assets/img/logo/jared-spa-logo.png') }}" class="logo" alt="Jared SPA Logo">
+        <img src="{{ public_path('assets/img/logo/logo.jpeg') }}" class="logo" alt="Jared SPA Logo">
         <h1>{{ $reportTitle }}</h1>
         <p class="date-range">Période : {{ $dateRange }}</p>
     </div>

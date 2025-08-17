@@ -67,7 +67,7 @@
                             <div class="d-flex justify-content-between">
                                 <h5 class="text-muted"><i class="fas fa-money-bill-wave"></i> Revenu Total</h5>
                             </div>
-                            <h2 class="fw-bold text-success">{{ number_format($totalRevenue, 0, ',', ' ') }} fr</h2>
+                            <h2 class="fw-bold text-primary">{{ number_format($totalRevenue, 0, ',', ' ') }} fr</h2>
                         </div>
                     </div>
                 </div>
@@ -90,8 +90,16 @@
                 <div class="card-header bg-light">
                     <h4><i class="fas fa-chart-bar me-2"></i> Top 5 Produits Vendus</h4>
                 </div>
-                <div class="card-body p-3">
-                    <canvas id="productsChart" height="200"></canvas>
+                <div class="card-body p-3" style="min-height: 250px; border: 1px solid #eee;">
+                    @if(count($productStats) > 0)
+                        <canvas id="productsChart" height="200" style="display: block; width: 100%;"></canvas>
+                    @else
+                        <div class="alert alert-warning">Aucune donnée disponible pour cette période.</div>
+                    @endif
+                    <!-- Débogage: Afficher les données directement -->
+                    <div style="margin-top: 15px; font-size: 12px; color: #666;">
+                        <strong>Données disponibles:</strong> {{ count($productStats) }} produits
+                    </div>
                 </div>
             </div>
         </div>
@@ -192,8 +200,13 @@
 </div>
 @endsection
 
-@push('scripts')
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+@section('page-js')
+<!-- Assurez-vous que Chart.js est correctement chargé -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+<!-- Script de débogage pour voir si cette section est bien chargée -->
+<script>
+console.log('Script de débogage Chart.js chargé');
+</script>
 <script>
     function toggleDateInputs(value) {
         const dateInputs = document.getElementById('date_inputs');
@@ -204,12 +217,45 @@
         }
     }
 
-    // Préparation des données pour le graphique des produits les plus vendus
-    document.addEventListener('DOMContentLoaded', function() {
+    // Utiliser jQuery pour le chargement et la vérification que la page est complètement chargée
+    $(document).ready(function() {
+        console.log('Document prêt - Initialisation du graphique');
+        
+        // Vérifier si Chart.js est bien chargé
+        if (typeof Chart === 'undefined') {
+            console.error('Chart.js n\'est pas chargé');
+            $('.card-body.p-3').prepend('<div class="alert alert-danger">Erreur: Chart.js n\'est pas chargé.</div>');
+            return;
+        } else {
+            console.log('Chart.js correctement chargé');
+        }
+
+        // Vérifier si l'élément canvas existe
+        const canvas = document.getElementById('productsChart');
+        if (!canvas) {
+            console.error('Canvas #productsChart introuvable');
+            return;
+        }
+        console.log('Canvas trouvé:', canvas);
+
+        // Débogage: afficher les statistiques des produits dans la console
         const productStats = @json(array_slice($productStats, 0, 5));
+        console.log('Données des produits:', productStats);
+        
+        // Vérifier si productStats contient des données
+        if (!productStats || Object.keys(productStats).length === 0) {
+            console.error('Aucune donnée de produit disponible pour le graphique');
+            $(canvas).after('<div class="alert alert-warning">Aucune donnée disponible pour cette période.</div>');
+            return;
+        }
+        
         const labels = Object.values(productStats).map(p => p.name);
         const data = Object.values(productStats).map(p => p.quantity);
         const revenues = Object.values(productStats).map(p => p.revenue);
+        
+        console.log('Labels:', labels);
+        console.log('Données:', data);
+        console.log('Revenus:', revenues);
         
         // Configuration du graphique
         const ctx = document.getElementById('productsChart').getContext('2d');
@@ -220,8 +266,8 @@
                 datasets: [{
                     label: 'Quantité vendue',
                     data: data,
-                    backgroundColor: 'rgba(76, 175, 80, 0.7)',
-                    borderColor: 'rgba(76, 175, 80, 1)',
+                    backgroundColor: 'rgba(255, 87, 168, 0.7)',
+                    borderColor: 'rgba(255, 87, 168, 1)',
                     borderWidth: 1
                 }]
             },
@@ -258,4 +304,4 @@
         });
     });
 </script>
-@endpush
+@endsection
