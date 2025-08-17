@@ -10,9 +10,11 @@
 <div class="card">
     <div class="card-header d-flex justify-content-between align-items-center">
         <h5 class="mb-0">Liste des Prestations</h5>
+        @can('create prestations')
         <a href="{{ route('prestations.create') }}" class="btn btn-primary">
             <i class="bx bx-plus me-1"></i> Ajouter une prestation
         </a>
+        @endcan
     </div>
     <div class="card-body">
         <!-- Formulaire de recherche -->
@@ -64,12 +66,17 @@
                                         <i class="bx bx-dots-vertical-rounded"></i>
                                     </button>
                                     <div class="dropdown-menu">
+                                        @can('view prestations')
                                         <a class="dropdown-item" href="{{ route('prestations.show', $prestation->id) }}">
                                             <i class="bx bx-show-alt me-1"></i> Voir
                                         </a>
+                                        @endcan
+                                        @can('edit prestations')
                                         <a class="dropdown-item" href="{{ route('prestations.edit', $prestation->id) }}">
                                             <i class="bx bx-edit-alt me-1"></i> Modifier
                                         </a>
+                                        @endcan
+                                        @can('delete prestations')
                                         <form action="{{ route('prestations.destroy', $prestation->id) }}" method="POST" 
                                             onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cette prestation?')">
                                             @csrf
@@ -78,6 +85,7 @@
                                                 <i class="bx bx-trash me-1"></i> Supprimer
                                             </button>
                                         </form>
+                                        @endcan
                                     </div>
                                 </div>
                             </td>

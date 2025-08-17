@@ -18,6 +18,7 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\QrScannerController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\PermissionController;
+use App\Http\Controllers\Admin\ReportController;
 
 // Welcome page
 Route::get('/', function () {
@@ -148,4 +149,65 @@ Route::prefix('api')->middleware('auth')->group(function () {
 // Routes de test
 Route::middleware('auth')->group(function () {
     Route::get('/notifications-test', [SeanceController::class, 'notificationTest'])->name('notifications.test');
+});
+
+// Routes pour les rapports
+Route::middleware(['auth'])->prefix('admin/reports')->name('reports.')->group(function () {
+    Route::get('/', [ReportController::class, 'index'])->name('index')->middleware('can:view reports');
+    
+    // Rapports de prestations
+    Route::get('/prestations', [ReportController::class, 'prestations'])->name('prestations')->middleware('can:view reports');
+    Route::get('/prestations/excel', [ReportController::class, 'exportPrestationsExcel'])->name('prestations.excel')->middleware('can:export reports');
+    Route::get('/prestations/pdf', [ReportController::class, 'exportPrestationsPdf'])->name('prestations.pdf')->middleware('can:export reports');
+    
+    // Rapports de produits
+    Route::get('/products', [ReportController::class, 'products'])->name('products')->middleware('can:view reports');
+    Route::get('/products/excel', [ReportController::class, 'exportProductsExcel'])->name('products.excel')->middleware('can:export reports');
+    Route::get('/products/pdf', [ReportController::class, 'exportProductsPdf'])->name('products.pdf')->middleware('can:export reports');
+    
+    // Rapports de séances
+    Route::get('/seances', [ReportController::class, 'seances'])->name('seances')->middleware('can:view reports');
+    Route::get('/seances/excel', [ReportController::class, 'exportSeancesExcel'])->name('seances.excel')->middleware('can:export reports');
+    Route::get('/seances/pdf', [ReportController::class, 'exportSeancesPdf'])->name('seances.pdf')->middleware('can:export reports');
+    
+    // Rapports d'achats
+    Route::get('/purchases/excel', [ReportController::class, 'exportPurchasesExcel'])->name('purchases.excel')->middleware('can:export reports');
+});
+
+// Route temporaire pour réparer les permissions
+Route::get('/fix-admin-permissions', function () {
+    // Récupérer le super-admin
+    $user = \App\Models\User::where('email', 'admin@admin.com')->first();
+    
+    if (!$user) {
+        return 'Utilisateur admin non trouvé';
+    }
+    
+    // Vider le cache des permissions
+    app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
+    
+    // S'assurer que toutes les permissions existent
+    $viewReports = \Spatie\Permission\Models\Permission::firstOrCreate(['name' => 'view reports']);
+    $exportReports = \Spatie\Permission\Models\Permission::firstOrCreate(['name' => 'export reports']);
+    
+    // S'assurer que le rôle super-admin existe
+    $superAdminRole = \Spatie\Permission\Models\Role::firstOrCreate(['name' => 'super-admin']);
+    
+    // Donner explicitement les permissions au rôle
+    $superAdminRole->givePermissionTo($viewReports);
+    $superAdminRole->givePermissionTo($exportReports);
+    
+    // Vérifier que l'utilisateur a le rôle
+    if (!$user->hasRole('super-admin')) {
+        $user->assignRole('super-admin');
+    }
+    
+    // Vérifier les permissions
+    $hasViewReports = $user->hasPermissionTo('view reports') ? 'Oui' : 'Non';
+    $hasExportReports = $user->hasPermissionTo('export reports') ? 'Oui' : 'Non';
+    
+    return "Permissions réparées. L'utilisateur {$user->name} a-t-il les permissions? <br>" .
+           "view reports: {$hasViewReports} <br>" .
+           "export reports: {$hasExportReports} <br>" .
+           "<a href='/' class='btn btn-primary'>Retour à l'accueil</a>";
 });

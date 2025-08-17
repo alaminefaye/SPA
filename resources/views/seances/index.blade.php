@@ -10,9 +10,11 @@
 <div class="card">
     <div class="card-header d-flex justify-content-between align-items-center">
         <h5 class="mb-0">Liste des Séances</h5>
+        @can('create seances')
         <a href="{{ route('seances.create') }}" class="btn btn-primary">
             <i class="bx bx-plus me-1"></i> Nouvelle Séance
         </a>
+        @endcan
     </div>
     
     <div class="card-body">
@@ -116,15 +118,22 @@
                                         <i class="bx bx-dots-vertical-rounded"></i>
                                     </button>
                                     <div class="dropdown-menu">
+                                        @can('view seances')
                                         <a class="dropdown-item" href="{{ route('seances.show', $seance->id) }}">
                                             <i class="bx bx-show-alt me-1"></i> Voir
                                         </a>
+                                        @endcan
+                                        @can('view seances')
                                         <a class="dropdown-item" href="{{ route('seances.ticket', $seance->id) }}" target="_blank">
                                             <i class="bx bx-printer me-1"></i> Imprimer Ticket
                                         </a>
+                                        @endcan
+                                        @can('edit seances')
                                         <a class="dropdown-item" href="{{ route('seances.edit', $seance->id) }}">
                                             <i class="bx bx-edit-alt me-1"></i> Modifier
                                         </a>
+                                        @endcan
+                                        @can('delete seances')
                                         <form action="{{ route('seances.destroy', $seance->id) }}" method="POST" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cette séance?');">
                                             @csrf
                                             @method('DELETE')
@@ -132,6 +141,7 @@
                                                 <i class="bx bx-trash me-1"></i> Supprimer
                                             </button>
                                         </form>
+                                        @endcan
                                     </div>
                                 </div>
                             </td>

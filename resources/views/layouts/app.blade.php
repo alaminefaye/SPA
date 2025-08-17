@@ -89,6 +89,7 @@
             
           
           <!-- Séances Management -->
+            @can('view seances')
             <li class="menu-item {{ request()->is('seances*') ? 'active open' : '' }}">
               <a href="javascript:void(0);" class="menu-link menu-toggle">
                 <i class="menu-icon tf-icons bx bx-calendar"></i>
@@ -112,15 +113,19 @@
                 </li>
               </ul>
             </li>
+            @endcan
             <!-- Salon Management -->
+            @can('view salons')
             <li class="menu-item {{ request()->is('salons*') ? 'active' : '' }}">
               <a href="{{ route('salons.index') }}" class="menu-link">
                 <i class="menu-icon tf-icons bx bx-building"></i>
                 <div data-i18n="Salon">Gestion des salons</div>
               </a>
             </li>
+            @endcan
 
             <!-- Prestation Management -->
+            @can('view prestations')
             <li class="menu-item {{ request()->is('prestations*') ? 'active' : '' }}">
               <a href="{{ route('prestations.index') }}" class="menu-link">
                 <i class="menu-icon tf-icons bx bx-timer"></i>
@@ -128,17 +133,21 @@
                 </div>
               </a>
             </li>
+            @endcan
 
             <!-- Client Management -->
+            @can('view clients')
             <li class="menu-item {{ request()->is('clients*') ? 'active' : '' }}">
               <a href="{{ route('clients.index') }}" class="menu-link">
                 <i class="menu-icon tf-icons bx bx-user"></i>
                 <div data-i18n="Client">Gestion des clients</div>
               </a>
             </li>
+            @endcan
             
             
             
+            @can('view reservations')
             <li class="menu-item {{ request()->is('reservations*') ? 'active' : '' }}">
               <a href="{{ route('reservations.index') }}" class="menu-link">
                 <i class="menu-icon tf-icons bx bx-calendar-check"></i>
@@ -153,8 +162,10 @@
                 </div>
               </a>
             </li>
+            @endcan
 
             <!-- Suggestions et préoccupations -->
+            @can('view feedbacks')
             <li class="menu-item {{ request()->is('feedbacks*') ? 'active' : '' }}">
               <a href="{{ route('feedbacks.index') }}" class="menu-link">
                 <i class="menu-icon tf-icons bx bx-message-alt-dots"></i>
@@ -169,49 +180,61 @@
                 </div>
               </a>
             </li>
+            @endcan
 
             <!-- Add more menu items as needed -->
             
             <!-- Gestion des Produits Dropdown -->
+            @canany(['view products', 'view product categories', 'view purchases'])
             <li class="menu-item {{ request()->is('product-categories*') || request()->is('products*') || request()->is('purchases*') ? 'active open' : '' }}">
               <a href="javascript:void(0);" class="menu-link menu-toggle">
                 <i class="menu-icon tf-icons bx bx-package"></i>
                 <div data-i18n="Produits">Gestion des produits</div>
               </a>
               <ul class="menu-sub">
+                @can('view product categories')
                 <li class="menu-item {{ request()->is('product-categories*') ? 'active' : '' }}">
                   <a href="{{ route('product-categories.index') }}" class="menu-link">
                     <div data-i18n="Catégories">Catégories</div>
                   </a>
                 </li>
+                @endcan
+                @can('view products')
                 <li class="menu-item {{ request()->is('products*') ? 'active' : '' }}">
                   <a href="{{ route('products.index') }}" class="menu-link">
                     <div data-i18n="Produits">Produits</div>
                   </a>
                 </li>
+                @endcan
+                @can('view purchases')
                 <li class="menu-item {{ request()->is('purchases*') ? 'active' : '' }}">
                   <a href="{{ route('purchases.index') }}" class="menu-link">
                     <div data-i18n="Achats">Achats</div>
                   </a>
                 </li>
+                @endcan
               </ul>
             </li>
+            @endcanany
             <!-- Logs d'activité -->  
-            
-          <li class="menu-item {{ request()->is('activity-logs*') ? 'active' : '' }}">
+            @can('view activity logs')
+            <li class="menu-item {{ request()->is('activity-logs*') ? 'active' : '' }}">
               <a href="{{ route('activity.index') }}" class="menu-link">
                 <i class="menu-icon tf-icons bx bx-history"></i>
                 <div>Journal d'activité</div>
               </a>
             </li>
+            @endcan
             
             <!-- Gestion des utilisateurs -->  
+            @can('view users')
             <li class="menu-item {{ request()->is('users*') ? 'active' : '' }}">
               <a href="{{ route('users.index') }}" class="menu-link">
                 <i class="menu-icon tf-icons bx bx-user"></i>
                 <div>Gestion des utilisateurs</div>
               </a>
             </li>
+            @endcan
             
             <!-- Gestion des rôles et permissions -->  
             @can('view roles')
@@ -229,6 +252,38 @@
                 <li class="menu-item {{ request()->is('permissions*') ? 'active' : '' }}">
                   <a href="{{ route('permissions.index') }}" class="menu-link">
                     <div data-i18n="Permissions">Permissions</div>
+                  </a>
+                </li>
+              </ul>
+            </li>
+            @endcan
+            
+            <!-- Rapports -->  
+            @can('view reports')
+            <li class="menu-item {{ request()->is('admin/reports*') ? 'active open' : '' }}">
+              <a href="javascript:void(0);" class="menu-link menu-toggle">
+                <i class="menu-icon tf-icons bx bx-line-chart"></i>
+                <div data-i18n="Rapports">Rapports et statistiques</div>
+              </a>
+              <ul class="menu-sub">
+                <li class="menu-item {{ request()->is('admin/reports') ? 'active' : '' }}">
+                  <a href="{{ route('reports.index') }}" class="menu-link">
+                    <div data-i18n="Vue d'ensemble">Vue d'ensemble</div>
+                  </a>
+                </li>
+                <li class="menu-item {{ request()->is('admin/reports/seances*') ? 'active' : '' }}">
+                  <a href="{{ route('reports.seances') }}" class="menu-link">
+                    <div data-i18n="Séances">Séances</div>
+                  </a>
+                </li>
+                <li class="menu-item {{ request()->is('admin/reports/prestations*') ? 'active' : '' }}">
+                  <a href="{{ route('reports.prestations') }}" class="menu-link">
+                    <div data-i18n="Prestations">Prestations</div>
+                  </a>
+                </li>
+                <li class="menu-item {{ request()->is('admin/reports/products*') ? 'active' : '' }}">
+                  <a href="{{ route('reports.products') }}" class="menu-link">
+                    <div data-i18n="Produits">Ventes de produits</div>
                   </a>
                 </li>
               </ul>
@@ -351,8 +406,8 @@
                   <script>
                     document.write(new Date().getFullYear());
                   </script>
-                  , made with ❤️ by
-                  <a href="https://themeselection.com" target="_blank" class="footer-link fw-bolder">AL AMINE FAYE</a>
+                  , Developper ❤️ par
+                  <a href="#" target="_blank" class="footer-link fw-bolder">AL AMINE FAYE</a>
                 </div>
               </div>
             </footer>

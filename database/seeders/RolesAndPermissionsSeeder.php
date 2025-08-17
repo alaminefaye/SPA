@@ -82,6 +82,10 @@ class RolesAndPermissionsSeeder extends Seeder
         Permission::firstOrCreate(['name' => 'delete activity logs']);
         Permission::firstOrCreate(['name' => 'clear all activity logs']);
 
+        // Permissions pour Rapports
+        Permission::firstOrCreate(['name' => 'view reports']);
+        Permission::firstOrCreate(['name' => 'export reports']);
+
         // Permissions pour Users
         Permission::firstOrCreate(['name' => 'view users']);
         Permission::firstOrCreate(['name' => 'create users']);
@@ -114,7 +118,8 @@ class RolesAndPermissionsSeeder extends Seeder
             'view purchases', 'create purchases', 'edit purchases', 'delete purchases',
             'view feedbacks', 'create feedbacks', 'edit feedbacks', 'delete feedbacks', 'mark feedback as read',
             'view activity logs', 'delete activity logs', 'clear all activity logs',
-            'view users', 'create users', 'edit users', 'delete users'
+            'view users', 'create users', 'edit users', 'delete users',
+            'view reports', 'export reports'
         ]);
 
         // Rôle Manager - peut gérer les opérations quotidiennes mais pas les configurations
@@ -129,7 +134,8 @@ class RolesAndPermissionsSeeder extends Seeder
             'view reservations', 'create reservations', 'edit reservations', 'mark reservation as read',
             'view purchases', 'create purchases', 'edit purchases',
             'view feedbacks', 'mark feedback as read',
-            'view activity logs'
+            'view activity logs',
+            'view reports', 'export reports'
         ]);
 
         // Rôle Réceptionniste - gérer les clients et réservations
@@ -142,7 +148,8 @@ class RolesAndPermissionsSeeder extends Seeder
             'view salons',
             'view reservations', 'create reservations', 'edit reservations', 'mark reservation as read',
             'view purchases', 'create purchases',
-            'view feedbacks', 'create feedbacks', 'mark feedback as read'
+            'view feedbacks', 'create feedbacks', 'mark feedback as read',
+            'view reports'
         ]);
 
         // Rôle Esthéticien - gérer les séances

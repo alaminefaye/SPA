@@ -10,9 +10,11 @@
 <div class="card">
     <div class="card-header d-flex justify-content-between align-items-center">
         <h5 class="mb-0">Liste des Clients</h5>
+        @can('create clients')
         <a href="{{ route('clients.create') }}" class="btn btn-primary">
             <i class="bx bx-plus me-1"></i> Ajouter un client
         </a>
+        @endcan
     </div>
     <div class="card-body">
         <!-- Formulaire de recherche -->
@@ -74,12 +76,17 @@
                                         <i class="bx bx-dots-vertical-rounded"></i>
                                     </button>
                                     <div class="dropdown-menu">
+                                        @can('view clients')
                                         <a class="dropdown-item" href="{{ route('clients.show', $client->id) }}">
                                             <i class="bx bx-show-alt me-1"></i> Voir
                                         </a>
+                                        @endcan
+                                        @can('edit clients')
                                         <a class="dropdown-item" href="{{ route('clients.edit', $client->id) }}">
                                             <i class="bx bx-edit-alt me-1"></i> Modifier
                                         </a>
+                                        @endcan
+                                        @can('delete clients')
                                         <form action="{{ route('clients.destroy', $client->id) }}" method="POST" 
                                             onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer ce client?')">
                                             @csrf
@@ -88,6 +95,7 @@
                                                 <i class="bx bx-trash me-1"></i> Supprimer
                                             </button>
                                         </form>
+                                        @endcan
                                     </div>
                                 </div>
                             </td>
