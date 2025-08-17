@@ -63,6 +63,13 @@ Route::middleware('auth')->group(function () {
         Route::delete('/', [LoginActivityController::class, 'clearAll'])->middleware('can:delete login activities')->name('clear-all');
     });
     
+    // Routes pour la génération de QR code
+    Route::prefix('qrcode')->name('qrcode.')->middleware('auth')->group(function () {
+        Route::get('/', [\App\Http\Controllers\Admin\QrCodeController::class, 'index'])->name('index');
+        Route::post('/generate', [\App\Http\Controllers\Admin\QrCodeController::class, 'generate'])->name('generate');
+        Route::get('/download/{filename}', [\App\Http\Controllers\Admin\QrCodeController::class, 'download'])->name('download');
+    });
+    
     // Salon routes
     Route::resource('salons', SalonController::class);
     

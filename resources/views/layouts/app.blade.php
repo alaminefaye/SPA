@@ -255,6 +255,11 @@
                   </a>
                 </li>
                 @endcan
+                <li class="menu-item {{ request()->is('qrcode*') ? 'active' : '' }}">
+                  <a href="{{ route('qrcode.index') }}" class="menu-link">
+                    <div data-i18n="QRCode">Génération de QR Code</div>
+                  </a>
+                </li>
               </ul>
             </li>
             @endcanany
