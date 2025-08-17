@@ -180,18 +180,26 @@
             row.style.display = 'none';
         });
         
+        // Fonction pour retirer les accents d'une chaîne
+        function removeAccents(str) {
+            return str.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+        }
+
         // Fonction pour filtrer les prestations basée sur la recherche
         searchInput.addEventListener('input', function() {
             const searchTerm = this.value.toLowerCase();
+            const searchTermWithoutAccent = removeAccents(searchTerm);
+            
             document.querySelectorAll('.prestation-checkbox').forEach(checkbox => {
                 const row = checkbox.closest('tr');
                 const prestationName = row.querySelector('td:nth-child(2)').textContent.toLowerCase();
+                const prestationNameWithoutAccent = removeAccents(prestationName);
                 
                 if (searchTerm === '') {
                     // Si le champ de recherche est vide, ne rien afficher
                     row.style.display = 'none';
-                } else if (prestationName.includes(searchTerm)) {
-                    // Afficher les lignes qui correspondent à la recherche
+                } else if (prestationName.includes(searchTerm) || prestationNameWithoutAccent.includes(searchTermWithoutAccent)) {
+                    // Afficher les lignes qui correspondent à la recherche (avec ou sans accent)
                     row.style.display = '';
                 } else {
                     // Cacher les lignes qui ne correspondent pas à la recherche

@@ -341,12 +341,18 @@
             });
         }
         
+        // Fonction pour retirer les accents d'une chaîne
+        function removeAccents(str) {
+            return str.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+        }
+
         // Recherche de prestations
         const rechercheInput = document.getElementById('recherche-prestation');
         const prestationsTableBody = document.getElementById('prestations-table-body');
         
         rechercheInput.addEventListener('input', function() {
             const valeur = this.value.toLowerCase().trim();
+            const valeurSansAccent = removeAccents(valeur);
             let html = '';
             
             // Si la valeur est vide, ne rien afficher
@@ -355,10 +361,11 @@
                 return;
             }
             
-            // Filtrer les prestations selon la recherche
-            const resultats = toutesLesPrestation.filter(prestation => 
-                prestation.nom.toLowerCase().includes(valeur)
-            );
+            // Filtrer les prestations selon la recherche (insensible aux accents)
+            const resultats = toutesLesPrestation.filter(prestation => { 
+                const nomSansAccent = removeAccents(prestation.nom.toLowerCase());
+                return nomSansAccent.includes(valeurSansAccent);
+            });
             
             // Générer le HTML pour les résultats
             resultats.forEach(prestation => {

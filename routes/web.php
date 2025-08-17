@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\SearchController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ClientController;
 use App\Http\Controllers\DashboardController;
@@ -19,6 +20,7 @@ use App\Http\Controllers\QrScannerController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\PermissionController;
 use App\Http\Controllers\Admin\ReportController;
+use App\Http\Controllers\Admin\LoginActivityController;
 use App\Http\Controllers\LoyaltyPointsController;
 
 // Welcome page
@@ -38,6 +40,9 @@ Route::middleware('guest')->group(function () {
 });
 
 // Authenticated routes
+// Route pour la recherche de menu
+Route::get('/api/search', [SearchController::class, 'search'])->name('api.search');
+
 Route::middleware('auth')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
@@ -48,6 +53,14 @@ Route::middleware('auth')->group(function () {
         Route::get('/{id}', [ActivityLogController::class, 'show'])->name('activity.show');
         Route::delete('/{id}', [ActivityLogController::class, 'destroy'])->name('activity.destroy');
         Route::delete('/', [ActivityLogController::class, 'clearAll'])->name('activity.clearAll');
+    });
+    
+    // Routes pour les activités de connexion
+    Route::prefix('login-activities')->name('login-activities.')->middleware('can:view login activities')->group(function () {
+        Route::get('/', [LoginActivityController::class, 'index'])->name('index');
+        Route::get('/{loginActivity}', [LoginActivityController::class, 'show'])->name('show');
+        Route::delete('/{loginActivity}', [LoginActivityController::class, 'destroy'])->middleware('can:delete login activities')->name('destroy');
+        Route::delete('/', [LoginActivityController::class, 'clearAll'])->middleware('can:delete login activities')->name('clear-all');
     });
     
     // Salon routes

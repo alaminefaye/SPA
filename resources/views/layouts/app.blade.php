@@ -46,6 +46,7 @@
     <link rel="stylesheet" href="{{ asset('assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.css') }}" />
 
     <!-- Page CSS -->
+    <link rel="stylesheet" href="{{ asset('assets/css/search.css') }}" />
     @yield('page-css')
 
     <!-- Helpers -->
@@ -232,15 +233,31 @@
               </ul>
             </li>
             @endcanany
-            <!-- Logs d'activité -->  
-            @can('view activity logs')
-            <li class="menu-item {{ request()->is('activity-logs*') ? 'active' : '' }}">
-              <a href="{{ route('activity.index') }}" class="menu-link">
+            <!-- Gestion d'activité -->  
+            @canany(['view activity logs', 'view login activities'])
+            <li class="menu-item {{ request()->is('activity-logs*') || request()->is('login-activities*') ? 'active open' : '' }}">
+              <a href="javascript:void(0);" class="menu-link menu-toggle">
                 <i class="menu-icon tf-icons bx bx-history"></i>
-                <div>Journal d'activité</div>
+                <div data-i18n="Activities">Gestion d'activité</div>
               </a>
+              <ul class="menu-sub">
+                @can('view activity logs')
+                <li class="menu-item {{ request()->is('activity-logs*') ? 'active' : '' }}">
+                  <a href="{{ route('activity.index') }}" class="menu-link">
+                    <div data-i18n="Journal">Journal d'activité</div>
+                  </a>
+                </li>
+                @endcan
+                @can('view login activities')
+                <li class="menu-item {{ request()->is('login-activities*') ? 'active' : '' }}">
+                  <a href="{{ route('login-activities.index') }}" class="menu-link">
+                    <div data-i18n="Connexions">Activités de connexion</div>
+                  </a>
+                </li>
+                @endcan
+              </ul>
             </li>
-            @endcan
+            @endcanany
             
             <!-- Gestion des utilisateurs -->  
             @can('view users')
@@ -334,14 +351,16 @@
             <div class="navbar-nav-right d-flex align-items-center" id="navbar-collapse">
               <!-- Search -->
               <div class="navbar-nav align-items-center">
-                <div class="nav-item d-flex align-items-center">
+                <div id="search-container" class="nav-item d-flex align-items-center search-container">
                   <i class="bx bx-search fs-4 lh-0"></i>
                   <input
+                    id="navbar-search"
                     type="text"
                     class="form-control border-0 shadow-none"
-                    placeholder="Search..."
+                    placeholder="Rechercher des pages ou menus..."
                     aria-label="Search..."
                   />
+                  <div id="search-results" class="search-results-dropdown"></div>
                 </div>
               </div>
               <!-- /Search -->
@@ -469,6 +488,7 @@
     <script src="{{ asset('assets/js/notification-manager.js') }}"></script>
 
     <!-- Page JS -->
+    <script src="{{ asset('assets/js/search-menu.js') }}"></script>
     @yield('page-js')
   </body>
 </html>

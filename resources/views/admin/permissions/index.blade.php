@@ -50,8 +50,8 @@
                                     @foreach($groupPermissions as $permission)
                                         <li class="list-group-item d-flex justify-content-between align-items-center">
                                             <div>{{ $permission->name }}</div>
-                                            <a href="{{ route('permissions.show', $permission) }}" class="btn btn-sm btn-info">
-                                                <i class="fas fa-eye"></i>
+                                            <a href="{{ route('permissions.show', $permission) }}" class="btn btn-icon btn-info btn-action" data-bs-toggle="tooltip" data-bs-placement="top" title="Voir détails">
+                                                <i class="bx bx-show"></i>
                                             </a>
                                         </li>
                                     @endforeach
@@ -64,4 +64,16 @@
         </div>
     </div>
 </div>
+@endsection
+
+@section('page-js')
+<script>
+    $(document).ready(function() {
+        // Initialiser les tooltips Bootstrap
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl);
+        });
+    });
+</script>
 @endsection

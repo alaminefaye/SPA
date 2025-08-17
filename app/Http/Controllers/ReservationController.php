@@ -14,6 +14,41 @@ class ReservationController extends Controller
     /**
      * Display a listing of the resource.
      */
+    /**
+     * Retire les accents d'une chaîne de caractères
+     *
+     * @param  string  $string
+     * @return string
+     */
+    private function removeAccents($string)
+    {
+        if (!preg_match('/[\x80-\xff]/', $string)) {
+            return $string;
+        }
+
+        $chars = [
+            // Décomposer les caractères accentués
+            'à' => 'a', 'á' => 'a', 'â' => 'a', 'ã' => 'a', 'ä' => 'a', 'å' => 'a', 'æ' => 'ae',
+            'ç' => 'c',
+            'è' => 'e', 'é' => 'e', 'ê' => 'e', 'ë' => 'e',
+            'ì' => 'i', 'í' => 'i', 'î' => 'i', 'ï' => 'i',
+            'ñ' => 'n',
+            'ò' => 'o', 'ó' => 'o', 'ô' => 'o', 'õ' => 'o', 'ö' => 'o', 'ø' => 'o',
+            'ù' => 'u', 'ú' => 'u', 'û' => 'u', 'ü' => 'u',
+            'ý' => 'y', 'ÿ' => 'y',
+            'À' => 'A', 'Á' => 'A', 'Â' => 'A', 'Ã' => 'A', 'Ä' => 'A', 'Å' => 'A', 'Æ' => 'AE',
+            'Ç' => 'C',
+            'È' => 'E', 'É' => 'E', 'Ê' => 'E', 'Ë' => 'E',
+            'Ì' => 'I', 'Í' => 'I', 'Î' => 'I', 'Ï' => 'I',
+            'Ñ' => 'N',
+            'Ò' => 'O', 'Ó' => 'O', 'Ô' => 'O', 'Õ' => 'O', 'Ö' => 'O', 'Ø' => 'O',
+            'Ù' => 'U', 'Ú' => 'U', 'Û' => 'U', 'Ü' => 'U',
+            'Ý' => 'Y'
+        ];
+        
+        return strtr($string, $chars);
+    }
+    
     public function index(Request $request)
     {
         $search = $request->input('search');
@@ -21,15 +56,26 @@ class ReservationController extends Controller
         $query = Reservation::with(['client', 'salon', 'prestations']);
         
         if ($search) {
-            $query->whereHas('client', function($q) use ($search) {
-                $q->where('nom_complet', 'LIKE', "%{$search}%")
-                  ->orWhere('numero_telephone', 'LIKE', "%{$search}%");
-            })
-            ->orWhereHas('salon', function($q) use ($search) {
-                $q->where('nom', 'LIKE', "%{$search}%");
-            })
-            ->orWhereHas('prestations', function($q) use ($search) {
-                $q->where('nom_prestation', 'LIKE', "%{$search}%");
+            // Normaliser la recherche pour ignorer les accents
+            $normalizedSearch = $this->removeAccents($search);
+            
+            // Au lieu d'utiliser UNACCENT qui n'est pas disponible dans toutes les bases de données,
+            // nous allons récupérer les données et les filtrer en PHP
+            $normalizedSearch = strtolower($normalizedSearch);
+            $searchLower = strtolower($search);
+            
+            // Nous utilisons la recherche SQL standard
+            $query->where(function($query) use ($searchLower) {
+                $query->whereHas('client', function($q) use ($searchLower) {
+                    $q->whereRaw('LOWER(nom_complet) LIKE ?', ['%' . $searchLower . '%'])
+                      ->orWhere('numero_telephone', 'LIKE', "%{$searchLower}%");
+                })
+                ->orWhereHas('salon', function($q) use ($searchLower) {
+                    $q->whereRaw('LOWER(nom) LIKE ?', ['%' . $searchLower . '%']);
+                })
+                ->orWhereHas('prestations', function($q) use ($searchLower) {
+                    $q->whereRaw('LOWER(nom_prestation) LIKE ?', ['%' . $searchLower . '%']);
+                });
             });
         }
         

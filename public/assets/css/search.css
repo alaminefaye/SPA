@@ -1,0 +1,93 @@
+/* Styles pour la fonctionnalité de recherche */
+.search-container {
+  position: relative;
+  width: 100%;
+}
+
+.search-results-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  width: 320px;
+  max-height: 400px;
+  overflow-y: auto;
+  background-color: #fff;
+  border-radius: 0.375rem;
+  box-shadow: 0 0.25rem 1rem rgba(161, 172, 184, 0.45);
+  z-index: 1090;
+  display: none;
+  padding: 0.5rem 0;
+  margin-top: 0.25rem;
+}
+
+.search-results-dropdown.show {
+  display: block;
+}
+
+.search-category {
+  padding: 0.5rem 1rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: #697a8d;
+  background-color: rgba(67, 89, 113, 0.04);
+  margin-bottom: 0.25rem;
+}
+
+.search-item {
+  display: flex;
+  align-items: center;
+  padding: 0.625rem 1rem;
+  color: #697a8d;
+  transition: all 0.2s ease-in-out;
+  text-decoration: none;
+}
+
+.search-item:hover {
+  background-color: rgba(67, 89, 113, 0.06);
+  text-decoration: none;
+  color: #566a7f;
+}
+
+.search-item i {
+  font-size: 1rem;
+  margin-right: 0.75rem;
+  color: #696cff;
+}
+
+.search-item span {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.search-no-result {
+  padding: 0.625rem 1rem;
+  color: #697a8d;
+  text-align: center;
+  font-style: italic;
+}
+
+/* Style pour l'animation de chargement */
+.search-loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 1rem;
+}
+
+.search-loading::after {
+  content: '';
+  width: 1.5rem;
+  height: 1.5rem;
+  border: 2px solid rgba(105, 108, 255, 0.2);
+  border-top-color: #696cff;
+  border-radius: 50%;
+  animation: search-loading-animation 0.8s linear infinite;
+}
+
+@keyframes search-loading-animation {
+  to {
+    transform: rotate(360deg);
+  }
+}
