@@ -133,6 +133,20 @@ Route::middleware('auth')->group(function () {
     
     // Client search route
     Route::get('/client-search-by-phone', [ClientController::class, 'searchByPhone'])->name('clients.searchByPhone');
+    
+    // Profile routes
+    Route::prefix('profile')->group(function () {
+        Route::get('/', [App\Http\Controllers\ProfileController::class, 'show'])->name('profile.show');
+        Route::get('/edit', [App\Http\Controllers\ProfileController::class, 'edit'])->name('profile.edit');
+        Route::put('/', [App\Http\Controllers\ProfileController::class, 'update'])->name('profile.update');
+        Route::put('/password', [App\Http\Controllers\ProfileController::class, 'updatePassword'])->name('profile.password.update');
+    });
+    
+    // Settings routes
+    Route::prefix('settings')->group(function () {
+        Route::get('/', [App\Http\Controllers\SettingsController::class, 'index'])->name('settings.index');
+        Route::put('/', [App\Http\Controllers\SettingsController::class, 'update'])->name('settings.update');
+    });
 });
 
 // Routes publiques pour les réservations (sans authentification)

@@ -24,6 +24,7 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'profile_photo_path',
     ];
 
     /**
@@ -44,7 +45,7 @@ class User extends Authenticatable
     public function getActivitylogOptions(): LogOptions
     {
         return LogOptions::defaults()
-            ->logOnly(['name', 'email'])
+            ->logOnly(['name', 'email', 'profile_photo_path'])
             ->logOnlyDirty()
             ->setDescriptionForEvent(fn(string $eventName) => "Cet utilisateur a été {$eventName}");
     }
