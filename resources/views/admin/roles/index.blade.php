@@ -23,6 +23,24 @@
             </div>
         </div>
         <div class="card-body">
+            <!-- Formulaire de recherche -->
+            <form action="{{ route('roles.index') }}" method="GET" class="mb-4">
+                <div class="row g-3">
+                    <div class="col-md-8">
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="bx bx-search"></i></span>
+                            <input type="text" name="search" class="form-control" placeholder="Rechercher un rôle..." value="{{ request('search') }}">
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <button type="submit" class="btn btn-primary me-2">Rechercher</button>
+                        @if(request()->has('search'))
+                            <a href="{{ route('roles.index') }}" class="btn btn-outline-secondary">Réinitialiser</a>
+                        @endif
+                    </div>
+                </div>
+            </form>
+            
             @if (session('success'))
                 <div class="alert alert-success alert-dismissible" role="alert">
                     {{ session('success') }}

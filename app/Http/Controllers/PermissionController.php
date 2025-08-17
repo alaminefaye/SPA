@@ -17,11 +17,19 @@ class PermissionController extends Controller
     }
 
     /**
-     * Liste toutes les permissions
+     * Liste toutes les permissions avec option de recherche
      */
-    public function index()
+    public function index(Request $request)
     {
-        $permissions = Permission::all()->groupBy(function ($item, $key) {
+        $search = $request->input('search');
+        
+        $query = Permission::query();
+        
+        if ($search) {
+            $query->where('name', 'LIKE', "%{$search}%");
+        }
+        
+        $permissions = $query->get()->groupBy(function ($item, $key) {
             $parts = explode(' ', $item->name);
             return $parts[1] ?? 'other';
         });

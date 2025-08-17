@@ -29,6 +29,26 @@
                 <i class="bx bx-plus"></i> Nouvel utilisateur
             </a>
         </div>
+        
+        <div class="card-body">
+            <!-- Formulaire de recherche -->
+            <form action="{{ route('users.index') }}" method="GET" class="mb-3">
+                <div class="row g-3">
+                    <div class="col-md-8">
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="bx bx-search"></i></span>
+                            <input type="text" name="search" class="form-control" placeholder="Rechercher un utilisateur..." value="{{ request('search') }}">
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <button type="submit" class="btn btn-primary me-2">Rechercher</button>
+                        @if(request()->has('search'))
+                            <a href="{{ route('users.index') }}" class="btn btn-outline-secondary">Réinitialiser</a>
+                        @endif
+                    </div>
+                </div>
+            </form>
+        </div>
         <div class="table-responsive text-nowrap">
             <table class="table table-hover">
                 <thead>

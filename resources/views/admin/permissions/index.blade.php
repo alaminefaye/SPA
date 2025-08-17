@@ -16,6 +16,24 @@
             </div>
         </div>
         <div class="card-body">
+            <!-- Formulaire de recherche -->
+            <form action="{{ route('permissions.index') }}" method="GET" class="mb-4">
+                <div class="row g-3">
+                    <div class="col-md-8">
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="bx bx-search"></i></span>
+                            <input type="text" name="search" class="form-control" placeholder="Rechercher une permission..." value="{{ request('search') }}">
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <button type="submit" class="btn btn-primary me-2">Rechercher</button>
+                        @if(request()->has('search'))
+                            <a href="{{ route('permissions.index') }}" class="btn btn-outline-secondary">Réinitialiser</a>
+                        @endif
+                    </div>
+                </div>
+            </form>
+            
             <div class="alert alert-info">
                 <i class="fas fa-info-circle"></i> Les permissions sont définies au niveau du système et ne peuvent pas être modifiées via l'interface. Elles sont attribuées aux rôles dans la section de gestion des rôles.
             </div>

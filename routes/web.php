@@ -19,6 +19,7 @@ use App\Http\Controllers\QrScannerController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\PermissionController;
 use App\Http\Controllers\Admin\ReportController;
+use App\Http\Controllers\LoyaltyPointsController;
 
 // Welcome page
 Route::get('/', function () {
@@ -57,6 +58,14 @@ Route::middleware('auth')->group(function () {
     
     // Client routes
     Route::resource('clients', ClientController::class);
+    
+    // Points de fidélité routes
+    Route::group(['prefix' => 'loyalty-points', 'as' => 'loyalty-points.', 'middleware' => ['auth']], function () {
+        Route::get('/', [LoyaltyPointsController::class, 'index'])->middleware('can:view loyalty points')->name('index');
+        Route::get('/{client}/edit', [LoyaltyPointsController::class, 'edit'])->middleware('can:manage loyalty points')->name('edit');
+        Route::put('/{client}', [LoyaltyPointsController::class, 'update'])->middleware('can:manage loyalty points')->name('update');
+        Route::get('/{client}/history', [LoyaltyPointsController::class, 'history'])->middleware('can:view loyalty points')->name('history');
+    });
     
     // Routes pour le démarrage et la fin de séance
     // Note: Ces routes spécifiques doivent être définies AVANT la route resource

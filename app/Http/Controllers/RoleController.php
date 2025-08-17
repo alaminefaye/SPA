@@ -19,11 +19,19 @@ class RoleController extends Controller
     }
     
     /**
-     * Liste tous les rôles
+     * Liste tous les rôles avec option de recherche
      */
-    public function index()
+    public function index(Request $request)
     {
-        $roles = Role::withCount(['permissions', 'users'])->get();
+        $search = $request->input('search');
+        
+        $query = Role::withCount(['permissions', 'users']);
+        
+        if ($search) {
+            $query->where('name', 'LIKE', "%{$search}%");
+        }
+        
+        $roles = $query->get();
         return view('admin.roles.index', compact('roles'));
     }
 

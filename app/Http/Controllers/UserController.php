@@ -12,13 +12,30 @@ use Spatie\Permission\Models\Role;
 class UserController extends Controller
 {
     /**
-     * Affiche la liste des utilisateurs.
+     * Affiche la liste des utilisateurs avec option de recherche.
      *
+     * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\View\View
      */
-    public function index()
+    public function index(Request $request)
     {
-        $users = User::latest()->paginate(10);
+        $search = $request->input('search');
+        
+        $query = User::query();
+        
+        if ($search) {
+            $query->where(function($q) use ($search) {
+                $q->where('name', 'LIKE', "%{$search}%")
+                  ->orWhere('email', 'LIKE', "%{$search}%");
+            });
+        }
+        
+        $users = $query->latest()->paginate(10);
+        
+        // Préserver les paramètres de recherche dans les liens de pagination
+        if ($search) {
+            $users->appends(['search' => $search]);
+        }
         
         return view('users.index', compact('users'));
     }

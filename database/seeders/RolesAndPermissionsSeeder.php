@@ -25,6 +25,12 @@ class RolesAndPermissionsSeeder extends Seeder
         Permission::firstOrCreate(['name' => 'create clients']);
         Permission::firstOrCreate(['name' => 'edit clients']);
         Permission::firstOrCreate(['name' => 'delete clients']);
+        
+        // Permissions pour Points de fidélité
+        Permission::firstOrCreate(['name' => 'view loyalty points']);
+        Permission::firstOrCreate(['name' => 'add loyalty points']);
+        Permission::firstOrCreate(['name' => 'remove loyalty points']);
+        Permission::firstOrCreate(['name' => 'manage loyalty points']);
 
         // Permissions pour Séances
         Permission::firstOrCreate(['name' => 'view seances']);
@@ -109,6 +115,7 @@ class RolesAndPermissionsSeeder extends Seeder
         $adminRole = Role::firstOrCreate(['name' => 'admin']);
         $adminRole->givePermissionTo([
             'view clients', 'create clients', 'edit clients', 'delete clients',
+            'view loyalty points', 'add loyalty points', 'remove loyalty points', 'manage loyalty points',
             'view seances', 'create seances', 'edit seances', 'delete seances',
             'view products', 'create products', 'edit products', 'delete products', 'manage stock',
             'view product categories', 'create product categories', 'edit product categories', 'delete product categories',
@@ -126,6 +133,7 @@ class RolesAndPermissionsSeeder extends Seeder
         $managerRole = Role::firstOrCreate(['name' => 'manager']);
         $managerRole->givePermissionTo([
             'view clients', 'create clients', 'edit clients',
+            'view loyalty points', 'add loyalty points', 'remove loyalty points', 'manage loyalty points',
             'view seances', 'create seances', 'edit seances',
             'view products', 'create products', 'edit products', 'manage stock',
             'view product categories',
@@ -142,6 +150,7 @@ class RolesAndPermissionsSeeder extends Seeder
         $receptionistRole = Role::firstOrCreate(['name' => 'receptionist']);
         $receptionistRole->givePermissionTo([
             'view clients', 'create clients', 'edit clients',
+            'view loyalty points', 'add loyalty points',
             'view seances',
             'view products',
             'view prestations',

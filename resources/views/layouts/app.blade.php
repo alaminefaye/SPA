@@ -136,14 +136,30 @@
             @endcan
 
             <!-- Client Management -->
-            @can('view clients')
-            <li class="menu-item {{ request()->is('clients*') ? 'active' : '' }}">
-              <a href="{{ route('clients.index') }}" class="menu-link">
+            @canany(['view clients', 'view loyalty points'])
+            <li class="menu-item {{ request()->is('clients*') || request()->is('loyalty-points*') ? 'active open' : '' }}">
+              <a href="javascript:void(0);" class="menu-link menu-toggle">
                 <i class="menu-icon tf-icons bx bx-user"></i>
-                <div data-i18n="Client">Gestion des clients</div>
+                <div data-i18n="Clients">Gestion clients</div>
               </a>
+              <ul class="menu-sub">
+                @can('view clients')
+                <li class="menu-item {{ request()->is('clients*') && !request()->is('loyalty-points*') ? 'active' : '' }}">
+                  <a href="{{ route('clients.index') }}" class="menu-link">
+                    <div data-i18n="Liste">Liste des clients</div>
+                  </a>
+                </li>
+                @endcan
+                @can('view loyalty points')
+                <li class="menu-item {{ request()->is('loyalty-points*') ? 'active' : '' }}">
+                  <a href="{{ route('loyalty-points.index') }}" class="menu-link">
+                    <div data-i18n="Points">Points de fidélité</div>
+                  </a>
+                </li>
+                @endcan
+              </ul>
             </li>
-            @endcan
+            @endcanany
             
             
             
