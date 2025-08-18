@@ -67,7 +67,9 @@ class RoleController extends Controller
         }
 
         $role = Role::create(['name' => $request->name]);
-        $role->syncPermissions($request->permissions);
+        // Convert permission IDs to Permission objects before syncing
+        $permissions = Permission::whereIn('id', $request->permissions)->get();
+        $role->syncPermissions($permissions);
 
         return redirect()->route('roles.index')
             ->with('success', 'Rôle créé avec succès.');
@@ -127,7 +129,9 @@ class RoleController extends Controller
         }
 
         $role->update(['name' => $request->name]);
-        $role->syncPermissions($request->permissions);
+        // Convert permission IDs to Permission objects before syncing
+        $permissions = Permission::whereIn('id', $request->permissions)->get();
+        $role->syncPermissions($permissions);
 
         return redirect()->route('roles.index')
             ->with('success', 'Rôle mis à jour avec succès.');

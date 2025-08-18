@@ -268,27 +268,30 @@ console.log('Script de débogage pour séances Chart.js chargé');
             }
             console.log('Chart.js correctement chargé');
             
-            // Vérifier si l'élément canvas existe
-            const canvas = document.getElementById('seancesStatusChart');
-            if (!canvas) {
-                console.error('Canvas #seancesStatusChart introuvable');
-                $('.card-body:first').append('<div class="alert alert-danger">Erreur: Canvas #seancesStatusChart introuvable.</div>');
-                return;
-            }
-            console.log('Canvas trouvé:', canvas);
-            
-            // Vérifier si des données sont disponibles
+            // Définir d'abord les variables de données
             const terminees = {{ $totalTerminees }};
             const annulees = {{ $totalAnnulees }};
             const enAttente = {{ $totalEnAttente }};
             
             console.log('Données disponibles:', { terminees, annulees, enAttente });
             
-            if (terminees === 0 && annulees === 0 && enAttente === 0) {
-                console.error('Aucune donnée disponible pour le graphique');
-                $(canvas).after('<div class="alert alert-warning">Aucune donnée disponible pour cette période.</div>');
+            // Vérifier si des données sont disponibles
+            const hasData = (terminees > 0 || annulees > 0 || enAttente > 0);
+            if (!hasData) {
+                console.log('Aucune donnée disponible pour le graphique');
                 return;
             }
+            
+            // Vérifier si l'élément canvas existe
+            const canvas = document.getElementById('seancesStatusChart');
+            if (!canvas) {
+                console.error('Canvas #seancesStatusChart introuvable');
+                // Afficher un message d'erreur plus convivial
+                $('#report_type').closest('.card').after('<div class="alert alert-info mt-3">Les données du graphique ne peuvent pas être affichées. Veuillez actualiser la page.</div>');
+                return;
+            }
+            
+            console.log('Canvas trouvé:', canvas);
             
             try {
                 // Graphique des statuts
