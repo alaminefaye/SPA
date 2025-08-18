@@ -21,6 +21,7 @@ use App\Http\Controllers\RoleController;
 use App\Http\Controllers\PermissionController;
 use App\Http\Controllers\Admin\ReportController;
 use App\Http\Controllers\Admin\LoginActivityController;
+use App\Http\Controllers\Admin\EmployeeController;
 use App\Http\Controllers\LoyaltyPointsController;
 
 // Welcome page
@@ -150,6 +151,18 @@ Route::middleware('auth')->group(function () {
     // QR Code Scanner routes
     Route::get('/qr-scanner', [QrScannerController::class, 'index'])->name('qrscanner.index');
     Route::post('/qr-scanner/process', [QrScannerController::class, 'process'])->name('qrscanner.process');
+    
+    // Routes pour la gestion des employés
+    Route::prefix('admin/employees')->name('admin.employees.')->group(function () {
+        Route::get('/', [EmployeeController::class, 'index'])->middleware('can:view employees')->name('index');
+        Route::get('/create', [EmployeeController::class, 'create'])->middleware('can:create employees')->name('create');
+        Route::post('/', [EmployeeController::class, 'store'])->middleware('can:create employees')->name('store');
+        Route::get('/{employee}', [EmployeeController::class, 'show'])->middleware('can:view employees')->name('show');
+        Route::get('/{employee}/edit', [EmployeeController::class, 'edit'])->middleware('can:edit employees')->name('edit');
+        Route::put('/{employee}', [EmployeeController::class, 'update'])->middleware('can:edit employees')->name('update');
+        Route::delete('/{employee}', [EmployeeController::class, 'destroy'])->middleware('can:delete employees')->name('destroy');
+        Route::patch('/{employee}/toggle-status', [EmployeeController::class, 'toggleStatus'])->middleware('can:toggle employee status')->name('toggle-status');
+    });
     
     // Client search route
     Route::get('/client-search-by-phone', [ClientController::class, 'searchByPhone'])->name('clients.searchByPhone');

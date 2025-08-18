@@ -34,6 +34,8 @@
     <link rel="stylesheet" href="{{ asset('assets/vendor/fonts/boxicons.css') }}" />
     <!-- Ajout du CDN BoxIcons pour garantir le chargement des icônes -->
     <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet" />
+    <!-- Ajout de FontAwesome pour les icônes d'actions -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" integrity="sha512-1ycn6IcaQQ40/MKBW2W4Rhis/DbILU74C1vSrLJxCq57o941Ym01SwNsOMqvEBFlcgUa6xLiPY/NS5R+E6ztJQ==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 
     <!-- Core CSS -->
     <link rel="stylesheet" href="{{ asset('assets/vendor/css/core.css') }}" class="template-customizer-core-css" />
@@ -162,7 +164,15 @@
             </li>
             @endcanany
             
-            
+            <!-- Gestion des employés -->
+            @can('view employees')
+            <li class="menu-item {{ request()->is('admin/employees*') ? 'active' : '' }}">
+              <a href="{{ route('admin.employees.index') }}" class="menu-link">
+                <i class="menu-icon tf-icons bx bx-user-pin"></i>
+                <div data-i18n="Employees">Gestion des employés</div>
+              </a>
+            </li>
+            @endcan
             
             @can('view reservations')
             <li class="menu-item {{ request()->is('reservations*') ? 'active' : '' }}">
