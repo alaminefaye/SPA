@@ -35,11 +35,15 @@ class QrCodeController extends Controller
         $filename = Str::slug($name) . '-' . time() . '.png';
         $path = 'qrcodes/' . $filename;
 
-        // Generate QR code
+        // Generate QR code with positioning squares in pink (#FF57A8) and content in black
         $qrCode = QrCode::format('png')
                 ->size(500)
                 ->errorCorrection('H')
                 ->margin(1)
+                ->color(0, 0, 0) // Content in black
+                ->eyeColor(0, 255, 87, 168, 0, 0, 0) // Left eye in pink
+                ->eyeColor(1, 255, 87, 168, 0, 0, 0) // Top right eye in pink
+                ->eyeColor(2, 255, 87, 168, 0, 0, 0) // Bottom left eye in pink
                 ->generate($link);
 
         // Store the QR code
