@@ -518,17 +518,48 @@ class SeanceController extends Controller
     /**
      * Affiche les séances du jour qui ne sont pas encore démarrées
      */
-    public function aDemarrer()
+    public function aDemarrer(Request $request)
     {
         $today = now()->toDateString(); // Format Y-m-d
+        $search = $request->input('search');
         
-        $seances = Seance::with(['client', 'salon', 'prestations'])
+        $query = Seance::with(['client', 'salon', 'prestations'])
             ->whereDate('date_seance', $today)
-            ->whereIn('statut', ['planifiee', 'en_cours']) // Afficher les séances planifiées ET en cours
-            ->orderBy('heure_prevu', 'asc')
-            ->get();
+            ->whereIn('statut', ['planifiee', 'en_cours']); // Afficher les séances planifiées ET en cours
         
-        return view('seances.a_demarrer', compact('seances'));
+        // Recherche si un terme est spécifié
+        if ($search) {
+            $query->where(function($q) use ($search) {
+                $q->whereHas('client', function($subq) use ($search) {
+                    $subq->where('nom_complet', 'LIKE', "%{$search}%")
+                          ->orWhere('numero_telephone', 'LIKE', "%{$search}%");
+                })
+                ->orWhereHas('salon', function($subq) use ($search) {
+                    $subq->where('nom', 'LIKE', "%{$search}%");
+                })
+                ->orWhereHas('prestations', function($subq) use ($search) {
+                    $subq->where('nom_prestation', 'LIKE', "%{$search}%");
+                });
+            });
+        }
+        
+        // Filtrer par salon si spécifié
+        if ($request->filled('salon_id')) {
+            $query->where('salon_id', $request->input('salon_id'));
+        }
+        
+        // Filtrer par statut si spécifié (planifiee ou en_cours)
+        if ($request->filled('statut')) {
+            $query->where('statut', $request->input('statut'));
+        }
+        
+        $seances = $query->orderBy('heure_prevu', 'asc')
+                        ->get();
+        
+        // Récupérer la liste des salons pour le filtre
+        $salons = Salon::orderBy('nom')->pluck('nom', 'id');
+        
+        return view('seances.a_demarrer', compact('seances', 'search', 'salons'));
     }
     
     /**

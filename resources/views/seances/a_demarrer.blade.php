@@ -15,6 +15,45 @@
         </a>
     </div>
     
+    <!-- Section de recherche -->
+    <div class="card-body pb-0">
+        <form method="GET" action="{{ route('seances.a_demarrer') }}" id="search-form">
+            <div class="row mb-3">
+                <div class="col-md-6 mb-2">
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="bx bx-search"></i></span>
+                        <input type="text" class="form-control" placeholder="Rechercher un client, salon ou prestation" name="search" value="{{ request('search') }}">
+                    </div>
+                </div>
+                <div class="col-md-3 mb-2">
+                    <select class="form-select" name="salon_id">
+                        <option value="">Tous les salons</option>
+                        @foreach($salons as $id => $nom)
+                            <option value="{{ $id }}" {{ request('salon_id') == $id ? 'selected' : '' }}>{{ $nom }}</option>
+                        @endforeach
+                    </select>
+                </div>
+                <div class="col-md-3 mb-2">
+                    <select class="form-select" name="statut">
+                        <option value="">Tous les statuts</option>
+                        <option value="planifiee" {{ request('statut') == 'planifiee' ? 'selected' : '' }}>Planifiée</option>
+                        <option value="en_cours" {{ request('statut') == 'en_cours' ? 'selected' : '' }}>En cours</option>
+                    </select>
+                </div>
+            </div>
+            <div class="row mb-3">
+                <div class="col-12 text-end">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bx bx-filter-alt me-1"></i> Filtrer
+                    </button>
+                    <a href="{{ route('seances.a_demarrer') }}" class="btn btn-secondary">
+                        <i class="bx bx-reset me-1"></i> Réinitialiser
+                    </a>
+                </div>
+            </div>
+        </form>
+    </div>
+    
     <div class="card-body">
         @if (session('success'))
             <div class="alert alert-success alert-dismissible" role="alert">
