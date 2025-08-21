@@ -406,7 +406,7 @@
                             </div>
                           </div>
                           <div class="flex-grow-1">
-                            <span class="fw-semibold d-block">{{ auth()->check() ? auth()->user()->name : 'John Doe' }}</span>
+                            <span class="fw-semibold d-block">{{ auth()->check() ? auth()->user()->name : 'User' }}</span>
                             <small class="text-muted">Admin</small>
                           </div>
                         </div>

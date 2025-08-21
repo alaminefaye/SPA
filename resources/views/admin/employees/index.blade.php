@@ -26,6 +26,52 @@
             Liste des employés
         </div>
         <div class="card-body">
+            <form method="GET" action="{{ route('admin.employees.index') }}" class="mb-4">
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fas fa-search"></i></span>
+                            <input type="text" name="search" class="form-control" placeholder="Rechercher par nom, prénom, téléphone, email" value="{{ request('search') }}">
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-2">
+                        <select name="poste" class="form-select">
+                            <option value="">-- Tous les postes --</option>
+                            @foreach($postes as $key => $value)
+                                <option value="{{ $key }}" {{ request('poste') == $key ? 'selected' : '' }}>{{ $value }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    
+                    <div class="col-md-2">
+                        <select name="salon_id" class="form-select">
+                            <option value="">-- Tous les salons --</option>
+                            @foreach($salons as $id => $nom)
+                                <option value="{{ $id }}" {{ request('salon_id') == $id ? 'selected' : '' }}>{{ $nom }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    
+                    <div class="col-md-2">
+                        <select name="status" class="form-select">
+                            <option value="">-- Tous les statuts --</option>
+                            <option value="active" {{ request('status') == 'active' ? 'selected' : '' }}>Actif</option>
+                            <option value="inactive" {{ request('status') == 'inactive' ? 'selected' : '' }}>Inactif</option>
+                        </select>
+                    </div>
+                    
+                    <div class="col-md-2 d-flex">
+                        <button type="submit" class="btn btn-primary flex-fill me-1">
+                            <i class="fas fa-search me-1"></i> Filtrer
+                        </button>
+                        
+                        <a href="{{ route('admin.employees.index') }}" class="btn btn-outline-secondary flex-fill">
+                            <i class="fas fa-redo-alt me-1"></i>
+                        </a>
+                    </div>
+                </div>
+            </form>
             <div class="table-responsive">
                 <table class="table table-bordered table-hover" id="employeesTable">
                     <thead>

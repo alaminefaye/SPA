@@ -14,10 +14,52 @@ class EmployeeController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $employees = Employee::with('salon')->orderBy('nom')->paginate(15);
-        return view('admin.employees.index', compact('employees'));
+        $query = Employee::with('salon');
+        
+        // Recherche par nom/prénom
+        if ($request->filled('search')) {
+            $search = $request->input('search');
+            $query->where(function($q) use ($search) {
+                $q->where('nom', 'LIKE', "%{$search}%")
+                  ->orWhere('prenom', 'LIKE', "%{$search}%")
+                  ->orWhere('numero_telephone', 'LIKE', "%{$search}%")
+                  ->orWhere('email', 'LIKE', "%{$search}%");
+            });
+        }
+        
+        // Filtre par poste
+        if ($request->filled('poste')) {
+            $query->where('poste', $request->input('poste'));
+        }
+        
+        // Filtre par salon
+        if ($request->filled('salon_id')) {
+            $query->where('salon_id', $request->input('salon_id'));
+        }
+        
+        // Filtre par statut
+        if ($request->filled('status')) {
+            $query->where('actif', $request->input('status') === 'active' ? 1 : 0);
+        }
+        
+        $employees = $query->orderBy('nom')->paginate(15)->withQueryString();
+        
+        // Récupérer les salons et les postes pour les filtres
+        $salons = Salon::orderBy('nom')->pluck('nom', 'id');
+        $postes = [
+            'Esthéticienne' => 'Esthéticienne',
+            'Coiffeur/Coiffeuse' => 'Coiffeur/Coiffeuse',
+            'Masseur/Masseuse' => 'Masseur/Masseuse',
+            'Manucure' => 'Manucure',
+            'Pédicure' => 'Pédicure',
+            'Réceptionniste' => 'Réceptionniste',
+            'Manager' => 'Manager',
+            'Directeur/Directrice' => 'Directeur/Directrice',
+        ];
+        
+        return view('admin.employees.index', compact('employees', 'salons', 'postes'));
     }
 
     /**
