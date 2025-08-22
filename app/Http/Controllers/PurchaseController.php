@@ -125,9 +125,13 @@ class PurchaseController extends Controller
             
             DB::commit();
             
-            return redirect()->route('purchases.show', $purchase)
-                ->with('success', 'Achat enregistré avec succès.' . 
-                    (!$request->client_id && $clientId ? ' Un nouveau client a été créé.' : ''));
+            // Retourner une vue qui va ouvrir le ticket dans une nouvelle fenêtre
+            return view('purchases.created', [
+                'purchase' => $purchase,
+                'ticketUrl' => route('purchases.ticket', $purchase),
+                'redirectUrl' => route('purchases.show', $purchase)
+            ])->with('success', 'Achat enregistré avec succès.' . 
+                (!$request->client_id && $clientId ? ' Un nouveau client a été créé.' : ''));
                 
         } catch (\Exception $e) {
             DB::rollBack();

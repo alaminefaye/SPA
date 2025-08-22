@@ -182,8 +182,12 @@ class SeanceController extends Controller
         
         $seance->save();
         
-        return redirect()->route('seances.index')
-            ->with('success', 'Séance créée avec succès');
+        // Retourner une vue qui va ouvrir le ticket dans une nouvelle fenêtre
+        return view('seances.created', [
+            'seance' => $seance,
+            'ticketUrl' => route('seances.ticket', $seance->id),
+            'redirectUrl' => route('seances.index')
+        ])->with('success', 'Séance créée avec succès');
     }
 
     /**
