@@ -59,7 +59,6 @@
                             <th>Heure</th>
                             <th>Statut</th>
                             <th>Séance d'origine</th>
-                            <th>Commentaire</th>
                             <th class="text-center">Actions</th>
                         </tr>
                     </thead>
@@ -100,19 +99,16 @@
                                         <span class="text-muted">N/A</span>
                                     @endif
                                 </td>
-                                <td>
-                                    <small>{{ Str::limit($rappel->commentaire, 50) }}</small>
-                                </td>
-                                <td class="text-center d-flex gap-1 justify-content-center">
+                                <td class="text-center">
                                     @if($rappel->statut == 'en_attente')
-                                        <!-- Bouton WhatsApp - Maintenant visible en dehors du dropdown -->
-                                        <a class="btn btn-sm btn-success d-inline-flex align-items-center" href="{{ $rappel->getWhatsAppUrl() }}" target="_blank" title="Envoyer rappel WhatsApp">
+                                        <!-- Bouton WhatsApp -->
+                                        <a class="btn btn-sm btn-success" href="{{ $rappel->getWhatsAppUrl() }}" target="_blank" title="Envoyer rappel WhatsApp">
                                             <i class="bx bxl-whatsapp"></i>
                                         </a>
                                         
                                         <!-- Menu déroulant pour les autres actions -->
                                         <div class="dropdown d-inline-block">
-                                            <button type="button" class="btn btn-sm btn-outline-secondary dropdown-toggle hide-arrow py-0" data-bs-toggle="dropdown">
+                                            <button type="button" class="btn btn-sm btn-outline-secondary dropdown-toggle hide-arrow" data-bs-toggle="dropdown">
                                                 <i class="bx bx-dots-vertical-rounded"></i>
                                             </button>
                                             <div class="dropdown-menu dropdown-menu-end">
@@ -143,7 +139,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="7" class="text-center py-4">
+                                <td colspan="6" class="text-center py-4">
                                     <div class="text-center">
                                         <i class="bx bx-calendar-x text-secondary mb-2" style="font-size: 4rem;"></i>
                                         <p class="mb-0">Aucun rappel de rendez-vous trouvé pour cette période</p>
