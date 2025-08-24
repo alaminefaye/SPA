@@ -45,12 +45,14 @@ class ClientController extends Controller
             'nom_complet' => 'required|string|max:255',
             'numero_telephone' => 'required|string|max:255',
             'adresse_mail' => 'required|email|max:255|unique:clients',
+            'date_naissance' => 'nullable|date|before_or_equal:today',
         ]);
 
         Client::create([
             'nom_complet' => $request->nom_complet,
             'numero_telephone' => $request->numero_telephone,
             'adresse_mail' => $request->adresse_mail,
+            'date_naissance' => $request->date_naissance,
         ]);
 
         return redirect()->route('clients.index')
@@ -91,12 +93,14 @@ class ClientController extends Controller
                 'max:255',
                 Rule::unique('clients')->ignore($client->id),
             ],
+            'date_naissance' => 'nullable|date|before_or_equal:today',
         ]);
 
         $client->update([
             'nom_complet' => $request->nom_complet,
             'numero_telephone' => $request->numero_telephone,
             'adresse_mail' => $request->adresse_mail,
+            'date_naissance' => $request->date_naissance,
         ]);
 
         return redirect()->route('clients.index')

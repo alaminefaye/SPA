@@ -147,9 +147,22 @@
               </a>
               <ul class="menu-sub">
                 @can('view clients')
-                <li class="menu-item {{ request()->is('clients*') && !request()->is('loyalty-points*') ? 'active' : '' }}">
+                <li class="menu-item {{ request()->is('clients*') && !request()->is('clients-anniversaires') && !request()->is('loyalty-points*') ? 'active' : '' }}">
                   <a href="{{ route('clients.index') }}" class="menu-link">
                     <div data-i18n="Liste">Liste des clients</div>
+                  </a>
+                </li>
+                <li class="menu-item {{ request()->is('clients-anniversaires') ? 'active' : '' }}">
+                  <a href="{{ route('clients.anniversaires') }}" class="menu-link">
+                    <div data-i18n="Anniversaires" style="position: relative;">
+                      Anniversaires à venir
+                      @if(isset($todayBirthdaysCount) && $todayBirthdaysCount > 0)
+                      <span class="badge rounded-pill badge-center h-px-20 w-px-20 bg-danger position-absolute" 
+                            style="top: -8px; right: -20px;">
+                        {{ $todayBirthdaysCount }}
+                      </span>
+                      @endif
+                    </div>
                   </a>
                 </li>
                 @endcan

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Spatie\Activitylog\Traits\LogsActivity;
@@ -15,6 +16,16 @@ class Client extends Model
         'numero_telephone',
         'adresse_mail',
         'points',
+        'date_naissance',
+    ];
+    
+    /**
+     * The attributes that should be cast.
+     *
+     * @var array<string, string>
+     */
+    protected $casts = [
+        'date_naissance' => 'date',
     ];
     
     /**
@@ -67,7 +78,7 @@ class Client extends Model
     public function getActivitylogOptions(): LogOptions
     {
         return LogOptions::defaults()
-            ->logOnly(['nom_complet', 'numero_telephone', 'adresse_mail', 'points'])
+            ->logOnly(['nom_complet', 'numero_telephone', 'adresse_mail', 'points', 'date_naissance'])
             ->logOnlyDirty()
             ->dontSubmitEmptyLogs()
             ->setDescriptionForEvent(function(string $eventName) {
@@ -85,5 +96,54 @@ class Client extends Model
                 }
                 return $desc;
             });
+    }
+
+    /**
+     * Vérifie si c'est l'anniversaire du client aujourd'hui
+     * 
+     * @return bool
+     */
+    public function isAnniversaireToday(): bool
+    {
+        if (!$this->date_naissance) {
+            return false;
+        }
+        
+        return $this->date_naissance->format('d-m') === now()->format('d-m');
+    }
+    
+    /**
+     * Obtient le nombre de jours avant le prochain anniversaire
+     * 
+     * @return int|null Retourne null si pas de date de naissance, sinon le nombre de jours
+     */
+    public function joursAvantAnniversaire(): ?int
+    {
+        if (!$this->date_naissance) {
+            return null;
+        }
+        
+        $today = now();
+        $birthdayThisYear = Carbon::createFromDate(
+            $today->year,
+            $this->date_naissance->month,
+            $this->date_naissance->day
+        );
+        
+        if ($birthdayThisYear->isPast()) {
+            $birthdayThisYear->addYear();
+        }
+        
+        return $today->diffInDays($birthdayThisYear, false);
+    }
+    
+    /**
+     * Retourne la date d'anniversaire formatée
+     * 
+     * @return string|null
+     */
+    public function getDateAnniversaireFormattee(): ?string
+    {
+        return $this->date_naissance ? $this->date_naissance->format('d/m/Y') : null;
     }
 }

@@ -22,5 +22,6 @@ class ViewComposerServiceProvider extends ServiceProvider
         // Enregistrement des ViewComposers pour les notifications
         view()->composer('layouts.app', \App\Http\ViewComposers\ReservationNotificationsComposer::class);
         view()->composer('layouts.app', \App\Http\ViewComposers\FeedbackNotificationsComposer::class);
+        view()->composer('layouts.app', \App\Http\ViewComposers\BirthdayNotificationsComposer::class);
     }
 }

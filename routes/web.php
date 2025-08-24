@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\SearchController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\AnniversaireController;
 use App\Http\Controllers\ClientController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\PrestationController;
@@ -79,6 +80,8 @@ Route::middleware('auth')->group(function () {
     
     // Client routes
     Route::resource('clients', ClientController::class);
+    Route::get('/clients-anniversaires', [\App\Http\Controllers\AnniversaireController::class, 'index'])->name('clients.anniversaires');
+    Route::get('/debug-anniversaires', [\App\Http\Controllers\DebugController::class, 'debug'])->name('debug.anniversaires');
     
     // Points de fidélité routes
     Route::group(['prefix' => 'loyalty-points', 'as' => 'loyalty-points.', 'middleware' => ['auth']], function () {
