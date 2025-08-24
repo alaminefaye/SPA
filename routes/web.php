@@ -24,6 +24,7 @@ use App\Http\Controllers\Admin\ReportController;
 use App\Http\Controllers\Admin\LoginActivityController;
 use App\Http\Controllers\Admin\EmployeeController;
 use App\Http\Controllers\LoyaltyPointsController;
+use App\Http\Controllers\RappelRendezVousController;
 
 // Welcome page
 Route::get('/', function () {
@@ -95,6 +96,14 @@ Route::middleware('auth')->group(function () {
     // Note: Ces routes spécifiques doivent être définies AVANT la route resource
     Route::get('/seances/a-demarrer', [SeanceController::class, 'aDemarrer'])->name('seances.a_demarrer');
     Route::get('/seances/terminees', [SeanceController::class, 'terminees'])->name('seances.terminees');
+    
+    // Routes pour les rappels de rendez-vous
+    Route::prefix('rappels')->name('rappels.')->group(function () {
+        Route::get('/', [RappelRendezVousController::class, 'index'])->name('index');
+        Route::post('/{rappel}/confirmer', [RappelRendezVousController::class, 'confirmer'])->name('confirmer');
+        Route::post('/{rappel}/annuler', [RappelRendezVousController::class, 'annuler'])->name('annuler');
+        Route::get('/{rappel}/creer-seance', [RappelRendezVousController::class, 'creerSeance'])->name('creer-seance');
+    });
     Route::get('/seances-test/demarrage', [SeanceController::class, 'aDemarrer'])->name('seances.test.demarrage');
     Route::post('/seances/{id}/demarrer', [SeanceController::class, 'demarrer'])->name('seances.demarrer');
     Route::post('/seances/{id}/terminer', [SeanceController::class, 'terminer'])->name('seances.terminer');

@@ -114,6 +114,11 @@
                     <div data-i18n="Terminées">Séances terminées</div>
                   </a>
                 </li>
+                <li class="menu-item {{ request()->is('rappels*') ? 'active' : '' }}">
+                  <a href="{{ route('rappels.index') }}" class="menu-link">
+                    <div data-i18n="Rappels">Rappels de rendez-vous</div>
+                  </a>
+                </li>
               </ul>
             </li>
             @endcan

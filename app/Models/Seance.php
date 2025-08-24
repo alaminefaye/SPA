@@ -65,6 +65,14 @@ class Seance extends Model
     }
     
     /**
+     * Get the rappels de rendez-vous associated with the seance.
+     */
+    public function rappelsRendezVous()
+    {
+        return $this->hasMany(RappelRendezVous::class);
+    }
+    
+    /**
      * Calcule le prix total de toutes les prestations associées à la séance
      */
     public function calculerPrixTotal()

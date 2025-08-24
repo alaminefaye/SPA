@@ -190,6 +190,22 @@
                         </div>
                     </div>
                     
+                    <div class="row mb-3">
+                        <label class="col-sm-2 col-form-label">Rappel automatique</label>
+                        <div class="col-sm-10">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="creer_rappel" name="creer_rappel" value="1" checked>
+                                <label class="form-check-label" for="creer_rappel">
+                                    Créer automatiquement un rappel de prochain rendez-vous dans 2 semaines
+                                </label>
+                            </div>
+                            <div class="form-text text-info">
+                                <i class="bx bx-info-circle me-1"></i>
+                                Un rappel de rendez-vous sera automatiquement créé 14 jours après cette séance.
+                            </div>
+                        </div>
+                    </div>
+                    
                     <div class="row justify-content-end">
                         <div class="col-sm-10">
                             <button type="submit" class="btn btn-primary">Enregistrer</button>

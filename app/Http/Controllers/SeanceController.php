@@ -6,6 +6,7 @@ use App\Models\Client;
 use App\Models\Prestation;
 use App\Models\Salon;
 use App\Models\Seance;
+use App\Http\Controllers\RappelRendezVousController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
@@ -181,6 +182,11 @@ class SeanceController extends Controller
         }
         
         $seance->save();
+        
+        // Créer un rappel automatique si l'option est cochée
+        if ($request->has('creer_rappel') && $request->creer_rappel) {
+            RappelRendezVousController::creerRappelDepuisSeance($seance, 14); // Rappel dans 14 jours par défaut
+        }
         
         // Retourner une vue qui va ouvrir le ticket dans une nouvelle fenêtre
         return view('seances.created', [

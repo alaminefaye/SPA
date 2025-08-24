@@ -37,6 +37,14 @@ class Client extends Model
     }
     
     /**
+     * Get the rappels de rendez-vous for the client.
+     */
+    public function rappelsRendezVous(): HasMany
+    {
+        return $this->hasMany(RappelRendezVous::class);
+    }
+    
+    /**
      * Ajoute des points de fidélité au client
      * @param int $points Nombre de points à ajouter
      * @return bool
