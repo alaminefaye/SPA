@@ -141,6 +141,34 @@
             max-width: 100%;
             object-fit: cover;
         }
+        
+        /* Styles pour les icônes de satisfaction */
+        .satisfaction-container {
+            margin: 20px 0;
+        }
+        
+        .satisfaction-option {
+            cursor: pointer;
+            padding: 10px 5px;
+            border-radius: 10px;
+            transition: all 0.2s ease;
+        }
+        
+        .satisfaction-option:hover {
+            background-color: #f8f9fa;
+            transform: translateY(-5px);
+        }
+        
+        .satisfaction-option.active {
+            background-color: #e7f1ff;
+            border: 2px solid #4e73df;
+            transform: translateY(-5px);
+        }
+        
+        .emoji {
+            font-size: 2.5rem;
+            margin-bottom: 5px;
+        }
     </style>
 </head>
 <body>
@@ -272,15 +300,6 @@
                                 <div class="text-danger mt-2">{{ $message }}</div>
                             @enderror
                         </div>
-                        
-                        <div class="mb-3">
-                            <label for="sujet" class="form-label">Sujet <span class="text-danger">*</span></label>
-                            <input type="text" class="form-control @error('sujet') is-invalid @enderror" id="sujet" name="sujet" value="{{ old('sujet') }}" required>
-                            @error('sujet')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
-                        </div>
-                        
                         <div class="mb-3">
                             <label class="form-label">Employé concerné</label>
                             <div class="row employee-selection-container">
@@ -304,20 +323,78 @@
                                 <div class="text-danger">{{ $message }}</div>
                             @enderror
                         </div>
+                        <div class="mb-4">
+                            <label class="form-label">Niveau de satisfaction</label>
+                            <div class="satisfaction-container text-center">
+                                <div class="row justify-content-center">
+                                    <div class="col" style="max-width: 100px;">
+                                        <div class="satisfaction-option" data-rating="1">
+                                            <div class="emoji emoji-very-unsatisfied">😠</div>
+                                            <div class="mt-2">Très insatisfait</div>
+                                        </div>
+                                    </div>
+                                    <div class="col" style="max-width: 100px;">
+                                        <div class="satisfaction-option" data-rating="2">
+                                            <div class="emoji emoji-unsatisfied">🙁</div>
+                                            <div class="mt-2">Insatisfait</div>
+                                        </div>
+                                    </div>
+                                    <div class="col" style="max-width: 100px;">
+                                        <div class="satisfaction-option" data-rating="3">
+                                            <div class="emoji emoji-neutral">😐</div>
+                                            <div class="mt-2">Neutre</div>
+                                        </div>
+                                    </div>
+                                    <div class="col" style="max-width: 100px;">
+                                        <div class="satisfaction-option" data-rating="4">
+                                            <div class="emoji emoji-satisfied">🙂</div>
+                                            <div class="mt-2">Satisfait</div>
+                                        </div>
+                                    </div>
+                                    <div class="col" style="max-width: 100px;">
+                                        <div class="satisfaction-option" data-rating="5">
+                                            <div class="emoji emoji-very-satisfied">😀</div>
+                                            <div class="mt-2">Très satisfait</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="mt-3" id="satisfaction-display-container" style="display: none;">
+                                    <div class="alert alert-info">
+                                        <strong>Votre évaluation:</strong> <span id="satisfaction-text-display"></span>
+                                        <span id="satisfaction-value-display" class="badge bg-primary ms-2"></span>
+                                    </div>
+                                </div>
+                                <input type="hidden" name="satisfaction_rating" id="satisfaction_rating" value="{{ old('satisfaction_rating') }}">
+                                @error('satisfaction_rating')
+                                    <div class="text-danger mt-2">{{ $message }}</div>
+                                @enderror
+                            </div>
+                        </div>
                         
+                        
+                        
+                      
+
                         <div class="mb-3">
-                            <label for="photo" class="form-label">Photo (si applicable, max 10 MB)</label>
-                            <input type="file" class="form-control @error('photo') is-invalid @enderror" id="photo" name="photo" accept="image/*">
-                            <div class="form-text">Formats acceptés : JPEG, PNG, JPG, GIF - Maximum 10 MB</div>
-                            @error('photo')
+                            <label for="sujet" class="form-label">Sujet <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control @error('sujet') is-invalid @enderror" id="sujet" name="sujet" value="{{ old('sujet') }}" required>
+                            @error('sujet')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
                         </div>
-                        
+                                                     
                         <div class="mb-3">
                             <label for="message" class="form-label">Votre message <span class="text-danger">*</span></label>
                             <textarea class="form-control @error('message') is-invalid @enderror" id="message" name="message" rows="5" required>{{ old('message') }}</textarea>
                             @error('message')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+                        <div class="mb-3">
+                            <label for="photo" class="form-label">Photo (si necessaire, max 10 MB)</label>
+                            <input type="file" class="form-control @error('photo') is-invalid @enderror" id="photo" name="photo" accept="image/*">
+                            <div class="form-text">Formats acceptés : JPEG, PNG, JPG, GIF - Maximum 10 MB</div>
+                            @error('photo')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
                         </div>
@@ -359,6 +436,37 @@
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
         $(document).ready(function() {
+            // Gestion de la sélection des niveaux de satisfaction
+            $('.satisfaction-option').click(function() {
+                $('.satisfaction-option').removeClass('active');
+                $(this).addClass('active');
+                
+                const rating = $(this).data('rating');
+                $('#satisfaction_rating').val(rating);
+                
+                // Afficher la valeur et le texte de satisfaction
+                const texts = {
+                    '1': 'Très insatisfait',
+                    '2': 'Insatisfait',
+                    '3': 'Neutre',
+                    '4': 'Satisfait',
+                    '5': 'Très satisfait'
+                };
+                
+                $('#satisfaction-text-display').text(texts[rating]);
+                $('#satisfaction-value-display').text(rating + '/5');
+                $('#satisfaction-display-container').fadeIn();
+            });
+            
+            // Si un niveau de satisfaction était précédemment sélectionné (validation error), le resélectionner
+            const savedRating = $('#satisfaction_rating').val();
+            if (savedRating) {
+                $(`.satisfaction-option[data-rating="${savedRating}"]`).click();
+            } else {
+                // Cacher le conteneur d'affichage s'il n'y a pas de note sélectionnée
+                $('#satisfaction-display-container').hide();
+            }
+            
             // Gestion du champ de recherche des prestations
             const searchInput = document.getElementById('searchPrestation');
             

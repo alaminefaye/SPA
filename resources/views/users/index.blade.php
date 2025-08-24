@@ -37,7 +37,7 @@
                     <div class="col-md-8">
                         <div class="input-group">
                             <span class="input-group-text"><i class="bx bx-search"></i></span>
-                            <input type="text" name="search" class="form-control" placeholder="Rechercher un utilisateur..." value="{{ request('search') }}">
+                            <input type="text" name="search" class="form-control" placeholder="Rechercher un utilisateur..." value="{{ $search ?? '' }}">
                         </div>
                     </div>
                     <div class="col-md-4">
@@ -108,7 +108,9 @@
             </table>
         </div>
         <div class="card-footer">
-            {{ $users->links() }}
+            <div class="mt-3 px-2">
+                {{ $users->links('pagination::bootstrap-5') }}
+            </div>
         </div>
     </div>
 </div>

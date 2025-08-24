@@ -30,14 +30,9 @@ class UserController extends Controller
             });
         }
         
-        $users = $query->latest()->paginate(10);
+        $users = $query->latest()->paginate(10)->withQueryString();
         
-        // Préserver les paramètres de recherche dans les liens de pagination
-        if ($search) {
-            $users->appends(['search' => $search]);
-        }
-        
-        return view('users.index', compact('users'));
+        return view('users.index', compact('users', 'search'));
     }
 
     /**

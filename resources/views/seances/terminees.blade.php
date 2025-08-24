@@ -25,7 +25,7 @@
         
         <form action="{{ route('seances.terminees') }}" method="GET" class="mb-4">
             <div class="input-group">
-                <input type="text" class="form-control" placeholder="Rechercher..." name="search" value="{{ $search ?? '' }}">
+                <input type="text" class="form-control" placeholder="Rechercher..." name="search" value="{{ $search }}">
                 <button class="btn btn-outline-primary" type="submit">Rechercher</button>
                 @if($search ?? false)
                     <a href="{{ route('seances.terminees') }}" class="btn btn-outline-secondary">Réinitialiser</a>

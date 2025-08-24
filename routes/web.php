@@ -175,7 +175,13 @@ Route::middleware('auth')->group(function () {
         Route::delete('/{employee}', [EmployeeController::class, 'destroy'])->middleware('can:delete employees')->name('destroy');
         Route::patch('/{employee}/toggle-status', [EmployeeController::class, 'toggleStatus'])->middleware('can:toggle employee status')->name('toggle-status');
     });
-    
+
+    // Routes pour les notes de satisfaction
+    Route::prefix('admin/satisfaction')->name('admin.satisfaction.')->middleware('auth')->group(function () {
+        Route::get('/', [\App\Http\Controllers\Admin\SatisfactionRatingController::class, 'index'])->middleware('can:view employees')->name('index');
+        Route::get('/top-employees', [\App\Http\Controllers\Admin\SatisfactionRatingController::class, 'topEmployees'])->middleware('can:view employees')->name('top-employees');
+    });
+
     // Client search route
     Route::get('/client-search-by-phone', [ClientController::class, 'searchByPhone'])->name('clients.searchByPhone');
     

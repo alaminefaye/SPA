@@ -25,7 +25,7 @@
                     <div class="col-md-8">
                         <div class="input-group">
                             <span class="input-group-text"><i class="bx bx-search"></i></span>
-                            <input type="text" name="search" class="form-control" placeholder="Rechercher..." value="{{ request('search') }}">
+                            <input type="text" name="search" class="form-control" placeholder="Rechercher un feedback par nom, sujet ou message..." value="{{ $search ?? '' }}">
                         </div>
                     </div>
                     <div class="col-md-4">
@@ -60,6 +60,7 @@
                             <th>Client</th>
                             <th>Salon</th>
                             <th>Prestation</th>
+                            <th>Satisfaction</th>
                             <th>Sujet</th>
                             <th>Statut</th>
                             <th>Actions</th>
@@ -95,6 +96,33 @@
                                         {{ $feedback->prestation }}
                                     @else
                                         <span class="text-muted">Non spécifié</span>
+                                    @endif
+                                </td>
+                                <td>
+                                    @if($feedback->satisfaction_rating)
+                                        <div class="d-flex align-items-center">
+                                            <div class="me-2">
+                                                @switch($feedback->satisfaction_rating)
+                                                    @case(1)
+                                                        <span title="Très insatisfait" data-bs-toggle="tooltip">😠</span>
+                                                        @break
+                                                    @case(2)
+                                                        <span title="Insatisfait" data-bs-toggle="tooltip">🙁</span>
+                                                        @break
+                                                    @case(3)
+                                                        <span title="Neutre" data-bs-toggle="tooltip">😐</span>
+                                                        @break
+                                                    @case(4)
+                                                        <span title="Satisfait" data-bs-toggle="tooltip">🙂</span>
+                                                        @break
+                                                    @case(5)
+                                                        <span title="Très satisfait" data-bs-toggle="tooltip">😀</span>
+                                                        @break
+                                                @endswitch
+                                            </div>
+                                        </div>
+                                    @else
+                                        <span class="text-muted">Non évalué</span>
                                     @endif
                                 </td>
                                 <td>{{ Str::limit($feedback->sujet, 50) }}</td>
@@ -162,10 +190,22 @@
                 </table>
             </div>
 
-            <div class="mt-3">
-                {{ $feedbacks->links() }}
+            <div class="mt-3 px-2">
+                {{ $feedbacks->links('pagination::bootstrap-5') }}
             </div>
         </div>
     </div>
 </div>
 @endsection
+
+@push('scripts')
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialize tooltips
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl);
+        });
+    });
+</script>
+@endpush

@@ -39,13 +39,27 @@ class FeedbackController extends Controller
     /**
      * Display a listing of feedbacks in admin dashboard
      */
-    public function index()
+    public function index(Request $request)
     {
-        $feedbacks = Feedback::orderBy('is_priority', 'desc')
-            ->orderBy('created_at', 'desc')
-            ->paginate(10);
+        $search = $request->input('search');
         
-        return view('feedbacks.index', compact('feedbacks'));
+        $query = Feedback::query()
+            ->orderBy('is_priority', 'desc')
+            ->orderBy('created_at', 'desc');
+        
+        if ($search) {
+            $query->where(function($q) use ($search) {
+                $q->where('nom_complet', 'LIKE', "%{$search}%")
+                  ->orWhere('sujet', 'LIKE', "%{$search}%")
+                  ->orWhere('message', 'LIKE', "%{$search}%")
+                  ->orWhere('telephone', 'LIKE', "%{$search}%")
+                  ->orWhere('email', 'LIKE', "%{$search}%");
+            });
+        }
+        
+        $feedbacks = $query->paginate(10)->withQueryString();
+        
+        return view('feedbacks.index', compact('feedbacks', 'search'));
     }
 
     /**
@@ -74,6 +88,7 @@ class FeedbackController extends Controller
             'photo' => 'nullable|file|mimes:jpeg,png,jpg,gif|max:10240', // 10MB max
             'message' => 'required|string',
             'employee_id' => 'nullable|exists:employees,id',
+            'satisfaction_rating' => 'nullable|integer|between:1,5',
         ]);
 
         // Gérer l'upload de photo si présent

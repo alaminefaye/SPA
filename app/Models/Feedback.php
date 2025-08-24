@@ -26,12 +26,14 @@ class Feedback extends Model
         'message',
         'is_priority',
         'is_read',
-        'employee_id'
+        'employee_id',
+        'satisfaction_rating'
     ];
     
     protected $casts = [
         'is_priority' => 'boolean',
         'is_read' => 'boolean',
+        'satisfaction_rating' => 'integer',
     ];
     
     /**
@@ -56,7 +58,7 @@ class Feedback extends Model
     public function getActivitylogOptions(): LogOptions
     {
         return LogOptions::defaults()
-            ->logOnly(['nom_complet', 'telephone', 'email', 'salon_id', 'numero_ticket', 'prestation', 'sujet', 'photo', 'message', 'is_priority', 'is_read', 'employee_id'])
+            ->logOnly(['nom_complet', 'telephone', 'email', 'salon_id', 'numero_ticket', 'prestation', 'sujet', 'photo', 'message', 'is_priority', 'is_read', 'employee_id', 'satisfaction_rating'])
             ->logOnlyDirty()
             ->dontSubmitEmptyLogs()
             ->setDescriptionForEvent(function(string $eventName) {

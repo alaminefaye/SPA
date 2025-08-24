@@ -57,7 +57,8 @@ class RappelRendezVousController extends Controller
         
         $rappels = $query->orderBy('date_prevue')
                          ->orderBy('heure_prevue')
-                         ->paginate(20);
+                         ->paginate(20)
+                         ->withQueryString();
         
         return view('seances.rappels.index', compact('rappels', 'periode', 'search'));
     }

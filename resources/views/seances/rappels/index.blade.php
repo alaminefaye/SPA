@@ -153,8 +153,8 @@
             
             @if($rappels->count() > 0)
                 <div class="card-footer pb-0">
-                    <div class="d-flex justify-content-center">
-                        {{ $rappels->appends(request()->query())->links() }}
+                    <div class="mt-3 px-2">
+                        {{ $rappels->links('pagination::bootstrap-5') }}
                     </div>
                 </div>
             @endif

@@ -29,7 +29,7 @@ class LoyaltyPointsController extends Controller
             });
         }
         
-        $clients = $query->orderBy('points', 'desc')->paginate(10);
+        $clients = $query->orderBy('points', 'desc')->paginate(10)->withQueryString();
         
         // Statistiques des points de fidélité
         $statsPoints = DB::table('clients')

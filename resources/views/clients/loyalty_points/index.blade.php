@@ -195,8 +195,8 @@
                 </table>
             </div>
             
-            <div class="mt-3">
-                {{ $clients->links() }}
+            <div class="mt-3 px-2">
+                {{ $clients->links('pagination::bootstrap-5') }}
             </div>
         </div>
     </div>

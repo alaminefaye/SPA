@@ -24,6 +24,56 @@
                 </div>
                 
                 <div class="card-body">
+                    @if($feedback->satisfaction_rating)
+                    <div class="mb-4">
+                        <h6 class="fw-semibold">Niveau de satisfaction :</h6>
+                        <div class="p-3 bg-light rounded">
+                            <div class="d-flex align-items-center">
+                                <div class="me-2" style="font-size: 2rem">
+                                    @switch($feedback->satisfaction_rating)
+                                        @case(1)
+                                            <span title="Très insatisfait" data-bs-toggle="tooltip">😠</span>
+                                            @break
+                                        @case(2)
+                                            <span title="Insatisfait" data-bs-toggle="tooltip">🙁</span>
+                                            @break
+                                        @case(3)
+                                            <span title="Neutre" data-bs-toggle="tooltip">😐</span>
+                                            @break
+                                        @case(4)
+                                            <span title="Satisfait" data-bs-toggle="tooltip">🙂</span>
+                                            @break
+                                        @case(5)
+                                            <span title="Très satisfait" data-bs-toggle="tooltip">😀</span>
+                                            @break
+                                        @default
+                                            <span>Non évalué</span>
+                                    @endswitch
+                                </div>
+                                <div>
+                                    @switch($feedback->satisfaction_rating)
+                                        @case(1)
+                                            <strong class="text-danger">Très insatisfait</strong>
+                                            @break
+                                        @case(2)
+                                            <strong class="text-warning">Insatisfait</strong>
+                                            @break
+                                        @case(3)
+                                            <strong>Neutre</strong>
+                                            @break
+                                        @case(4)
+                                            <strong class="text-success">Satisfait</strong>
+                                            @break
+                                        @case(5)
+                                            <strong class="text-success">Très satisfait</strong>
+                                            @break
+                                    @endswitch
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    @endif
+                    
                     <div class="mb-4">
                         <h6 class="fw-semibold">Message :</h6>
                         <div class="p-3 bg-light rounded">
@@ -167,3 +217,15 @@
     </div>
 </div>
 @endsection
+
+@push('scripts')
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialize tooltips
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl);
+        });
+    });
+</script>
+@endpush

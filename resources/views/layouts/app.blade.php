@@ -184,11 +184,23 @@
             
             <!-- Gestion des employés -->
             @can('view employees')
-            <li class="menu-item {{ request()->is('admin/employees*') ? 'active' : '' }}">
-              <a href="{{ route('admin.employees.index') }}" class="menu-link">
+            <li class="menu-item {{ request()->is('admin/employees*') || request()->is('admin/satisfaction*') ? 'active open' : '' }}">
+              <a href="javascript:void(0);" class="menu-link menu-toggle">
                 <i class="menu-icon tf-icons bx bx-user-pin"></i>
                 <div data-i18n="Employees">Gestion des employés</div>
               </a>
+              <ul class="menu-sub">
+                <li class="menu-item {{ request()->is('admin/employees') || request()->is('admin/employees/create') || request()->is('admin/employees/*/edit') ? 'active' : '' }}">
+                  <a href="{{ route('admin.employees.index') }}" class="menu-link">
+                    <div data-i18n="Liste">Liste des employés</div>
+                  </a>
+                </li>
+                <li class="menu-item {{ request()->is('admin/satisfaction*') ? 'active' : '' }}">
+                  <a href="{{ route('admin.satisfaction.index') }}" class="menu-link">
+                    <div data-i18n="Satisfaction">Notes de satisfaction</div>
+                  </a>
+                </li>
+              </ul>
             </li>
             @endcan
             
