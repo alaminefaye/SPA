@@ -65,7 +65,12 @@
                                         <span class="badge bg-info">Dans {{ $client->joursAvantAnniversaire() }} jours</span>
                                     @endif
                                 </td>
-                                <td>
+                                <td class="d-flex gap-1">
+                                    @if($client->isAnniversaireToday())
+                                        <a href="{{ $client->getWhatsAppUrl() }}" target="_blank" class="btn btn-sm btn-success d-inline-flex align-items-center" title="Envoyer voeux d'anniversaire par WhatsApp">
+                                            <i class="bx bxl-whatsapp"></i>
+                                        </a>
+                                    @endif
                                     <a href="{{ route('clients.show', $client->id) }}" class="btn btn-sm btn-info">
                                         <i class="ti ti-eye"></i> Voir
                                     </a>

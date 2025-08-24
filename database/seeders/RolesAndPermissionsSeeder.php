@@ -92,6 +92,19 @@ class RolesAndPermissionsSeeder extends Seeder
         Permission::firstOrCreate(['name' => 'view reports']);
         Permission::firstOrCreate(['name' => 'export reports']);
         
+        // Permissions pour Rappels de rendez-vous
+        Permission::firstOrCreate(['name' => 'view rappels']);
+        Permission::firstOrCreate(['name' => 'create rappels']);
+        Permission::firstOrCreate(['name' => 'edit rappels']);
+        Permission::firstOrCreate(['name' => 'delete rappels']);
+        Permission::firstOrCreate(['name' => 'confirm rappels']);
+        Permission::firstOrCreate(['name' => 'cancel rappels']);
+        Permission::firstOrCreate(['name' => 'send whatsapp messages']);
+        
+        // Permissions pour Anniversaires
+        Permission::firstOrCreate(['name' => 'view anniversaires']);
+        Permission::firstOrCreate(['name' => 'send anniversary messages']);
+        
         // Permissions pour Employés
         Permission::firstOrCreate(['name' => 'view employees']);
         Permission::firstOrCreate(['name' => 'create employees']);
@@ -131,6 +144,8 @@ class RolesAndPermissionsSeeder extends Seeder
             'view reservations', 'create reservations', 'edit reservations', 'delete reservations', 'mark reservation as read',
             'view purchases', 'create purchases', 'edit purchases', 'delete purchases',
             'view feedbacks', 'create feedbacks', 'edit feedbacks', 'delete feedbacks', 'mark feedback as read',
+            'view rappels', 'create rappels', 'edit rappels', 'delete rappels', 'confirm rappels', 'cancel rappels', 'send whatsapp messages',
+            'view anniversaires', 'send anniversary messages',
             'view activity logs', 'delete activity logs', 'clear all activity logs',
             'view users', 'create users', 'edit users', 'delete users',
             'view reports', 'export reports',
@@ -150,6 +165,8 @@ class RolesAndPermissionsSeeder extends Seeder
             'view reservations', 'create reservations', 'edit reservations', 'mark reservation as read',
             'view purchases', 'create purchases', 'edit purchases',
             'view feedbacks', 'mark feedback as read',
+            'view rappels', 'create rappels', 'edit rappels', 'confirm rappels', 'cancel rappels', 'send whatsapp messages',
+            'view anniversaires', 'send anniversary messages',
             'view activity logs',
             'view reports', 'export reports',
             'view employees', 'edit employees'
@@ -167,6 +184,8 @@ class RolesAndPermissionsSeeder extends Seeder
             'view reservations', 'create reservations', 'edit reservations', 'mark reservation as read',
             'view purchases', 'create purchases',
             'view feedbacks', 'create feedbacks', 'mark feedback as read',
+            'view rappels', 'create rappels', 'edit rappels', 'confirm rappels', 'cancel rappels', 'send whatsapp messages',
+            'view anniversaires', 'send anniversary messages',
             'view reports',
             'view employees'
         ]);

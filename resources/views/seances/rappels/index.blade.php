@@ -103,13 +103,19 @@
                                 <td>
                                     <small>{{ Str::limit($rappel->commentaire, 50) }}</small>
                                 </td>
-                                <td class="text-center">
-                                    <div class="dropdown">
-                                        <button type="button" class="btn btn-sm dropdown-toggle hide-arrow py-0" data-bs-toggle="dropdown">
-                                            <i class="bx bx-dots-vertical-rounded"></i>
-                                        </button>
-                                        <div class="dropdown-menu dropdown-menu-end">
-                                            @if($rappel->statut == 'en_attente')
+                                <td class="text-center d-flex gap-1 justify-content-center">
+                                    @if($rappel->statut == 'en_attente')
+                                        <!-- Bouton WhatsApp - Maintenant visible en dehors du dropdown -->
+                                        <a class="btn btn-sm btn-success d-inline-flex align-items-center" href="{{ $rappel->getWhatsAppUrl() }}" target="_blank" title="Envoyer rappel WhatsApp">
+                                            <i class="bx bxl-whatsapp"></i>
+                                        </a>
+                                        
+                                        <!-- Menu déroulant pour les autres actions -->
+                                        <div class="dropdown d-inline-block">
+                                            <button type="button" class="btn btn-sm btn-outline-secondary dropdown-toggle hide-arrow py-0" data-bs-toggle="dropdown">
+                                                <i class="bx bx-dots-vertical-rounded"></i>
+                                            </button>
+                                            <div class="dropdown-menu dropdown-menu-end">
                                                 <a class="dropdown-item text-success" href="#" 
                                                    onclick="event.preventDefault(); document.getElementById('confirm-form-{{ $rappel->id }}').submit();">
                                                     <i class="bx bx-check me-1"></i> Confirmer
@@ -130,14 +136,9 @@
                                                 <a class="dropdown-item" href="{{ route('rappels.creer-seance', $rappel->id) }}">
                                                     <i class="bx bx-calendar-plus me-1"></i> Créer une séance
                                                 </a>
-                                                
-                                                <div class="dropdown-divider"></div>
-                                                <a class="dropdown-item text-success" href="{{ $rappel->getWhatsAppUrl() }}" target="_blank">
-                                                    <i class="bx bxl-whatsapp me-1"></i> Envoyer rappel WhatsApp
-                                                </a>
-                                            @endif
+                                            </div>
                                         </div>
-                                    </div>
+                                    @endif
                                 </td>
                             </tr>
                         @empty

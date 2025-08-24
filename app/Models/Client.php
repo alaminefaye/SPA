@@ -154,4 +154,66 @@ class Client extends Model
     {
         return $this->date_naissance ? $this->date_naissance->format('d/m/Y') : null;
     }
+    
+    /**
+     * Génère un message de voeux d'anniversaire pour le client
+     * 
+     * @return string
+     */
+    public function genererMessageAnniversaire(): string
+    {
+        $nomClient = $this->nom_complet;
+        $age = $this->getAge();
+        $ageText = $age ? " pour vos $age ans" : "";
+        
+        $message = "Bonjour $nomClient, \n\n";
+        $message .= "C'est JARED SPA qui vous contacte pour vous souhaiter un joyeux anniversaire$ageText ! 🎂🎉\n\n";
+        $message .= "Nous espérons que vous passerez une excellente journée et serions ravis de vous accueillir prochainement pour une séance bien-être.\n\n";
+        $message .= "À l'occasion de votre anniversaire, profitez d'une réduction de 10% sur votre prochaine prestation !\n\n";
+        $message .= "L'équipe JARED SPA 💅";
+        
+        return $message;
+    }
+    
+    /**
+     * Retourne l'âge du client basé sur sa date de naissance
+     * 
+     * @return int|null
+     */
+    protected function getAge(): ?int
+    {
+        return $this->date_naissance ? $this->date_naissance->age : null;
+    }
+    
+    /**
+     * Génère l'URL WhatsApp pour envoyer un message d'anniversaire
+     * 
+     * @return string
+     */
+    public function getWhatsAppUrl(): string
+    {
+        $numero = $this->numero_telephone;
+        
+        // Nettoyage du numéro de téléphone
+        $numero = preg_replace('/[^0-9]/', '', $numero);
+        
+        // S'assurer que le numéro commence par le code pays (225)
+        if (!str_starts_with($numero, '225')) {
+            $numero = '225' . $numero;
+        }
+        
+        // Vérifier si le numéro contient un 0 après le code pays
+        if (substr($numero, 3, 1) !== '0') {
+            // Insérer un 0 après le code pays
+            $numero = substr($numero, 0, 3) . '0' . substr($numero, 3);
+        }
+        
+        // Formater le numéro au format international
+        $numeroFormate = '+' . $numero;
+        
+        // Encoder le message pour l'URL
+        $message = urlencode($this->genererMessageAnniversaire());
+        
+        return "https://api.whatsapp.com/send?phone={$numeroFormate}&text={$message}";
+    }
 }
