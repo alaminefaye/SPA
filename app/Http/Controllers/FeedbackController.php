@@ -66,7 +66,7 @@ class FeedbackController extends Controller
         $validated = $request->validate([
             'nom_complet' => 'required|string|max:255',
             'telephone' => 'required|string|max:20',
-            'email' => 'required|email|max:255',
+            'email' => 'nullable|email|max:255',
             'salon_id' => 'nullable|exists:salons,id',
             'numero_ticket' => 'nullable|string|max:50',
             'prestation' => 'nullable|string|max:255',
