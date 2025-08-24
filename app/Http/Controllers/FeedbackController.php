@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Feedback;
 use App\Models\Salon;
 use App\Models\Prestation;
+use App\Models\Employee;
 use App\Services\PriorityDetectionService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -31,7 +32,8 @@ class FeedbackController extends Controller
     {
         $salons = Salon::all();
         $prestations = Prestation::all();
-        return view('feedbacks.public-form', compact('salons', 'prestations'));
+        $employees = Employee::where('actif', true)->get();
+        return view('feedbacks.public-form', compact('salons', 'prestations', 'employees'));
     }
 
     /**
@@ -52,7 +54,8 @@ class FeedbackController extends Controller
     public function create()
     {
         $salons = Salon::all();
-        return view('feedbacks.create', compact('salons'));
+        $employees = Employee::where('actif', true)->get();
+        return view('feedbacks.create', compact('salons', 'employees'));
     }
 
     /**
@@ -70,6 +73,7 @@ class FeedbackController extends Controller
             'sujet' => 'required|string|max:255',
             'photo' => 'nullable|file|mimes:jpeg,png,jpg,gif|max:10240', // 10MB max
             'message' => 'required|string',
+            'employee_id' => 'nullable|exists:employees,id',
         ]);
 
         // Gérer l'upload de photo si présent

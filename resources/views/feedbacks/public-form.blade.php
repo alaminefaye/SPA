@@ -91,6 +91,56 @@
             font-style: italic;
             margin-bottom: 15px;
         }
+        
+        .header-image {
+            max-height: 200px;
+            object-fit: contain;
+        }
+        .card-form {
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+        .card-header {
+            background-color: #4e73df;
+            color: white;
+            border-bottom: none;
+        }
+        .btn-primary {
+            background-color: #4e73df;
+            border-color: #4e73df;
+        }
+        .btn-primary:hover {
+            background-color: #2e59d9;
+            border-color: #2e59d9;
+        }
+        .employee-item {
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        .employee-item:hover {
+            background-color: #f8f9fa;
+        }
+        .employee-item.active {
+            background-color: #e7f1ff;
+            border-color: #4e73df;
+            font-weight: bold;
+        }
+        .employee-photo-container {
+            width: 100%;
+            height: 150px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        .employee-photo-container img {
+            max-height: 150px;
+            max-width: 100%;
+            object-fit: cover;
+        }
     </style>
 </head>
 <body>
@@ -181,16 +231,45 @@
                         
                         <div class="mb-3">
                             <label for="prestation" class="form-label">Prestation concernée</label>
-                            <select class="form-select @error('prestation') is-invalid @enderror" id="prestation" name="prestation">
-                                <option value="">-- Sélectionnez une prestation --</option>
-                                @foreach ($prestations as $prestation)
-                                    <option value="{{ $prestation->nom_prestation }}" {{ old('prestation') == $prestation->nom_prestation ? 'selected' : '' }}>
-                                        {{ $prestation->nom_prestation }} ({{ number_format($prestation->prix, 0, ',', ' ') }} FCFA - {{ $prestation->duree->format('H:i') }})
-                                    </option>
-                                @endforeach
-                            </select>
+                            <div class="mb-2">
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="bx bx-search"></i></span>
+                                    <input type="text" class="form-control" id="searchPrestation" placeholder="Rechercher une prestation...">
+                                </div>
+                                <div class="form-text">Commencez à taper pour voir les prestations disponibles</div>
+                            </div>
+                            <div class="table-responsive prestations-table" style="max-height: 200px; overflow-y: auto;">
+                                <table class="table table-bordered table-hover">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th style="width: 70px;" class="text-center">Sélection</th>
+                                            <th>Prestation</th>
+                                            <th style="width: 140px;" class="text-end">Prix (FCFA)</th>
+                                            <th style="width: 100px;" class="text-center">Durée</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach($prestations as $prestation)
+                                        <tr class="prestation-row" style="display: none;">
+                                            <td class="text-center">
+                                                <div class="form-check d-flex justify-content-center">
+                                                    <input class="form-check-input prestation-radio" type="radio" 
+                                                        value="{{ $prestation->nom_prestation }}" id="prestation_{{ $prestation->id }}" 
+                                                        name="prestation" data-prix="{{ $prestation->prix }}" 
+                                                        data-duree="{{ $prestation->duree ? $prestation->duree->format('H:i') : '00:00' }}"
+                                                        {{ old('prestation') == $prestation->nom_prestation ? 'checked' : '' }}>
+                                                </div>
+                                            </td>
+                                            <td>{{ $prestation->nom_prestation }}</td>
+                                            <td class="text-end">{{ number_format($prestation->prix, 0, ',', ' ') }}</td>
+                                            <td class="text-center">{{ $prestation->duree ? $prestation->duree->format('H:i') : '00:00' }}</td>
+                                        </tr>
+                                        @endforeach
+                                    </tbody>
+                                </table>
+                            </div>
                             @error('prestation')
-                                <div class="invalid-feedback">{{ $message }}</div>
+                                <div class="text-danger mt-2">{{ $message }}</div>
                             @enderror
                         </div>
                         
@@ -199,6 +278,30 @@
                             <input type="text" class="form-control @error('sujet') is-invalid @enderror" id="sujet" name="sujet" value="{{ old('sujet') }}" required>
                             @error('sujet')
                                 <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Employé concerné</label>
+                            <div class="row employee-selection-container">
+                                <div class="col-md-8">
+                                    <ul class="list-group">
+                                        @foreach($employees as $employee)
+                                            <li class="list-group-item employee-item" data-employee-id="{{ $employee->id }}" data-photo="{{ $employee->photo ? asset('storage/'.$employee->photo) : asset('assets/img/default-profile.png') }}">
+                                                {{ $employee->nom_complet }}
+                                            </li>
+                                        @endforeach
+                                    </ul>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="employee-photo-container">
+                                        <img id="selected-employee-photo" src="{{ asset('assets/img/default-profile.png') }}" alt="Photo de l'employé" class="img-fluid rounded">
+                                    </div>
+                                </div>
+                                <input type="hidden" name="employee_id" id="employee_id" value="{{ old('employee_id') }}">
+                            </div>
+                            @error('employee_id')
+                                <div class="text-danger">{{ $message }}</div>
                             @enderror
                         </div>
                         
@@ -252,7 +355,83 @@
 
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- jQuery (needed for employee selection) -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
+        $(document).ready(function() {
+            // Gestion du champ de recherche des prestations
+            const searchInput = document.getElementById('searchPrestation');
+            
+            // Fonction pour retirer les accents d'une chaîne
+            function removeAccents(str) {
+                return str.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+            }
+
+            // Fonction pour filtrer les prestations basée sur la recherche
+            searchInput.addEventListener('input', function() {
+                const searchTerm = this.value.toLowerCase();
+                const searchTermWithoutAccent = removeAccents(searchTerm);
+                
+                document.querySelectorAll('.prestation-row').forEach(row => {
+                    const prestationName = row.querySelector('td:nth-child(2)').textContent.toLowerCase();
+                    const prestationNameWithoutAccent = removeAccents(prestationName);
+                    
+                    if (searchTerm === '') {
+                        // Si le champ de recherche est vide, ne rien afficher
+                        row.style.display = 'none';
+                    } else if (prestationName.includes(searchTerm) || prestationNameWithoutAccent.includes(searchTermWithoutAccent)) {
+                        // Afficher les lignes qui correspondent à la recherche (avec ou sans accent)
+                        row.style.display = '';
+                    } else {
+                        // Cacher les lignes qui ne correspondent pas à la recherche
+                        row.style.display = 'none';
+                    }
+                });
+            });
+            
+            // Si une prestation était précédemment sélectionnée (validation error), l'afficher
+            const savedPrestation = $('input[name="prestation"]:checked').val();
+            if (savedPrestation) {
+                searchInput.value = savedPrestation;
+                searchInput.dispatchEvent(new Event('input'));
+            }
+            
+            // Salon change handler
+            $('#salon_id').change(function() {
+                const salonId = $(this).val();
+                if (!salonId) {
+                    // Réinitialiser la recherche de prestation
+                    searchInput.value = '';
+                    searchInput.dispatchEvent(new Event('input'));
+                }
+            });
+
+            // Gestion de la sélection des employés
+            $('.employee-item').click(function() {
+                $('.employee-item').removeClass('active');
+                $(this).addClass('active');
+                
+                const employeeId = $(this).data('employee-id');
+                const photoUrl = $(this).data('photo');
+                
+                $('#employee_id').val(employeeId);
+                $('#selected-employee-photo').attr('src', photoUrl);
+            });
+
+            // Si un employé était précédemment sélectionné (validation error), le resélectionner
+            const savedEmployeeId = $('#employee_id').val();
+            if (savedEmployeeId) {
+                $(`.employee-item[data-employee-id="${savedEmployeeId}"]`).click();
+            }
+            
+            // Ajouter un style personnalisé au tableau des prestations
+            const prestationsTable = document.querySelector('.prestations-table');
+            if (prestationsTable) {
+                prestationsTable.style.borderRadius = '8px';
+                prestationsTable.style.overflow = 'hidden';
+            }
+        });
+        
         // Script pour supprimer les cartes dupliquées en bas de page
         document.addEventListener('DOMContentLoaded', function() {
             // On attend que le DOM soit complètement chargé

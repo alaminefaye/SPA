@@ -98,7 +98,7 @@
                     @if($feedback->salon)
                     <div class="mb-3">
                         <div class="small text-muted">Salon concerné</div>
-                        <div>{{ $feedback->salon->name }}</div>
+                        <div>{{ $feedback->salon->nom }}</div>
                     </div>
                     @endif
                     
@@ -113,6 +113,33 @@
                     <div class="mb-3">
                         <div class="small text-muted">Prestation concernée</div>
                         <div>{{ $feedback->prestation }}</div>
+                    </div>
+                    @endif
+                    
+                    @if($feedback->employee)
+                    <div class="mb-3">
+                        <div class="small text-muted">Employé concerné</div>
+                        <div class="d-flex align-items-center">
+                            @if($feedback->employee->photo)
+                            <div class="me-2">
+                                <img src="{{ asset('storage/' . $feedback->employee->photo) }}" 
+                                     class="rounded-circle" 
+                                     width="50" 
+                                     height="50" 
+                                     alt="Photo de {{ $feedback->employee->nom_complet }}">
+                            </div>
+                            @else
+                            <div class="me-2">
+                                <div class="avatar-placeholder rounded-circle bg-primary d-flex align-items-center justify-content-center" 
+                                     style="width: 50px; height: 50px;">
+                                    <span class="text-white font-weight-bold">
+                                        {{ substr($feedback->employee->prenom, 0, 1) }}{{ substr($feedback->employee->nom, 0, 1) }}
+                                    </span>
+                                </div>
+                            </div>
+                            @endif
+                            <div>{{ $feedback->employee->nom_complet }}</div>
+                        </div>
                     </div>
                     @endif
                 </div>

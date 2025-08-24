@@ -25,7 +25,8 @@ class Feedback extends Model
         'photo',
         'message',
         'is_priority',
-        'is_read'
+        'is_read',
+        'employee_id'
     ];
     
     protected $casts = [
@@ -42,12 +43,20 @@ class Feedback extends Model
     }
     
     /**
+     * Get the employee associated with the feedback
+     */
+    public function employee()
+    {
+        return $this->belongsTo(Employee::class);
+    }
+    
+    /**
      * Configure les options de journalisation d'activité
      */
     public function getActivitylogOptions(): LogOptions
     {
         return LogOptions::defaults()
-            ->logOnly(['nom_complet', 'telephone', 'email', 'salon_id', 'numero_ticket', 'prestation', 'sujet', 'photo', 'message', 'is_priority', 'is_read'])
+            ->logOnly(['nom_complet', 'telephone', 'email', 'salon_id', 'numero_ticket', 'prestation', 'sujet', 'photo', 'message', 'is_priority', 'is_read', 'employee_id'])
             ->logOnlyDirty()
             ->dontSubmitEmptyLogs()
             ->setDescriptionForEvent(function(string $eventName) {
