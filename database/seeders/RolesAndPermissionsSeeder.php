@@ -111,6 +111,16 @@ class RolesAndPermissionsSeeder extends Seeder
         Permission::firstOrCreate(['name' => 'edit employees']);
         Permission::firstOrCreate(['name' => 'delete employees']);
         Permission::firstOrCreate(['name' => 'toggle employee status']);
+        
+        // Permissions pour la gestion des présences des employés
+        Permission::firstOrCreate(['name' => 'view employee attendances']);
+        Permission::firstOrCreate(['name' => 'mark employee attendance']);
+        Permission::firstOrCreate(['name' => 'mark employee departure']);
+        Permission::firstOrCreate(['name' => 'mark employee absent']);
+        Permission::firstOrCreate(['name' => 'edit employee attendance']);
+        Permission::firstOrCreate(['name' => 'delete employee attendance']);
+        Permission::firstOrCreate(['name' => 'view attendance reports']);
+        Permission::firstOrCreate(['name' => 'export attendance reports']);
 
         // Permissions pour Users
         Permission::firstOrCreate(['name' => 'view users']);
@@ -149,7 +159,9 @@ class RolesAndPermissionsSeeder extends Seeder
             'view activity logs', 'delete activity logs', 'clear all activity logs',
             'view users', 'create users', 'edit users', 'delete users',
             'view reports', 'export reports',
-            'view employees', 'create employees', 'edit employees', 'delete employees', 'toggle employee status'
+            'view employees', 'create employees', 'edit employees', 'delete employees', 'toggle employee status',
+            'view employee attendances', 'mark employee attendance', 'mark employee departure', 'mark employee absent', 
+            'edit employee attendance', 'delete employee attendance', 'view attendance reports', 'export attendance reports'
         ]);
 
         // Rôle Manager - peut gérer les opérations quotidiennes mais pas les configurations
@@ -169,7 +181,9 @@ class RolesAndPermissionsSeeder extends Seeder
             'view anniversaires', 'send anniversary messages',
             'view activity logs',
             'view reports', 'export reports',
-            'view employees', 'edit employees'
+            'view employees', 'edit employees',
+            'view employee attendances', 'mark employee attendance', 'mark employee departure', 'mark employee absent', 
+            'view attendance reports'
         ]);
 
         // Rôle Réceptionniste - gérer les clients et réservations
@@ -187,7 +201,8 @@ class RolesAndPermissionsSeeder extends Seeder
             'view rappels', 'create rappels', 'edit rappels', 'confirm rappels', 'cancel rappels', 'send whatsapp messages',
             'view anniversaires', 'send anniversary messages',
             'view reports',
-            'view employees'
+            'view employees',
+            'view employee attendances'
         ]);
 
         // Rôle Esthéticien - gérer les séances

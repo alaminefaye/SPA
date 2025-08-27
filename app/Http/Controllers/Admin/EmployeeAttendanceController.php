@@ -13,6 +13,18 @@ use Illuminate\Support\Facades\DB;
 class EmployeeAttendanceController extends Controller
 {
     /**
+     * Constructor pour ajouter les middleware de vérification des permissions
+     */
+    public function __construct()
+    {
+        $this->middleware('can:view employee attendances', ['only' => ['index', 'calendar', 'report']]);
+        $this->middleware('can:mark employee attendance', ['only' => ['markAttendance']]);
+        $this->middleware('can:mark employee departure', ['only' => ['markDeparture']]);
+        $this->middleware('can:mark employee absent', ['only' => ['markAttendance']]);
+        $this->middleware('can:view attendance reports', ['only' => ['report']]);
+    }
+
+    /**
      * Display a listing of employee attendance.
      */
     public function index(Request $request)

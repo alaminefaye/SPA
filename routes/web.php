@@ -33,12 +33,22 @@ Route::get('/', function () {
 });
 
 // Routes simplifiées pour l'assiduité des employés
-Route::prefix('attendance')->middleware(['auth', 'can:view employees'])->group(function () {
-    Route::get('/', [App\Http\Controllers\Admin\EmployeeAttendanceController::class, 'index'])->name('attendance.index');
-    Route::get('/calendar', [App\Http\Controllers\Admin\EmployeeAttendanceController::class, 'calendar'])->name('attendance.calendar');
-    Route::get('/report', [App\Http\Controllers\Admin\EmployeeAttendanceController::class, 'report'])->name('attendance.report');
-    Route::post('/mark', [App\Http\Controllers\Admin\EmployeeAttendanceController::class, 'markAttendance'])->name('attendance.mark');
-    Route::post('/departure', [App\Http\Controllers\Admin\EmployeeAttendanceController::class, 'markDeparture'])->name('attendance.departure');
+Route::prefix('attendance')->middleware(['auth'])->group(function () {
+    Route::get('/', [App\Http\Controllers\Admin\EmployeeAttendanceController::class, 'index'])
+        ->middleware('can:view employee attendances')
+        ->name('attendance.index');
+    Route::get('/calendar', [App\Http\Controllers\Admin\EmployeeAttendanceController::class, 'calendar'])
+        ->middleware('can:view employee attendances')
+        ->name('attendance.calendar');
+    Route::get('/report', [App\Http\Controllers\Admin\EmployeeAttendanceController::class, 'report'])
+        ->middleware('can:view attendance reports')
+        ->name('attendance.report');
+    Route::post('/mark', [App\Http\Controllers\Admin\EmployeeAttendanceController::class, 'markAttendance'])
+        ->middleware('can:mark employee attendance')
+        ->name('attendance.mark');
+    Route::post('/departure', [App\Http\Controllers\Admin\EmployeeAttendanceController::class, 'markDeparture'])
+        ->middleware('can:mark employee departure')
+        ->name('attendance.departure');
 });
 
 // Authentication routes
@@ -186,10 +196,16 @@ Route::middleware('auth')->group(function () {
         Route::patch('/{employee}/toggle-status', [EmployeeController::class, 'toggleStatus'])->middleware('can:toggle employee status')->name('toggle-status');
         
         // Routes pour la liste de présence des employés sous admin/employees (gardées pour compatibilité)
-        Route::prefix('attendance')->name('admin.employees.attendance.')->middleware('can:view employees')->group(function () {
-            Route::get('/', [EmployeeAttendanceController::class, 'index'])->name('index');
-            Route::get('/calendar', [EmployeeAttendanceController::class, 'calendar'])->name('calendar');
-            Route::get('/report', [EmployeeAttendanceController::class, 'report'])->name('report');
+        Route::prefix('attendance')->name('admin.employees.attendance.')->group(function () {
+            Route::get('/', [EmployeeAttendanceController::class, 'index'])
+                ->middleware('can:view employee attendances')
+                ->name('index');
+            Route::get('/calendar', [EmployeeAttendanceController::class, 'calendar'])
+                ->middleware('can:view employee attendances')
+                ->name('calendar');
+            Route::get('/report', [EmployeeAttendanceController::class, 'report'])
+                ->middleware('can:view attendance reports')
+                ->name('report');
         });
         
         // Les routes d'actions d'assiduité ont été déplacées vers le groupe simplifié 'attendance'
