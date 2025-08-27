@@ -195,6 +195,11 @@
                     <div data-i18n="Liste">Liste des employés</div>
                   </a>
                 </li>
+                <li class="menu-item {{ request()->is('admin/employees/attendance*') || request()->is('Attendance') ? 'active' : '' }}">
+                  <a href="{{ route('attendance.index') }}" class="menu-link">
+                    <div data-i18n="Presence">Liste de présence</div>
+                  </a>
+                </li>
                 <li class="menu-item {{ request()->is('admin/satisfaction*') ? 'active' : '' }}">
                   <a href="{{ route('admin.satisfaction.index') }}" class="menu-link">
                     <div data-i18n="Satisfaction">Notes de satisfaction</div>

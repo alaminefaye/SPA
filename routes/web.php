@@ -23,12 +23,22 @@ use App\Http\Controllers\PermissionController;
 use App\Http\Controllers\Admin\ReportController;
 use App\Http\Controllers\Admin\LoginActivityController;
 use App\Http\Controllers\Admin\EmployeeController;
+use App\Http\Controllers\Admin\EmployeeAttendanceController;
 use App\Http\Controllers\LoyaltyPointsController;
 use App\Http\Controllers\RappelRendezVousController;
 
 // Welcome page
 Route::get('/', function () {
     return redirect()->route('login');
+});
+
+// Routes simplifiées pour l'assiduité des employés
+Route::prefix('attendance')->middleware(['auth', 'can:view employees'])->group(function () {
+    Route::get('/', [App\Http\Controllers\Admin\EmployeeAttendanceController::class, 'index'])->name('attendance.index');
+    Route::get('/calendar', [App\Http\Controllers\Admin\EmployeeAttendanceController::class, 'calendar'])->name('attendance.calendar');
+    Route::get('/report', [App\Http\Controllers\Admin\EmployeeAttendanceController::class, 'report'])->name('attendance.report');
+    Route::post('/mark', [App\Http\Controllers\Admin\EmployeeAttendanceController::class, 'markAttendance'])->name('attendance.mark');
+    Route::post('/departure', [App\Http\Controllers\Admin\EmployeeAttendanceController::class, 'markDeparture'])->name('attendance.departure');
 });
 
 // Authentication routes
@@ -174,6 +184,15 @@ Route::middleware('auth')->group(function () {
         Route::put('/{employee}', [EmployeeController::class, 'update'])->middleware('can:edit employees')->name('update');
         Route::delete('/{employee}', [EmployeeController::class, 'destroy'])->middleware('can:delete employees')->name('destroy');
         Route::patch('/{employee}/toggle-status', [EmployeeController::class, 'toggleStatus'])->middleware('can:toggle employee status')->name('toggle-status');
+        
+        // Routes pour la liste de présence des employés sous admin/employees (gardées pour compatibilité)
+        Route::prefix('attendance')->name('admin.employees.attendance.')->middleware('can:view employees')->group(function () {
+            Route::get('/', [EmployeeAttendanceController::class, 'index'])->name('index');
+            Route::get('/calendar', [EmployeeAttendanceController::class, 'calendar'])->name('calendar');
+            Route::get('/report', [EmployeeAttendanceController::class, 'report'])->name('report');
+        });
+        
+        // Les routes d'actions d'assiduité ont été déplacées vers le groupe simplifié 'attendance'
     });
 
     // Routes pour les notes de satisfaction
