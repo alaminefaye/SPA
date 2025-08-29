@@ -178,10 +178,29 @@ class ClientController extends Controller
         ]);
 
         try {
-            Excel::import(new ClientImport, $request->file('file'));
+            // Utiliser l'instance de ClientImport pour avoir accès à ses méthodes
+            $import = new ClientImport();
+            
+            // Importer le fichier
+            Excel::import($import, $request->file('file'));
+            
+            // Récupérer le nombre de doublons détectés
+            $duplicatesCount = $import->getDuplicatesCount();
+            
+            $message = 'Les clients ont été importés avec succès.';
+            
+            if ($duplicatesCount > 0) {
+                $message .= ' ' . $duplicatesCount . ' doublon(s) ont été détecté(s) et ignoré(s).'; 
+            }
+            
+            // Récupérer les erreurs de validation
+            $failures = array_merge($import->failures(), $import->errors());
+            if (!empty($failures)) {
+                $message .= ' Des erreurs ont été rencontrées pour certaines lignes.';  
+            }
             
             return redirect()->route('clients.index')
-                ->with('success', 'Les clients ont été importés avec succès');
+                ->with('success', $message);
         } catch (\Exception $e) {
             return redirect()->back()
                 ->with('error', 'Erreur lors de l\'importation : ' . $e->getMessage());
