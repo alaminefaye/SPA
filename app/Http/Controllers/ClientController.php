@@ -194,7 +194,10 @@ class ClientController extends Controller
             }
             
             // Récupérer les erreurs de validation
-            $failures = array_merge($import->failures(), $import->errors());
+            $failures = array_merge(
+                $import->failures() ? $import->failures()->toArray() : [], 
+                $import->errors() ? $import->errors()->toArray() : []
+            );
             if (!empty($failures)) {
                 $message .= ' Des erreurs ont été rencontrées pour certaines lignes.';  
             }
