@@ -104,6 +104,11 @@ Route::middleware('auth')->group(function () {
     Route::get('/clients-anniversaires', [\App\Http\Controllers\AnniversaireController::class, 'index'])->name('clients.anniversaires');
     Route::get('/debug-anniversaires', [\App\Http\Controllers\DebugController::class, 'debug'])->name('debug.anniversaires');
     
+    // Client import routes
+    Route::get('/clients-import', [ClientController::class, 'showImportForm'])->name('clients.import-form');
+    Route::post('/clients-import', [ClientController::class, 'import'])->name('clients.import');
+    Route::get('/clients-template', [ClientController::class, 'downloadTemplate'])->name('clients.download-template');
+    
     // Points de fidélité routes
     Route::group(['prefix' => 'loyalty-points', 'as' => 'loyalty-points.', 'middleware' => ['auth']], function () {
         Route::get('/', [LoyaltyPointsController::class, 'index'])->middleware('can:view loyalty points')->name('index');

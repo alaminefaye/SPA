@@ -49,8 +49,8 @@
             </div>
         </div>
         <div class="card-body">
-            <div class="table-responsive">
-                <table class="table table-bordered table-hover" id="attendanceTable">
+            <div class="table-responsive text-nowrap">
+                <table class="table table-hover">
                     <thead>
                         <tr>
                             <th width="3%">Photo</th>
@@ -64,7 +64,7 @@
                             <th width="11%">Actions</th>
                         </tr>
                     </thead>
-                    <tbody>
+                    <tbody class="table-border-bottom-0">
                         @forelse($employees as $employee)
                         @php
                             $attendance = $attendances->get($employee->id);
@@ -141,6 +141,9 @@
                         @endforelse
                     </tbody>
                 </table>
+            </div>
+            <div class="mt-3 px-2">
+                {{ $employees->links('pagination::bootstrap-5') }}
             </div>
         </div>
     </div>
@@ -305,17 +308,7 @@
     }
     
     $(document).ready(function() {
-        
-
-        // Initialiser DataTables
-        $('#attendanceTable').DataTable({
-            language: {
-                url: '//cdn.datatables.net/plug-ins/1.13.4/i18n/fr-FR.json',
-            },
-            "paging": false,
-            "info": false,
-            "order": [[4, 'desc'], [1, 'asc']], // Trier par statut (présent) puis par nom
-        });
+        // DataTables est désactivé en faveur de la pagination native de Laravel
         
         // Définir l'heure d'arrivée par défaut à l'heure actuelle
         $('#arrivalTime').val(new Date().toTimeString().slice(0, 5));

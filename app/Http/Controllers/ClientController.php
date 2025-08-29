@@ -3,8 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Models\Client;
+use App\Imports\ClientImport;
+use App\Exports\ClientTemplateExport;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
+use Maatwebsite\Excel\Facades\Excel;
 
 class ClientController extends Controller
 {
@@ -151,5 +154,45 @@ class ClientController extends Controller
                 'message' => 'Aucun client trouvé avec ce numéro de téléphone'
             ]);
         }
+    }
+
+    /**
+     * Show the form for importing clients
+     */
+    public function showImportForm()
+    {
+        return view('clients.import');
+    }
+
+    /**
+     * Import clients from Excel file
+     */
+    public function import(Request $request)
+    {
+        $request->validate([
+            'file' => 'required|mimes:xlsx,xls,csv|max:2048',
+        ], [
+            'file.required' => 'Veuillez sélectionner un fichier',
+            'file.mimes' => 'Le fichier doit être au format Excel (xlsx, xls) ou CSV',
+            'file.max' => 'La taille du fichier ne doit pas dépasser 2Mo',
+        ]);
+
+        try {
+            Excel::import(new ClientImport, $request->file('file'));
+            
+            return redirect()->route('clients.index')
+                ->with('success', 'Les clients ont été importés avec succès');
+        } catch (\Exception $e) {
+            return redirect()->back()
+                ->with('error', 'Erreur lors de l\'importation : ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Download a sample Excel template for client import
+     */
+    public function downloadTemplate()
+    {
+        return Excel::download(new ClientTemplateExport, 'modele_import_clients.xlsx');
     }
 }

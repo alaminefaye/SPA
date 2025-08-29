@@ -16,6 +16,7 @@ class DatabaseSeeder extends Seeder
             AdminUserSeeder::class,
             RolesAndPermissionsSeeder::class, // Exécuter le seeder des rôles et permissions après la création des utilisateurs admin
             PrestationSeeder::class,
+            ClientSeeder::class,
         ]);
     }
 }

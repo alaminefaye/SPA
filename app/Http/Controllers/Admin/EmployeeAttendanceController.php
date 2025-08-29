@@ -36,7 +36,7 @@ class EmployeeAttendanceController extends Controller
         $employees = Employee::where('actif', true)
             ->with(['salon'])
             ->orderBy('nom')
-            ->get();
+            ->paginate(10);
             
         // Récupérer les présences pour la date sélectionnée
         $attendances = EmployeeAttendance::where('date', $date->format('Y-m-d'))
@@ -45,6 +45,9 @@ class EmployeeAttendanceController extends Controller
             
         // Récupérer les salons pour le filtre
         $salons = Salon::orderBy('nom')->pluck('nom', 'id');
+        
+        // Préserver les paramètres lors de la navigation entre les pages
+        $employees->appends(['date' => $date->format('Y-m-d')]);
         
         return view('admin.employees.attendance.index', compact('employees', 'attendances', 'date', 'salons'));
     }

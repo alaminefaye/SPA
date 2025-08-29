@@ -10,11 +10,16 @@
 <div class="card">
     <div class="card-header d-flex justify-content-between align-items-center">
         <h5 class="mb-0">Liste des Clients</h5>
-        @can('create clients')
-        <a href="{{ route('clients.create') }}" class="btn btn-primary">
-            <i class="bx bx-plus me-1"></i> Ajouter un client
-        </a>
-        @endcan
+        <div>
+            <a href="{{ route('clients.import-form') }}" class="btn btn-success me-2">
+                <i class="bx bx-import me-1"></i> Importer
+            </a>
+            @can('create clients')
+            <a href="{{ route('clients.create') }}" class="btn btn-primary">
+                <i class="bx bx-plus me-1"></i> Ajouter un client
+            </a>
+            @endcan
+        </div>
     </div>
     <div class="card-body">
         <!-- Formulaire de recherche -->
