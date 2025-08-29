@@ -7,6 +7,32 @@
     <span class="text-muted fw-light">Gestion /</span> Clients
 </h4>
 
+<!-- Box compteur de clients -->
+<div class="row mb-4">
+    <div class="col-md-6 col-xl-4 mb-3">
+        <div class="card">
+            <div class="card-body">
+                <div class="d-flex align-items-start justify-content-between">
+                    <div class="content-left">
+                        <span class="fw-medium d-block mb-1">Total Clients</span>
+                        <div class="d-flex align-items-center">
+                            <h3 class="card-title mb-0 me-2">{{ $totalClients }}</h3>
+                            @if($newClients > 0)
+                                <small class="badge bg-success">+{{ $newClients }} nouveau(x)</small>
+                            @endif
+                        </div>
+                    </div>
+                    <div class="avatar">
+                        <span class="avatar-initial rounded bg-label-primary">
+                            <i class="bx bx-user bx-sm"></i>
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 <div class="card">
     <div class="card-header d-flex justify-content-between align-items-center">
         <h5 class="mb-0">Liste des Clients</h5>
@@ -50,7 +76,6 @@
             <table class="table table-hover">
                 <thead>
                     <tr>
-                        <th>ID</th>
                         <th>Nom complet</th>
                         <th>Numéro téléphone</th>
                         <th>Adresse mail</th>
@@ -61,7 +86,6 @@
                 <tbody class="table-border-bottom-0">
                     @forelse($clients as $client)
                         <tr>
-                            <td>{{ $client->id }}</td>
                             <td>{{ $client->nom_complet }}</td>
                             <td>{{ $client->numero_telephone }}</td>
                             <td>{{ $client->adresse_mail }}</td>

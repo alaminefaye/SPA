@@ -28,7 +28,13 @@ class ClientController extends Controller
         
         $clients = $query->paginate(10)->withQueryString();
         
-        return view('clients.index', compact('clients', 'search'));
+        // Compter tous les clients
+        $totalClients = Client::count();
+        
+        // Compter les nouveaux clients (créés cette semaine)
+        $newClients = Client::where('created_at', '>=', now()->subWeek())->count();
+        
+        return view('clients.index', compact('clients', 'search', 'totalClients', 'newClients'));
     }
 
     /**
