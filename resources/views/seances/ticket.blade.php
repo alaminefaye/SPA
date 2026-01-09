@@ -18,7 +18,7 @@
         }
         .header {
             text-align: center;
-            margin-bottom: 10px;
+            margin-bottom: 5px;
         }
         .logo {
             max-width: 30%;
@@ -35,7 +35,7 @@
         .subtitle {
             font-size: 12px;
             text-align: center;
-            margin-bottom: 10px;
+            margin-bottom: 5px;
         }
         .info-block {
             margin-bottom: 10px;
