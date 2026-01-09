@@ -43,10 +43,10 @@
                     </div>
                     
                     <div class="row mb-3">
-                        <label class="col-sm-2 col-form-label" for="nom_complet">Nom Complet</label>
+                        <label class="col-sm-2 col-form-label" for="nom_complet">Nom Complet <span id="nom-required" style="color:red; display:none;">*</span></label>
                         <div class="col-sm-10">
                             <input type="text" class="form-control" id="nom_complet" name="nom_complet" value="{{ old('nom_complet') }}" placeholder="Nom complet du client" />
-                            <div class="form-text">Laissez vide si vous recherchez un client existant par téléphone</div>
+                            <div class="form-text">Si le client n'existe pas, le nom complet est obligatoire pour le créer automatiquement</div>
                         </div>
                     </div>
                     
@@ -263,6 +263,9 @@
                         document.getElementById('nom_complet').value = data.client.nom_complet;
                         document.getElementById('adresse_mail').value = data.client.adresse_mail;
                         
+                        // Masquer l'astérisque rouge car le client existe
+                        document.getElementById('nom-required').style.display = 'none';
+                        
                         // Afficher la section de fidélité et les points disponibles
                         document.getElementById('fidelite-section').style.display = 'block';
                         const pointsDisponibles = data.client.points || 0;
@@ -277,11 +280,14 @@
                         
                         alert('Client trouvé et informations remplies automatiquement');
                     } else {
+                        // Afficher l'astérisque rouge car le client n'existe pas
+                        document.getElementById('nom-required').style.display = 'inline';
+                        
                         // Masquer la section de fidélité si aucun client n'est trouvé
                         document.getElementById('fidelite-section').style.display = 'none';
                         document.getElementById('utiliser-points-container').style.display = 'none';
                         
-                        alert(data.message + '. Veuillez compléter les informations du client.');
+                        alert(data.message + '. Veuillez compléter le nom complet du client (obligatoire).');
                         document.getElementById('nom_complet').focus();
                     }
                 })

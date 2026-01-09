@@ -96,24 +96,31 @@ class SeanceController extends Controller
         }
         
         // Vérification ou création du client
-        if ($request->filled('nom_complet') && $request->filled('adresse_mail')) {
-            // Création d'un nouveau client si tous les champs sont remplis
-            $client = Client::firstOrCreate(
-                ['numero_telephone' => $request->numero_telephone],
-                [
-                    'nom_complet' => $request->nom_complet,
-                    'adresse_mail' => $request->adresse_mail,
-                ]
-            );
-        } else {
-            // Vérification de l'existence du client avec ce numéro de téléphone
-            $client = Client::where('numero_telephone', $request->numero_telephone)->first();
-            
-            if (!$client) {
+        $client = Client::where('numero_telephone', $request->numero_telephone)->first();
+        
+        if (!$client) {
+            // Si le client n'existe pas, on doit au moins avoir le nom complet
+            if (!$request->filled('nom_complet')) {
                 return redirect()->back()
-                    ->withErrors(['numero_telephone' => 'Aucun client trouvé avec ce numéro de téléphone. Veuillez fournir toutes les informations du client.'])
+                    ->withErrors(['nom_complet' => 'Aucun client trouvé avec ce numéro de téléphone. Veuillez fournir au moins le nom complet du client.'])
                     ->withInput();
             }
+            
+            // Créer le nouveau client (l'email est optionnel)
+            $client = Client::create([
+                'numero_telephone' => $request->numero_telephone,
+                'nom_complet' => $request->nom_complet,
+                'adresse_mail' => $request->adresse_mail, // Peut être null
+            ]);
+        } else {
+            // Si le client existe déjà et qu'on a fourni de nouvelles infos, on peut les mettre à jour
+            if ($request->filled('nom_complet')) {
+                $client->nom_complet = $request->nom_complet;
+            }
+            if ($request->filled('adresse_mail')) {
+                $client->adresse_mail = $request->adresse_mail;
+            }
+            $client->save();
         }
         
         // Vérifier si le salon est disponible
