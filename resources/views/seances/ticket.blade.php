@@ -197,7 +197,7 @@
         </div>
         
         <div class="qr-code">
-            <img src="data:image/png;base64,{{ $qrCode }}" alt="QR Code">
+            <img src="data:image/svg+xml;base64,{{ $qrCode }}" alt="QR Code">
             <div class="text-center">Scannez pour démarrer la séance</div>
         </div>
         

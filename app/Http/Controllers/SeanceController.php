@@ -653,7 +653,8 @@ class SeanceController extends Controller
         // Créer le QR code avec les données de la séance
         // Format: seance:ID pour pouvoir identifier facilement lors du scan
         $qrCodeContent = 'seance:' . $seance->id;
-        $qrCode = base64_encode(QrCode::format('png')->size(200)->generate($qrCodeContent));
+        // Utiliser le format SVG qui ne nécessite pas l'extension imagick
+        $qrCode = base64_encode(QrCode::format('svg')->size(200)->generate($qrCodeContent));
         
         return view('seances.ticket', compact('seance', 'qrCode', 'pointsGagnes', 'pointsTotal'));
     }
