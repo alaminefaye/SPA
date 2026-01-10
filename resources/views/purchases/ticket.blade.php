@@ -138,6 +138,7 @@
             </div>
         </div>
         
+        @if($purchase->client)
         <div class="info-block">
             <div class="info-row">
                 <span>Client:</span>
@@ -148,6 +149,7 @@
                 <span>{{ $purchase->client->numero_telephone }}</span>
             </div>
         </div>
+        @endif
         
         <div class="info-block">
             <div class="text-bold" style="margin-bottom: 5px;">Produits:</div>
