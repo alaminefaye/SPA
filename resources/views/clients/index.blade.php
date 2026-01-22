@@ -37,6 +37,9 @@
     <div class="card-header d-flex justify-content-between align-items-center">
         <h5 class="mb-0">Liste des Clients</h5>
         <div>
+            <a href="{{ route('clients.export') }}" class="btn btn-info me-2">
+                <i class="bx bx-export me-1"></i> Exporter
+            </a>
             <a href="{{ route('clients.import-form') }}" class="btn btn-success me-2">
                 <i class="bx bx-import me-1"></i> Importer
             </a>

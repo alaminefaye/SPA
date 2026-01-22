@@ -108,6 +108,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/clients-import', [ClientController::class, 'showImportForm'])->name('clients.import-form');
     Route::post('/clients-import', [ClientController::class, 'import'])->name('clients.import');
     Route::get('/clients-template', [ClientController::class, 'downloadTemplate'])->name('clients.download-template');
+    Route::get('/clients-export', [ClientController::class, 'export'])->name('clients.export');
     
     // Points de fidélité routes
     Route::group(['prefix' => 'loyalty-points', 'as' => 'loyalty-points.', 'middleware' => ['auth']], function () {

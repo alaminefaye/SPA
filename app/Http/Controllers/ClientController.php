@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Client;
 use App\Imports\ClientImport;
 use App\Exports\ClientTemplateExport;
+use App\Exports\ClientsExport;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use Maatwebsite\Excel\Facades\Excel;
@@ -222,5 +223,13 @@ class ClientController extends Controller
     public function downloadTemplate()
     {
         return Excel::download(new ClientTemplateExport, 'modele_import_clients.xlsx');
+    }
+
+    /**
+     * Export all clients to Excel
+     */
+    public function export()
+    {
+        return Excel::download(new ClientsExport, 'clients_' . date('Y-m-d_His') . '.xlsx');
     }
 }
