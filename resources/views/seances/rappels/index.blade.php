@@ -19,6 +19,7 @@
                         <label class="form-label">Période</label>
                         <select class="form-select" name="periode" onchange="this.form.submit()">
                             <option value="aujourd'hui" {{ $periode == "aujourd'hui" ? 'selected' : '' }}>Aujourd'hui</option>
+                            <option value="3jours" {{ $periode == "3jours" ? 'selected' : '' }}>Dans 3 jours</option>
                             <option value="semaine" {{ $periode == "semaine" ? 'selected' : '' }}>Cette semaine</option>
                             <option value="mois" {{ $periode == "mois" ? 'selected' : '' }}>Ce mois</option>
                             <option value="tous" {{ $periode == "tous" ? 'selected' : '' }}>Tous les rappels</option>

@@ -40,6 +40,11 @@ class RappelRendezVousController extends Controller
                 $query->whereDate('date_prevue', $today);
                 break;
             
+            case '3jours':
+                $endOf3Days = $today->copy()->addDays(3);
+                $query->whereBetween('date_prevue', [$today, $endOf3Days]);
+                break;
+            
             case 'semaine':
                 $endOfWeek = $today->copy()->addDays(7);
                 $query->whereBetween('date_prevue', [$today, $endOfWeek]);
