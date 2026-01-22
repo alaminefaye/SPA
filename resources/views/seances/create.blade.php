@@ -303,16 +303,22 @@
         const dureeTotaleInput = document.getElementById('duree');
         const resumePrestations = document.getElementById('resume-prestations');
         
+        // Set pour stocker les IDs des prestations sélectionnées
+        const prestationsSelectionnees = new Set();
+        
         // Fonction pour calculer le prix total et la durée totale
         function calculerTotaux() {
             let prixTotal = 0;
             let heuresTotal = 0;
             let minutesTotal = 0;
-            let prestationsSelectionnees = [];
+            let prestationsList = [];
             
             checkboxes.forEach(checkbox => {
+                const prestationId = checkbox.value;
+                
+                // Mettre à jour l'ensemble des sélectionnées
                 if (checkbox.checked) {
-                    const prestationId = checkbox.value;
+                    prestationsSelectionnees.add(prestationId);
                     
                     // Récupérer les informations de la prestation
                     const prix = parseFloat(checkbox.getAttribute('data-prix'));
@@ -326,7 +332,10 @@
                     
                     // Ajouter à la liste des prestations sélectionnées
                     const nomPrestation = checkbox.closest('tr').querySelector('td:nth-child(2)').textContent;
-                    prestationsSelectionnees.push(`${nomPrestation} (${duree})`);
+                    prestationsList.push(`${nomPrestation} (${duree})`);
+                } else {
+                    // Retirer de l'ensemble si décochée
+                    prestationsSelectionnees.delete(prestationId);
                 }
             });
             
@@ -339,11 +348,11 @@
             dureeTotaleInput.value = `${String(heuresTotal).padStart(2, '0')}:${String(minutesTotal).padStart(2, '0')}`;
             
             // Mettre à jour le résumé
-            if (prestationsSelectionnees.length > 0) {
+            if (prestationsList.length > 0) {
                 resumePrestations.innerHTML = `
-                    <p class="mb-0"><strong>${prestationsSelectionnees.length}</strong> prestation(s) sélectionnée(s) :</p>
+                    <p class="mb-0"><strong>${prestationsList.length}</strong> prestation(s) sélectionnée(s) :</p>
                     <ul class="mb-0 mt-1">
-                        ${prestationsSelectionnees.map(p => `<li>${p}</li>`).join('')}
+                        ${prestationsList.map(p => `<li>${p}</li>`).join('')}
                     </ul>
                 `;
             } else {
@@ -372,25 +381,15 @@
         const rechercheInput = document.getElementById('recherche-prestation');
         const prestationsTableBody = document.getElementById('prestations-table-body');
         
-        rechercheInput.addEventListener('input', function() {
-            const valeur = this.value.toLowerCase().trim();
-            const valeurSansAccent = removeAccents(valeur);
+        // Fonction pour afficher les prestations (filtrées ou toutes)
+        function afficherPrestations(prestationsAAfficher) {
             let html = '';
             
-            // Si la valeur est vide, ne rien afficher
-            if (valeur === '') {
-                prestationsTableBody.innerHTML = '';
-                return;
-            }
-            
-            // Filtrer les prestations selon la recherche (insensible aux accents)
-            const resultats = toutesLesPrestation.filter(prestation => { 
-                const nomSansAccent = removeAccents(prestation.nom.toLowerCase());
-                return nomSansAccent.includes(valeurSansAccent);
-            });
-            
-            // Générer le HTML pour les résultats
-            resultats.forEach(prestation => {
+            // Générer le HTML pour les prestations
+            prestationsAAfficher.forEach(prestation => {
+                // Vérifier si cette prestation était déjà sélectionnée
+                const estSelectionnee = prestationsSelectionnees.has(prestation.id);
+                
                 html += `
                 <tr>
                     <td class="text-center">
@@ -398,7 +397,7 @@
                             <input class="form-check-input prestation-checkbox" type="checkbox" 
                                 value="${prestation.id}" id="prestation_${prestation.id}" 
                                 name="prestations[]" data-prix="${prestation.prix}" 
-                                data-duree="${prestation.duree}">
+                                data-duree="${prestation.duree}" ${estSelectionnee ? 'checked' : ''}>
                         </div>
                     </td>
                     <td>${prestation.nom}</td>
@@ -409,13 +408,33 @@
             });
             
             // Si aucun résultat
-            if (resultats.length === 0) {
+            if (prestationsAAfficher.length === 0) {
                 html = `<tr><td colspan="4" class="text-center">Aucune prestation correspondante</td></tr>`;
             }
             
             prestationsTableBody.innerHTML = html;
             actualiserEventListeners();
-            // Ne pas appeler calculerTotaux() ici car aucune case n'est encore cochée
+            // Recalculer les totaux après avoir restauré les checkboxes
+            calculerTotaux();
+        }
+        
+        rechercheInput.addEventListener('input', function() {
+            const valeur = this.value.toLowerCase().trim();
+            const valeurSansAccent = removeAccents(valeur);
+            
+            // Si la valeur est vide, afficher toutes les prestations
+            if (valeur === '') {
+                afficherPrestations(toutesLesPrestation);
+                return;
+            }
+            
+            // Filtrer les prestations selon la recherche (insensible aux accents)
+            const resultats = toutesLesPrestation.filter(prestation => { 
+                const nomSansAccent = removeAccents(prestation.nom.toLowerCase());
+                return nomSansAccent.includes(valeurSansAccent);
+            });
+            
+            afficherPrestations(resultats);
         });
         
         // Initialisation
