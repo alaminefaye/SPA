@@ -7,6 +7,7 @@ use App\Models\Prestation;
 use App\Models\Salon;
 use App\Models\Seance;
 use App\Http\Controllers\RappelRendezVousController;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
@@ -132,17 +133,12 @@ class SeanceController extends Controller
         $seance->client_id = $client->id;
         $seance->salon_id = $request->salon_id;
         
-        // Si le salon est disponible, la séance est planifiée, sinon elle est mise en attente
-        $seance->statut = $estDisponible ? Seance::STATUT_PLANIFIEE : Seance::STATUT_EN_ATTENTE;
-        $seance->commentaire = $request->commentaire;
+        // Simplification : La séance est toujours marquée comme terminée directement
+        $seance->statut = Seance::STATUT_TERMINEE;
+        $seance->heure_debut = now();
+        $seance->heure_fin = now();
         
-        // Ajouter un commentaire additionnel si la séance est mise en file d'attente
-        if (!$estDisponible) {
-            $commentaireFile = "\n[AUTO] Séance en file d'attente : le salon était occupé lors de la création.";
-            $seance->commentaire = $seance->commentaire 
-                ? $seance->commentaire . $commentaireFile 
-                : $commentaireFile;
-        }
+        $seance->commentaire = $request->commentaire;
         
         // Définir automatiquement la date du jour pour la séance
         $seance->date_seance = now()->toDateString();
@@ -433,10 +429,10 @@ class SeanceController extends Controller
     public function terminer(string $id)
     {
         try {
-            \Log::info("Début de la méthode terminer pour séance ID: {$id}");
+            Log::info("Début de la méthode terminer pour séance ID: {$id}");
             
             $seance = Seance::with('salon')->findOrFail($id);
-            \Log::info("Séance trouvée: ", [
+            Log::info("Séance trouvée: ", [
                 'id' => $seance->id,
                 'statut' => $seance->statut,
                 'heure_debut' => $seance->heure_debut,
@@ -448,26 +444,26 @@ class SeanceController extends Controller
             
             // Vérifier si la séance a déjà une heure de début mais pas d'heure de fin
             if ($seance->heure_debut === null) {
-                \Log::info("La séance n'a jamais été démarrée, ajout d'une heure de début automatique");
+                Log::info("La séance n'a jamais été démarrée, ajout d'une heure de début automatique");
                 // La séance n'a jamais été démarrée, on la démarre automatiquement
                 $seance->heure_debut = now();
             }
             
-            \Log::info("Ancien statut: {$seance->statut}");
+            Log::info("Ancien statut: {$seance->statut}");
             
             // Accepter de terminer la séance quel que soit son statut précédent
             // (planifiee ou en_cours) pour éviter les erreurs après refresh
             $seance->statut = Seance::STATUT_TERMINEE;
             $seance->heure_fin = now();
             
-            \Log::info("Nouveau statut: {$seance->statut}");
-            \Log::info("Tentative de sauvegarde...");
+            Log::info("Nouveau statut: {$seance->statut}");
+            Log::info("Tentative de sauvegarde...");
             
             $seance->save();
             
-            \Log::info("Sauvegarde réussie pour la séance ID: {$id}");
+            Log::info("Sauvegarde réussie pour la séance ID: {$id}");
         } catch (\Exception $e) {
-            \Log::error("Erreur lors de la terminaison de la séance ID: {$id}", [
+            Log::error("Erreur lors de la terminaison de la séance ID: {$id}", [
                 'message' => $e->getMessage(),
                 'file' => $e->getFile(),
                 'line' => $e->getLine(),
@@ -519,7 +515,7 @@ class SeanceController extends Controller
             return redirect()->route('seances.show', $id)
                 ->with('success', 'Séance terminée avec succès' . $messageAttribution);
         } catch (\Exception $e) {
-            \Log::error("Erreur lors du renvoi de la réponse (terminée): {$e->getMessage()}");
+            Log::error("Erreur lors du renvoi de la réponse (terminée): {$e->getMessage()}");
             
             if (request()->expectsJson() || request()->ajax() || request()->wantsJson()) {
                 return response()->json([

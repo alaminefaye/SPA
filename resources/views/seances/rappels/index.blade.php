@@ -83,7 +83,7 @@
                                 <td>{{ $rappel->heure_prevue->format('H:i') }}</td>
                                 <td>
                                     @if($rappel->statut == 'en_attente')
-                                        <span class="badge bg-warning">En attente</span>
+                                        <span class="badge bg-info">Programmé</span>
                                     @elseif($rappel->statut == 'confirme')
                                         <span class="badge bg-success">Confirmé</span>
                                     @elseif($rappel->statut == 'annule')
