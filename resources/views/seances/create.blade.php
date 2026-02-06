@@ -439,6 +439,20 @@
         
         // Initialisation
         calculerTotaux();
+        
+        // Prévention de la double soumission
+        const form = document.getElementById('seanceForm');
+        if (form) {
+            form.addEventListener('submit', function(e) {
+                const submitBtn = this.querySelector('button[type="submit"]');
+                if (submitBtn && !submitBtn.disabled) {
+                    // Désactiver le bouton pour empêcher les doubles clics
+                    submitBtn.disabled = true;
+                    // Ajouter un indicateur de chargement
+                    submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Traitement en cours...';
+                }
+            });
+        }
     });
 </script>
 @endsection

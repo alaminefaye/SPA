@@ -24,7 +24,7 @@
                     </div>
                 @endif
                 
-                <form action="{{ route('clients.store') }}" method="POST">
+                <form action="{{ route('clients.store') }}" method="POST" id="createClientForm">
                     @csrf
                     <div class="row mb-3">
                         <label class="col-sm-2 col-form-label" for="nom_complet">Nom Complet</label>
@@ -66,4 +66,21 @@
         </div>
     </div>
 </div>
+@endsection
+
+@section('page-js')
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const form = document.getElementById('createClientForm');
+        if (form) {
+            form.addEventListener('submit', function(e) {
+                const submitBtn = this.querySelector('button[type="submit"]');
+                if (submitBtn && !submitBtn.disabled) {
+                    submitBtn.disabled = true;
+                    submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Traitement en cours...';
+                }
+            });
+        }
+    });
+</script>
 @endsection

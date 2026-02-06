@@ -303,6 +303,18 @@
         
         // Initialiser les totaux au chargement de la page
         updateTotals();
+        
+        // Prévention de la double soumission
+        const form = document.getElementById('reservationForm');
+        if (form) {
+            form.addEventListener('submit', function(e) {
+                const submitBtn = this.querySelector('button[type="submit"]');
+                if (submitBtn && !submitBtn.disabled) {
+                    submitBtn.disabled = true;
+                    submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Traitement en cours...';
+                }
+            });
+        }
     });
 </script>
 @endsection
